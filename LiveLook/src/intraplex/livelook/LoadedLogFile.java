@@ -6,6 +6,7 @@
 
 package intraplex.livelook;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -18,13 +19,8 @@ public class LoadedLogFile extends ArrayList<IplinkNetworkLogEntry>{
     boolean streamInfoSet;
     String streamName;
     int index;
-    String srcIpAddress;
-    String dstIpAddress;
-    int srcPort;
-    int dstPort;
-    int pktInterval;
-    int codec;
-    int SR;
+    InetAddress address;
+    int destPort;
     
     public LoadedLogFile()
     {
@@ -50,13 +46,8 @@ public class LoadedLogFile extends ArrayList<IplinkNetworkLogEntry>{
             {
                 streamName = seperated[0].trim();
                 index = Integer.parseInt(seperated[1].trim());
-                srcIpAddress = seperated[2].trim();
-                dstIpAddress = seperated[3].trim();
-                srcPort = Integer.parseInt(seperated[4].trim());
-                dstPort = Integer.parseInt(seperated[5].trim());
-                pktInterval = Integer.parseInt(seperated[6].trim());
-                codec = Integer.parseInt(seperated[7].trim());
-                SR = Integer.parseInt(seperated[8].trim());
+                address = InetAddress.getByName(seperated[2].trim());
+                destPort = Integer.parseInt(seperated[3].trim());
                 return true;
             }
             else
@@ -66,29 +57,12 @@ public class LoadedLogFile extends ArrayList<IplinkNetworkLogEntry>{
         }
         catch (Exception e)
         {
-            
+        	
         }
         return true;
     }
 
-    public int getPktInterval() {
-        if (streamInfoSet)
-            return pktInterval;
-        return 0;
-    }
 
-    public int getCodec() {
-        if (streamInfoSet)
-            return codec;
-        return 0;
-    }
-
-    public int getSR() {
-        if (streamInfoSet)
-            return SR;
-        return 0;
-    }
-    
     
     
 }

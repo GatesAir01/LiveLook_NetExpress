@@ -8,7 +8,7 @@ package intraplex.livelook;
 
 import com.jtattoo.plaf.hifi.HiFiLookAndFeel;
 import intraplex.alarms.MailSettingsDialog;
-import static intraplex.livelook.NetworkLogDataPoint.BUFFER_DELAY;
+//import static intraplex.livelook.NetworkLogDataPoint.BUFFER_DELAY;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
@@ -61,23 +61,23 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
     Component csTab;
     public static ConfigFile configlite;
     public static LiveLookConfig livelookconfiglite;
-    public JDispatchMgr mgr;
+    public SnmpMgr mgr;
     public static JTabbedPane tabbedPane;
     public IPLinkNetworkTool_Lite()
     {
-        super("Intraplex"+((char)(174))+(" LiveView Lite"));
-       
-        
+        super("Intraplex"+((char)(174))+("LiveLook Lite NetXpress"));
+
+
         livelookconfiglite = new LiveLookConfig("livelook.properties");
         configlite = new ConfigFile();
-        
+
         livelookconfiglite.load();
         configlite.load();
-        System.out.println(" LiveLookLite has started .");
+        System.out.println("LiveLook Lite NetXpress has started.");
         loadConfigurations();
         report = new JPanel(false);
         history = new JPanel(false);
-        
+
         String filename = "log.csv";
         File f = new File("logs").getAbsoluteFile();
         if (f.exists() && f.isDirectory())
@@ -88,7 +88,7 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
                 Arrays.sort(streams, new Comparator<File>(){
                     public int compare(File f1, File f2)
                         {return (int)(f2.lastModified()-f1.lastModified());}});
-                
+
                 for (int i = 0; i < streams.length; i++)
                 {
                     File [] data = streams[i].listFiles();
@@ -98,17 +98,17 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
                     Arrays.sort(data, new Comparator<File>(){
                         public int compare(File f1, File f2)
                             {return (int)(f2.lastModified()-f1.lastModified());}});
-                    
+
                     filename = data[0].getPath();
                     break;
                     }
                 }
             }
-                
+
         }
-        
+
         tabbedPane = new JTabbedPane();
-        mgr = new JDispatchMgr(lite);
+        mgr = new SnmpMgr(lite, null);
         showLivelook = false;
         while (mgr.bindState() == 0)
         {
@@ -122,8 +122,8 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         {
             showLivelook = true;
             livelook = new MultiLiveLookPanel(mgr, lite);
-            tabbedPane.add("Live View", livelook); 
-            
+            tabbedPane.add("Live View", livelook);
+
             try
             {
                 String s = livelookconfiglite.get("Connections").toString();
@@ -138,10 +138,10 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         }
         tabbedPane.add("History", history);
         tabbedPane.add("Report", report);
-        
+
         tabbedPane.setEnabledAt(1, false);
         tabbedPane.setEnabledAt(2, false);
-        
+
         StatusPanel sp = new StatusPanel(mgr);
         if (showLivelook)
         {
@@ -151,8 +151,8 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
             //sp.setForeground(Color.red);
             tabbedPane.setBackgroundAt(3,Color.gray);
         }
-        
-        
+
+
         setContentPane(tabbedPane);
         try {
             BufferedImage icon = ImageIO.read(getClass().getClassLoader().getResource("resources/icon.png"));
@@ -161,12 +161,12 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         } catch (IOException ex) {
             Logger.getLogger(IPLinkNetworkTool_Lite.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
       if (showLivelook)
         {
             JMenuBar bar = new JMenuBar();
             JMenu menu = new JMenu("Settings");
-            
+
             JMenuItem menuItem = new JMenuItem("Save");
             menuItem.addActionListener(this);
             menuItem.setActionCommand("SAVE");
@@ -197,21 +197,21 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
             menuItem.setActionCommand("REMC");
             menuItem.setEnabled(false);
             menu.add(menuItem);
-            
+
            /* menuItem = new JMenuItem("Set Default Configuration");
             menuItem.addActionListener(this);
             menuItem.setActionCommand("DEFC");
             menu.add(menuItem);*/
             bar.add(menu);
-            
+
             menu = new JMenu("About");
-            menuItem = new JMenuItem("About LiveLook");
+            menuItem = new JMenuItem("About LiveLook Lite NetXpress");
             menuItem.setActionCommand("ABOUT");
             menuItem.addActionListener(this);
             bar.add(menu);
             menu.add(menuItem);
-            
-            
+
+
             this.setJMenuBar(bar);
         }
 
@@ -220,22 +220,22 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         addWindowListener(this);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     }
-    
+
     public static void updateConnectedStreamstabColor(Color e)
     {
         if(tabbedPane != null)
-        	tabbedPane.setBackgroundAt(3,e);    
+        	tabbedPane.setBackgroundAt(3,e);
     }
-    
-    
-    public static void main(String[] args) 
+
+
+    public static void main(String[] args)
     {
         Handler handler;
         try {
             handler = new FileHandler("error.log", 1000, 5, true);
             Logger.getLogger("errorlog").addHandler(handler);
         } catch (IOException e) {}
-         
+
         //Set the Local to English, This must be removed to support other languages.
         Locale.setDefault(new Locale("en", "US"));
         String laf = UIManager.getSystemLookAndFeelClassName();
@@ -244,31 +244,31 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         HiFiLookAndFeel.setCurrentTheme(props);
         try {UIManager.setLookAndFeel("com.jtattoo.plaf.hifi.HiFiLookAndFeel");} catch (Exception ex) {}
         IPLinkNetworkTool_Lite ipnt = new IPLinkNetworkTool_Lite();
-        
+
         ipnt.setVisible(true);
-        
+
     }
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-        
+
         if (ae.getActionCommand().equals("ABOUT"))
         {
-            AboutDialog dialog = new AboutDialog(this, true);
+            AboutDialog dialog = new AboutDialog(this, true, lite);
             dialog.setVisible(true);
         }
         else if (ae.getActionCommand().equals("SAVE"))
         {
             JFileChooser chooser = new JFileChooser();
             int returnVal = chooser.showSaveDialog(this);
-            if(returnVal == JFileChooser.APPROVE_OPTION) 
+            if(returnVal == JFileChooser.APPROVE_OPTION)
             {
                 livelookconfiglite.saveCopy(chooser.getSelectedFile().getAbsolutePath());
             }
         }
         else if (ae.getActionCommand().equals("REMC"))
         {
-            
+
            livelookconfiglite.setProperty("Connections", mgr.getConnectionsForSave());
            livelookconfiglite.save();
         }
@@ -283,7 +283,7 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
             FileFilter filter = new FileNameExtensionFilter("Properties File","properties");
             chooser.addChoosableFileFilter(filter);
             int returnVal = chooser.showOpenDialog(this);
-            if(returnVal == JFileChooser.APPROVE_OPTION) 
+            if(returnVal == JFileChooser.APPROVE_OPTION)
             {
                 loadNewConfiguration(chooser.getSelectedFile().getAbsolutePath());
             }
@@ -291,22 +291,22 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         else if (ae.getActionCommand().equals("SP"))
         {
             String sec = (String)JOptionPane.showInputDialog(null,
-             "Signaling Port", ""+JDispatchMgr.port);
-           
+             "Signaling Port", ""+SnmpMgr.port);
+
 
             if (sec != null)
             {
                 try
                 {
                    int port = Integer.parseInt(sec);
-                   JDispatchMgr.port = port;
-                   livelookconfiglite.setProperty("SignalingPort", JDispatchMgr.port+"");
+                   SnmpMgr.port = port;
+                   livelookconfiglite.setProperty("SignalingPort", SnmpMgr.port+"");
                    livelookconfiglite.save();
-                   
+
                 }
                 catch (Exception e)
                 {
-                    
+
                 }
             }
         }
@@ -330,17 +330,17 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
             }
         }
     }
-    
+
     public boolean getEnableLogging()
     {
         boolean retVal = true;
-        
+
         return retVal;
     }
-    
+
     private void loadConfigurations()
     {
-                
+
         LogMapEntry.loadConfigLite();
         try
         {
@@ -354,19 +354,19 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         {
                 LogMapEntry.daysPerLog = 1;
         }
-        
+
         try
         {
-            JDispatchMgr.port = Integer.parseInt(livelookconfiglite.get("SignalingPort").toString());
+            SnmpMgr.port = Integer.parseInt(livelookconfiglite.get("SignalingPort").toString());
         }
         catch (Exception e)
         {
-                JDispatchMgr.port = 50000;
+                SnmpMgr.port = 50000;
         }
-        
 
-        
-           
+
+
+
         try
         {
             NetworkLogDataPoint.ppsInterval = Integer.parseInt(livelookconfiglite.get("PPSInterval").toString());
@@ -379,11 +379,11 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         {
                 NetworkLogDataPoint.ppsInterval = 1;
         }
-        
+
         boolean showJitter = false;
         try
         {
-            
+
             showJitter = livelookconfiglite.get("showRxJitter").toString().equalsIgnoreCase("true");
             if (LogMapEntry.daysPerLog < 1 ||  LogMapEntry.daysPerLog > 30)
             {
@@ -396,17 +396,17 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         }
         if (showJitter)
         {
-            NetworkLogDataPoint.NUM_TRACES = NetworkLogDataPoint.RX_JITTER_IN_MSEC + 1;
+            //NetworkLogDataPoint.NUM_TRACES = NetworkLogDataPoint.RX_JITTER_IN_MSEC + 1;
         }
     }
-    
+
     public void loadNewConfiguration(String file)
     {
         livelookconfiglite.load(file);
         loadConfigurations();
         livelook.reloadConfiguation();
         String s = livelookconfiglite.getBadProperties();
-        
+
         if (s.length() > 0)
         {
             JOptionPane.showMessageDialog(this,
@@ -414,7 +414,7 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
                 "Unknown Configurations",
                 JOptionPane.WARNING_MESSAGE);
         }
-        
+
     }
 
     @Override
@@ -426,7 +426,7 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         if (showLivelook)
         {
             Object[] options = { "Yes", "No" };
-            int r = JOptionPane.showOptionDialog(null, "Close LiveLook and disconnect?", "Close LiveLook",
+            int r = JOptionPane.showOptionDialog(null, "Close " + ((lite)?"LiveLook Lite NetXpress":"LiveLook") + " and disconnect?", "Close " + ((lite)?"LiveLook Lite NetXpress":"LiveLook"),
             JOptionPane.DEFAULT_OPTION, JOptionPane.YES_NO_OPTION,
             null, options, options[0]);
 
@@ -462,4 +462,3 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
     public void windowDeactivated(WindowEvent we) {
       }
 }
-

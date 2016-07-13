@@ -39,11 +39,10 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
 	        enableDataLogging.setSelected(false);
         }
         enableEmailAlarms.setSelected(LogMapEntry.default_enableEmail);
-        lossRatePercent.setText(LogMapEntry.default_lossRateAlarm*100 + "");
-        afterCorrectPer.setText(LogMapEntry.default_lossRateCorrectedAlarm*100 + "");
+        NetXpressBox.setSelected(true);
+        FullMonitoring.setSelected(true);
         alarmThresholdTime.setText(LogMapEntry.default_alarmthresholdTime + "");
-        enableLossRateAlarm.setSelected(LogMapEntry.default_lossRateAlarmEnabled);
-        enableLossRateCorAlarm.setSelected(LogMapEntry.default_lossRateCorrectedAlarmEnabled);
+        StreamDownAlarm.setSelected(LogMapEntry.default_lossRateAlarmEnabled);
         enableDataLogging.setSelected(LogMapEntry.default_enableStreamLogging);
         
         LogMapEntry.next_lossRateAlarmEnabled = LogMapEntry.default_lossRateAlarmEnabled;
@@ -65,10 +64,10 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         try
         {
         	String ipaddress = (lite)?configlite.get("Last.IP").toString():config.get("Last.IP").toString();
-            String index= (lite)?configlite.get("Last.Index").toString():config.get("Last.Index").toString();
-            String dpo = config.get("Last.DPort").toString();
-            ipAddress.setText(ipaddress);
+        	ipAddress.setText(ipaddress);
+        	String index= (lite)?configlite.get("Last.Index").toString():config.get("Last.Index").toString();
             streamIndex.setText(index);
+            String dpo = (lite)?configlite.get("Last.DPort").toString():config.get("Last.DPort").toString();
             destPort.setText(dpo);
             //EnableLoggingCheckBox.setSelected(true);
             
@@ -93,20 +92,23 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         streamIndex = new javax.swing.JTextField();
         okButton = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
-        enableLossRateAlarm = new javax.swing.JCheckBox();
-        lossRatePercent = new javax.swing.JTextField();
-        jLabel7 = new javax.swing.JLabel();
-        enableLossRateCorAlarm = new javax.swing.JCheckBox();
-        afterCorrectPer = new javax.swing.JTextField();
-        jLabel8 = new javax.swing.JLabel();
         alarmThresholdLabel2 = new javax.swing.JLabel();
         alarmThresholdTime = new javax.swing.JTextField();
         AlarmThresholdLabel1 = new javax.swing.JLabel();
         enableEmailAlarms = new javax.swing.JCheckBox();
         useDefaultBox = new javax.swing.JCheckBox();
         enableDataLogging = new javax.swing.JCheckBox();
+        StreamDownAlarm = new javax.swing.JCheckBox();
+        ShutDownAlarm = new javax.swing.JCheckBox();
         jLabel4 = new javax.swing.JLabel();
         destPort = new javax.swing.JTextField();
+        NetXpressBox = new javax.swing.JCheckBox();
+        NetXpressLXBox = new javax.swing.JCheckBox();
+        NetXpressLXRBox = new javax.swing.JCheckBox();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        StatusOnly = new javax.swing.JCheckBox();
+        FullMonitoring = new javax.swing.JCheckBox();
 
         jLabel3.setText("IP Address");
 
@@ -133,33 +135,6 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Alarm Settings"));
-
-        enableLossRateAlarm.setText("% Loss Rate greater than ");
-        enableLossRateAlarm.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enableLossRateAlarmActionPerformed(evt);
-            }
-        });
-
-        lossRatePercent.setText("5");
-        lossRatePercent.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lossRatePercentActionPerformed(evt);
-            }
-        });
-
-        jLabel7.setText("%");
-
-        enableLossRateCorAlarm.setText("% Loss Rate after correction greater than ");
-        enableLossRateCorAlarm.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enableLossRateCorAlarmActionPerformed(evt);
-            }
-        });
-
-        afterCorrectPer.setText("1");
-
-        jLabel8.setText("%");
 
         alarmThresholdLabel2.setText("seconds");
 
@@ -193,6 +168,20 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
             }
         });
 
+        StreamDownAlarm.setText("Stream Down");
+        StreamDownAlarm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                StreamDownAlarmActionPerformed(evt);
+            }
+        });
+
+        ShutDownAlarm.setText("Stream Shut Down");
+        ShutDownAlarm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ShutDownAlarmActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -201,47 +190,35 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(AlarmThresholdLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
+                        .addComponent(AlarmThresholdLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(alarmThresholdTime, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(alarmThresholdLabel2)
-                        .addGap(117, 117, 117))
-                    .addComponent(useDefaultBox)
+                        .addGap(136, 136, 136))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(enableLossRateCorAlarm)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(afterCorrectPer, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(enableLossRateAlarm)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(lossRatePercent, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel7)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel8))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(enableEmailAlarms)
-                        .addGap(40, 40, 40)
-                        .addComponent(enableDataLogging, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(19, 19, 19))
+                                .addGap(3, 3, 3)
+                                .addComponent(StreamDownAlarm)
+                                .addGap(18, 18, 18)
+                                .addComponent(ShutDownAlarm))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(enableEmailAlarms)
+                                    .addComponent(useDefaultBox))
+                                .addGap(40, 40, 40)
+                                .addComponent(enableDataLogging, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(enableLossRateAlarm)
-                    .addComponent(lossRatePercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel7))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(afterCorrectPer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8)
-                    .addComponent(enableLossRateCorAlarm))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(StreamDownAlarm)
+                    .addComponent(ShutDownAlarm))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(AlarmThresholdLabel1)
                     .addComponent(alarmThresholdTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -264,6 +241,45 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
             }
         });
 
+        NetXpressBox.setText("NetXpress");
+        NetXpressBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NetXpressBoxActionPerformed(evt);
+            }
+        });
+
+        NetXpressLXBox.setText("NetXpressLX");
+        NetXpressLXBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NetXpressLXBoxActionPerformed(evt);
+            }
+        });
+
+        NetXpressLXRBox.setText("NetXpressLXR");
+        NetXpressLXRBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NetXpressLXRBoxActionPerformed(evt);
+            }
+        });
+
+        jLabel5.setText("Stream Type");
+
+        jLabel6.setText("Stream Monitoring");
+
+        StatusOnly.setText("Stream Status Only");
+        StatusOnly.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                StatusOnlyActionPerformed(evt);
+            }
+        });
+
+        FullMonitoring.setText("Full Stream Monitoring");
+        FullMonitoring.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                FullMonitoringActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -276,21 +292,39 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(38, 38, 38))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(22, 22, 22)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel2))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(streamIndex)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(ipAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(destPort)))))
+                                .addComponent(jLabel6)
+                                .addGap(18, 18, 18)
+                                .addComponent(FullMonitoring)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(StatusOnly)
+                                .addGap(11, 11, 11))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel1))
+                                .addGap(19, 19, 19)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(streamIndex)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(ipAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel4)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(destPort))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(NetXpressBox)
+                                .addGap(18, 18, 18)
+                                .addComponent(NetXpressLXBox)
+                                .addGap(18, 18, 18)
+                                .addComponent(NetXpressLXRBox)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -306,8 +340,19 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(streamIndex, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NetXpressBox)
+                    .addComponent(NetXpressLXBox)
+                    .addComponent(NetXpressLXRBox)
+                    .addComponent(jLabel5))
+                .addGap(4, 4, 4)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(StatusOnly)
+                    .addComponent(FullMonitoring))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(okButton)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -343,24 +388,6 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
     }
    
         LogMapEntry.next_enableEmail = enableEmailAlarms.isSelected();
-         try 
-        {
-            LogMapEntry.next_lossRateAlarm = Double.parseDouble(lossRatePercent.getText())/100;
-        }
-        catch (Exception e)
-        {
-            JOptionPane.showMessageDialog(this, "Loss Rate alarm is not valid");
-            return;
-        }
-        try 
-        {
-            LogMapEntry.next_lossRateCorrectedAlarm = Double.parseDouble(afterCorrectPer.getText())/100;
-        }
-        catch (Exception e)
-        {
-            JOptionPane.showMessageDialog(this, "Loss Rate alarm after correction is not valid");
-            return;
-        }
         
         try
         {
@@ -388,12 +415,15 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this.getParent(),"Invalid alarm threshold");
             return;
         }
-        LogMapEntry.next_lossRateAlarmEnabled = enableLossRateAlarm.isSelected();
-        LogMapEntry.next_lossRateCorrectedAlarmEnabled = enableLossRateCorAlarm.isSelected();
+        if(StreamDownAlarm.isSelected() && FullMonitoring.isSelected()) {
+        	LogMapEntry.next_lossRateAlarmEnabled = true;
+        }
         LogMapEntry.next_useDefault = useDefaultBox.isSelected();
         LogMapEntry.next_enableStreamLogging = enableDataLogging.isSelected();
-     
-     
+        SnmpMgr.nextStreamType = getSelectedStreamType();
+        LogMapEntry.nextStreamType = getSelectedStreamType();
+        SnmpMgr.statusOnly = getSelectedMonitoringType();
+        
         if(!lite) {
         	config.put("Last.IP",iPAddress);
     	    config.put("Last.Index",stream);
@@ -410,31 +440,108 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
     dispose();
     }//GEN-LAST:event_okButtonActionPerformed
 
+    private int getSelectedStreamType() {
+    	if(NetXpressBox.isSelected()) 
+    	{
+    		return 0;
+    	}else 
+    		if(NetXpressLXBox.isSelected()) 
+    	{
+    		return 1;
+    	}else 
+    		if(NetXpressLXRBox.isSelected()) 
+    	{
+    		return 2;
+    	}
+    	return 0;
+    }
+    
+    private boolean getSelectedMonitoringType() {
+    	if(FullMonitoring.isSelected()) 
+    	{
+    		return false;
+    	}else {
+    		return true;
+    	}
+    }
+    
     private void ipAddressActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ipAddressActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_ipAddressActionPerformed
 
-    private void enableLossRateAlarmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableLossRateAlarmActionPerformed
+        private void useDefaultSet (boolean b)
+        {
+        enableEmailAlarms.setEnabled(b);
+        enableDataLogging.setEnabled(b);
+        alarmThresholdTime.setEnabled(b);
+        AlarmThresholdLabel1.setEnabled(b);
+        alarmThresholdLabel2.setEnabled(b);
+        StreamDownAlarm.setEnabled(b);
+
+        if(b) {
+	        if(StatusOnly.isSelected()) {
+	            ShutDownAlarm.setEnabled(b);
+	        }
+        }
+        else {
+            ShutDownAlarm.setEnabled(b);
+        }
+    }
+    private void destPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_destPortActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_enableLossRateAlarmActionPerformed
+    }//GEN-LAST:event_destPortActionPerformed
 
-    private void lossRatePercentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lossRatePercentActionPerformed
+    private void NetXpressBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NetXpressBoxActionPerformed
+        NetXpressLXBox.setSelected(false);
+        NetXpressLXRBox.setSelected(false);
+    }//GEN-LAST:event_NetXpressBoxActionPerformed
+
+    private void NetXpressLXBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NetXpressLXBoxActionPerformed
+    	NetXpressBox.setSelected(false);
+        NetXpressLXRBox.setSelected(false);
+    }//GEN-LAST:event_NetXpressLXBoxActionPerformed
+
+    private void NetXpressLXRBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NetXpressLXRBoxActionPerformed
+    	NetXpressLXBox.setSelected(false);
+        NetXpressBox.setSelected(false);
+    }//GEN-LAST:event_NetXpressLXRBoxActionPerformed
+
+    private void StatusOnlyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StatusOnlyActionPerformed
+        FullMonitoring.setSelected(false);
+        if(!useDefaultBox.isSelected()) {
+	    	ShutDownAlarm.setEnabled(true);
+	    	StreamDownAlarm.setSelected(SnmpMgr.StreamDownAlarm);
+	        ShutDownAlarm.setSelected(SnmpMgr.ShutDownAlarm);
+        }
+        else {
+	    	StreamDownAlarm.setSelected(SnmpMgr.DefaultStreamDownAlarm);
+	        ShutDownAlarm.setSelected(SnmpMgr.DefaultShutDownAlarm);
+        }
+        
+    }//GEN-LAST:event_StatusOnlyActionPerformed
+
+    private void FullMonitoringActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FullMonitoringActionPerformed
+    	StatusOnly.setSelected(false);
+        if(!useDefaultBox.isSelected()) {
+	    	ShutDownAlarm.setEnabled(false);
+        }
+        StreamDownAlarm.setSelected(false);
+        ShutDownAlarm.setSelected(false);
+    }//GEN-LAST:event_FullMonitoringActionPerformed
+
+    private void ShutDownAlarmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ShutDownAlarmActionPerformed
+        if(StatusOnly.isSelected())
+        	SnmpMgr.ShutDownAlarm = ShutDownAlarm.isSelected();
+    }//GEN-LAST:event_ShutDownAlarmActionPerformed
+
+    private void StreamDownAlarmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StreamDownAlarmActionPerformed
+        SnmpMgr.StreamDownAlarm = StreamDownAlarm.isSelected();
+    }//GEN-LAST:event_StreamDownAlarmActionPerformed
+
+    private void enableDataLoggingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableDataLoggingActionPerformed
+
         // TODO add your handling code here:
-    }//GEN-LAST:event_lossRatePercentActionPerformed
-
-    private void enableLossRateCorAlarmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableLossRateCorAlarmActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_enableLossRateCorAlarmActionPerformed
-
-    private void alarmThresholdTimeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_alarmThresholdTimeActionPerformed
-
-        // TODO add your handling code here:
-
-    }//GEN-LAST:event_alarmThresholdTimeActionPerformed
-
-    private void enableEmailAlarmsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableEmailAlarmsActionPerformed
-
-    }//GEN-LAST:event_enableEmailAlarmsActionPerformed
+    }//GEN-LAST:event_enableDataLoggingActionPerformed
 
     private void useDefaultBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_useDefaultBoxActionPerformed
 
@@ -447,31 +554,16 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         enableDataLogging.setEnabled(useDefaultBox.isSelected());*/
 
         useDefaultSet(!(useDefaultBox.isSelected()));
-
     }//GEN-LAST:event_useDefaultBoxActionPerformed
 
-        private void useDefaultSet (boolean b)
-    {
-        enableLossRateAlarm.setEnabled(b);
-        enableLossRateCorAlarm.setEnabled(b);
-        lossRatePercent.setEnabled(b);
-        afterCorrectPer.setEnabled(b);
-        enableEmailAlarms.setEnabled(b);
-        enableDataLogging.setEnabled(b);
-        alarmThresholdTime.setEnabled(b);
-        AlarmThresholdLabel1.setEnabled(b);
-        alarmThresholdLabel2.setEnabled(b);
-        
-    }
-    private void enableDataLoggingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableDataLoggingActionPerformed
+    private void enableEmailAlarmsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableEmailAlarmsActionPerformed
+
+    }//GEN-LAST:event_enableEmailAlarmsActionPerformed
+
+    private void alarmThresholdTimeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_alarmThresholdTimeActionPerformed
 
         // TODO add your handling code here:
-
-    }//GEN-LAST:event_enableDataLoggingActionPerformed
-
-    private void destPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_destPortActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_destPortActionPerformed
+    }//GEN-LAST:event_alarmThresholdTimeActionPerformed
 
     String iPAddress;
     String stream;
@@ -504,23 +596,26 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel AlarmThresholdLabel1;
-    private javax.swing.JTextField afterCorrectPer;
+    private javax.swing.JCheckBox FullMonitoring;
+    private javax.swing.JCheckBox NetXpressBox;
+    private javax.swing.JCheckBox NetXpressLXBox;
+    private javax.swing.JCheckBox NetXpressLXRBox;
+    private javax.swing.JCheckBox ShutDownAlarm;
+    private javax.swing.JCheckBox StatusOnly;
+    private javax.swing.JCheckBox StreamDownAlarm;
     private javax.swing.JLabel alarmThresholdLabel2;
     private javax.swing.JTextField alarmThresholdTime;
     private javax.swing.JTextField destPort;
     private javax.swing.JCheckBox enableDataLogging;
     private javax.swing.JCheckBox enableEmailAlarms;
-    private javax.swing.JCheckBox enableLossRateAlarm;
-    private javax.swing.JCheckBox enableLossRateCorAlarm;
     private javax.swing.JTextField ipAddress;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField lossRatePercent;
     private javax.swing.JButton okButton;
     private javax.swing.JTextField streamIndex;
     private javax.swing.JCheckBox useDefaultBox;

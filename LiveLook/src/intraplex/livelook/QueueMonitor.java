@@ -18,10 +18,10 @@ import javax.swing.JLabel;
 public class QueueMonitor implements Runnable{
 
 
-    JDispatchMgr mgr;
+    SnmpMgr mgr;
     JLabel numPoints;
     
-    public QueueMonitor(JDispatchMgr m, JLabel n)
+    public QueueMonitor(SnmpMgr m, JLabel n)
     {
         mgr = m;
         numPoints = n;

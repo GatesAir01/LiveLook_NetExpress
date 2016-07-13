@@ -57,14 +57,14 @@ public class LiveLookConfig extends Properties{
     "Alert.alarmthresholdtime",
     "Alert.EnableStreamLogging",
     "Alert.CorrectedLossRatePercent",
-    "SignalingPort"
-    
+    "SignalingPort",
+    "MacFileLocation"
     };
     
     public LiveLookConfig(String config)
     {
         configfile = config;
-        put("defaultDirectory", System.getProperty("user.home")+"/Livelook");
+        put("defaultDirectory", System.getProperty("user.home")+"/Livelook NetXpress");
         
     }
     

@@ -11,6 +11,8 @@ import java.awt.Color;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.logging.Level;
 import javax.swing.AbstractListModel;
@@ -28,19 +30,11 @@ public class StatusListModel extends AbstractTableModel {
     static SimpleDateFormat sdf = new SimpleDateFormat("EEE hh:mm:ss aa MM/dd/yyyy");
     public static final String[] dataState = new String[]
         {
-		"Not In Use",	                // Gray
+        "Not In Use",
 		"Up",	                        // Green
-		"Down (TX No Route)",           //Red
-		"Down (TX WAN)",	            //Red
-		"Down (RX Packet Loss)",        //Red
-		"Down (Remote Indication)",     //Red
-		"Down (No Channel Activity)",   //Yellow
-		"Down (AES Unlock)",	        //Green
-		"TX Send Error",			    //Red
-		"Down (RX Queue Is Full)",      //Yellow
-                "Down (Invalid Configuration)",  //Yellow
-		"Down (RX Packet Loss Threshold)", //Red
-		"Connection Lost" //Red
+		"Down",           //Red
+		"In Progress",
+		"Out of Service"
         };
     Color green = new Color(43,148,49);
     Color[] colors = new Color[]
@@ -58,10 +52,12 @@ public class StatusListModel extends AbstractTableModel {
             Color.yellow,  //Yellow
             Color.red //Red
     };
+    SnmpMgr mgr;
             
-    public StatusListModel(ArrayList<LogMapEntry> l )
+    public StatusListModel(ArrayList<LogMapEntry> l, SnmpMgr mgr)
     {
         list = l;
+        this.mgr = mgr;
     }
 
     @Override
@@ -73,10 +69,10 @@ public class StatusListModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 4;
+        return 5;
     }
     
-    private final String[] colNames = new String[] {"Stream Name", "Last Message Time", "Logging Path", "Status"};
+    private final String[] colNames = new String[] {"Stream Name", "Last Message Time", "Logging Path", "Status", "Full Monitoring"};
 
     public String getColumnName(int col) {
         return colNames[col];
@@ -84,27 +80,38 @@ public class StatusListModel extends AbstractTableModel {
     
     @Override
     public Object getValueAt(int i, int i1) {
-        
-        LogMapEntry e = list.get(i);
+    	Stream e;
+    	LogMapEntry entry = null;
+    	Collection<Stream> col = mgr.map.values();
+    	Iterator it =  col.iterator();
+    	
+    	for( int x = 0; x < i; x++) {
+    		e = (Stream)it.next();
+    	}
+    	e = (Stream)it.next();
         if (i1 == 0)
             return e.streamName;
         else if (i1 == 1)
             return sdf.format(e.lastEntry);
         else if (i1 == 2)
-            if (e.enableLogging)
-                return e.fileName;
+        {
+        	 entry = mgr.logMap.get(Long.parseLong(e.ip.replace(".",  "") + e.dstPort));
+            if (entry.enableLogging)
+                return entry.fileName;
             else
                 return "Logging is disabled";
+        }
+        else if(i1 == 4) {
+        	return !e.statusOnly;
+        }
         
-        int state = e.dataState;
+        int state = Integer.parseInt(e.connectionState);
         
-        if (System.currentTimeMillis() - e.lastEntry > 30000)
-            state = dataState.length-1;
-        
-        
-        if (state < dataState.length)
-            return dataState[state];
-        
+        if (state < dataState.length && e.adminState != 2)
+        	return dataState[state];
+        else if(e.adminState == 2)
+        	return dataState[4];
+        	
         return "Error";
     
     }
@@ -112,14 +119,7 @@ public class StatusListModel extends AbstractTableModel {
     public Color getRowColour(int row) {
         
         LogMapEntry e = list.get(row);
-        
-        if (System.currentTimeMillis() - e.lastEntry > 30000)
-            return Color.red;
-        
-        if (e.dataState < dataState.length)
-            return colors[e.dataState];
-        
-        return Color.red;
+        return mgr.checkForStreamStatus("" + e.address.toString().replace("/", ""), "" + e.destPort);
     }
 
     boolean isConnectionLost(int row) {

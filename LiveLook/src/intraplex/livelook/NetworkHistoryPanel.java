@@ -57,7 +57,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import static intraplex.livelook.IPLinkNetworkTool.config;
 import static intraplex.livelook.IPLinkNetworkTool.livelookconfig;
-import static intraplex.livelook.NetworkLogDataPoint.DATA_GAP;
+//import static intraplex.livelook.NetworkLogDataPoint.DATA_GAP;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.text.DecimalFormat;
@@ -202,9 +202,9 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
         chooser = new JFileChooser("logs");
         chooser.setMultiSelectionEnabled(true);
         fileNameField.setText(f);
-        addTrace(0, 0, false);
-        addTrace(7, 0, false);
-        addTrace(4, 1, false);
+        addTrace(2, 0, false);
+        addTrace(1, 0, false);
+        addTrace(0, 1, false);
         addTrace(5, 1, true);
         
 
@@ -213,9 +213,8 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
     
     public void loadConfiguation()     
     {
-        searchParams = new String[]{"","Loss Rate After Correction > .2",
-            "Loss Rate > 6",
-            "Burst Ratio > 50",
+        searchParams = new String[]{"", "Packets Lost > 10", 
+        		"Packets Received < 400"
         };
         traceColors = new Color[8];
         
@@ -373,22 +372,6 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
     {
         long start = startTime.getDate().getTime();
         long end = endTime.getDate().getTime();
-        if (log.pps != usePPSBox.isSelected())
-        {
-            log.pps = usePPSBox.isSelected();
-            int tracesPerChart = traces.length/popupItem.length;
-            for (int p = 0; p < popupItem.length; p++)
-            {
-                int offset =tracesPerChart*p;
-                for (int i = 0; i < tracesPerChart; i++)
-                {
-                    if (traceTypes[offset+i] >= 0)
-                    {
-                        traces[offset+i].setKey(NetworkLogDataPoint.getTypeTitle(traceTypes[offset+i],log.pps)); 
-                    }
-                }
-            }
-        }
         
         long intvl;
         if (search)
@@ -463,7 +446,6 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
         endDate = new javax.swing.JPanel();
         startDate = new javax.swing.JPanel();
         updateButton = new javax.swing.JButton();
-        usePPSBox = new javax.swing.JCheckBox();
 
         jLabel1.setText("Start");
 
@@ -585,14 +567,6 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
             }
         });
 
-        usePPSBox.setText("Show counts in packets per second (pps)");
-        usePPSBox.setToolTipText("showing data in pps allows for easier searching since values are comparable over multiple intevals");
-        usePPSBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                usePPSBoxActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -610,9 +584,7 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 388, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(firstButton, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(usePPSBox))
+                                .addComponent(firstButton, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(startDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -623,7 +595,7 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
                                 .addComponent(updateButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(generateReport)))
-                        .addGap(0, 133, Short.MAX_VALUE))
+                        .addGap(0, 319, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(20, 20, 20)
                         .addComponent(jLabel3)
@@ -659,8 +631,7 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(firstButton)
-                    .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(usePPSBox))
+                    .addComponent(searchBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(startDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -851,8 +822,15 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
             JOptionPane.showMessageDialog(null,"Interval is too small for range selected,\nentire range may not be able to be shown!", "Warning",
                             JOptionPane.WARNING_MESSAGE);
         }
-        String reportname = ReportBuilder.generateReport(start-intvl/2,end+intvl/2, intvl, pointsPerInterval,log);
         
+        String reportname = "";
+        if(log.gapTimes.size() > 0) {
+        	reportname = ReportBuilder.generateReport(start-intvl/2,end+intvl/2, intvl, pointsPerInterval,log, log.gapTimes.size());
+        }
+        else 
+        {
+        	reportname = ReportBuilder.generateReport(start-intvl/2,end+intvl/2, intvl, pointsPerInterval,log);
+        }
         File f = new File(reportname).getAbsoluteFile();
         
         try {
@@ -887,11 +865,6 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
     private void firstButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_firstButtonActionPerformed
         findFirst();
     }//GEN-LAST:event_firstButtonActionPerformed
-
-    private void usePPSBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usePPSBoxActionPerformed
-        updatePlot();
-        prepareMenus();
-    }//GEN-LAST:event_usePPSBoxActionPerformed
                                    
     public void findNext()
     {
@@ -1100,7 +1073,6 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
     private javax.swing.JComboBox searchBox;
     private javax.swing.JPanel startDate;
     private javax.swing.JButton updateButton;
-    private javax.swing.JCheckBox usePPSBox;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -1208,7 +1180,8 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
                         return false;
                     }
                     traceTypes[offset+k] = type;   
-                    charts[chart].getXYPlot().getRenderer(type == NetworkLogDataPoint.DATA_GAP ? 1 : 0).setSeriesVisible(k, Boolean.TRUE);
+                    charts[chart].getXYPlot().getRenderer().setSeriesVisible(k, Boolean.TRUE);
+                    
                     if (update)
                     {
                         updatePlot();

@@ -47,6 +47,13 @@ public class NetworkLogEntryArray {
         return entry;
     }
     
+    public IplinkNetworkLogEntry add(Stream stream)
+    {
+        IplinkNetworkLogEntry entry = new IplinkNetworkLogEntry(stream);
+        add(entry);
+        return entry;
+    }
+    
     public void clear()
     {
         mutex.lock();

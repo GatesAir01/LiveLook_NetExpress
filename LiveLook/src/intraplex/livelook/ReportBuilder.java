@@ -17,7 +17,9 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jfree.chart.ChartFactory;
@@ -58,6 +60,34 @@ public class ReportBuilder {
         return result;
     }
     
+    public static String loadTemplate(String file, int gaps)
+    {
+        BufferedReader reader = null;
+        String result = "";
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            String s = null;
+            while ((s = reader.readLine())!=null)
+            {
+                result+=s+"\n";
+            }
+            reader.close();
+        } catch (Exception ex) {
+            Logger.getLogger(ReportBuilder.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        
+        int startIndex = result.indexOf("<html>");
+        int endIndex = result.indexOf("</html>");
+        String temp = "" + result.substring(0, startIndex + 6);
+        for(int x = 0; x <= gaps / 2; x++) {
+        	temp += "<h1>Section " +  (x + 1) + "</h1><br>";
+        	temp += result.substring(startIndex + 6, endIndex);
+        	temp += "<br>";
+        }
+        
+        return temp += result.substring(endIndex);
+    }
+    
         public static void saveReport(String file,String report)
     {
            BufferedWriter writer = null;
@@ -75,7 +105,7 @@ public class ReportBuilder {
         
     public static String generateReport(long starttime, long endtime, long interval, int pointsPerInterval, LogFileHandler log)
     {
-        String base = loadTemplate("templates/report.html");
+        String base = loadTemplate("C:/Users/jlucas/LiveLook NetXpress/templates/report.html");
         chartname = "chart"+sdf.format(System.currentTimeMillis());
         //Ok we have the base get chart images
        //System.out.println("The start Time is " +starttime+" and the end time is "+  endtime);
@@ -105,11 +135,86 @@ public class ReportBuilder {
             String inner = base.substring(index+14,endindex);
             String end = base.substring(endindex+15,base.length());
             
+            if(inner.equals("Start Time"))
+            	base = start + (new Date((new Timestamp(starttime)).getTime())).toString() + end;
+            else if(inner.equals("End Time"))
+            	base = start + (new Date((new Timestamp(endtime)).getTime())).toString() + end;
+            else
             base = start + nma.getValue(inner) +end;
+
             imgRef++;
             
         }
         
+        String reportname = "generated/report"+sdf.format(System.currentTimeMillis())+".html";
+        saveReport(reportname,base);
+        return reportname;
+    }
+    
+    public static String generateReport(long starttime, long endtime, long interval, int pointsPerInterval, LogFileHandler log, int gaps)
+    {
+        String base = loadTemplate("C:/Users/jlucas/LiveLook NetXpress/templates/report.html", gaps);
+        chartname = "chart"+sdf.format(System.currentTimeMillis());
+        //Ok we have the base get chart images
+       //System.out.println("The start Time is " +starttime+" and the end time is "+  endtime);
+        
+        for(int x = 0; x <= gaps / 2; x++){
+        	String temp = "<h1>Section " +  (x + 1) + "</h1><br>";
+        	String temp2 = "<br><h1>Section " +  (x + 2) + "</h1><br>";
+	        int index = base.indexOf(temp) + temp.length();
+	        int endIndex = base.indexOf(temp2, index);
+	        int imgRef = 1;
+	        while ((index = base.indexOf("<livelookchart>")) != -1 && (base.indexOf("<livelookchart>") > endIndex || endIndex == -1))
+	        {
+	            int endindex = base.indexOf("</livelookchart>");
+	            if (endindex == -1)break;
+	            String start = base.substring(0,index);
+	            String inner = base.substring(index+15,endindex);
+	            String end = base.substring(endindex+16,base.length());
+	            String image = generateChart(inner,starttime,endtime, interval, pointsPerInterval, log,imgRef);
+	            base = start + image +end;
+	            endIndex = base.indexOf(temp2, index);
+	            imgRef++;
+	            
+	        }
+	        long tempStart = 0;
+	        long tempEnd = 0;
+	        
+	        if(x == 0){
+	        	tempStart = starttime;
+	        	tempEnd = log.gapTimes.get(x);
+	        }
+	        else if(x == gaps / 2){
+	        	tempStart = log.gapTimes.get(x);
+	        	tempEnd = endtime;
+	        }
+	        else {
+	        	tempStart = log.gapTimes.get(x);
+	        	tempEnd = log.gapTimes.get(x + 1);
+	        }
+	        
+	        NetworkModelAnalyizer nma = new NetworkModelAnalyizer(tempStart, tempEnd, interval, pointsPerInterval, log);
+
+	        nma.loadBasicBurstStats();
+	        while ((index = base.indexOf("<livelookstat>")) != -1 && (base.indexOf("<livelookstat>") < endIndex || endIndex == -1))
+	        {
+	            int endindex = base.indexOf("</livelookstat>");
+	            if (endindex == -1)break;
+	            String start = base.substring(0,index);
+	            String inner = base.substring(index+14,endindex);
+	            String end = base.substring(endindex+15,base.length());
+
+	            if(inner.equals("Start Time"))
+	            	base = start + (new Date((new Timestamp(tempStart)).getTime())).toString() + end;
+	            else if(inner.equals("End Time"))
+	            	base = start + (new Date((new Timestamp(tempEnd)).getTime())).toString() + end;
+	            else
+	            base = start + nma.getValue(inner) +end;
+	            endIndex = base.indexOf(temp2, index);
+	            imgRef++;
+	            
+	        }
+        }
         String reportname = "generated/report"+sdf.format(System.currentTimeMillis())+".html";
         saveReport(reportname,base);
         return reportname;

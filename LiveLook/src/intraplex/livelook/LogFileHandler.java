@@ -32,7 +32,7 @@ import static intraplex.livelook.IPLinkNetworkTool.config;
 public class LogFileHandler {
     
     public static final int NUM_COLS = 27;
-    public static final int NUM_COLS_NEW = 32;
+    public static final int NUM_COLS_NEW = 7;
     long firstHour;
     long start;
     long end;
@@ -45,11 +45,13 @@ public class LogFileHandler {
     public boolean pps;
     int firstEntryIndex = -1;
     int lastEntryIndex = -1;
-    
+    ArrayList<Long> gapTimes;
+    boolean inGap;
     
     public LogFileHandler(String file)
     {
-        
+        gapTimes = new ArrayList<Long>();
+        inGap = false;
         ScriptEngineManager factory = new ScriptEngineManager();
         engine = factory.getEngineByName("JavaScript");
         logFile = new LoadedLogFile();
@@ -116,7 +118,7 @@ public class LogFileHandler {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(files[f])));
                 String s = reader.readLine();
                 String[] seperated = s.split(",");
-                if (seperated.length == 9)
+                if (seperated.length == 4)
                 {
                     if (!logFile.setStreamInfo(seperated))
                     {
@@ -127,7 +129,6 @@ public class LogFileHandler {
                 while ((s = reader.readLine())!=null)
                 {
                     String[] split = s.split(",");
-                    
                     if (split.length == NUM_COLS_NEW || split.length == NUM_COLS )
                     {
                         
@@ -252,6 +253,7 @@ public class LogFileHandler {
       
     public boolean load(int[] type, long starttime, long endtime, long interval, int pointsPerInterval, XYSeries[] trace)
     {
+    	if(gapTimes.size() > 0) gapTimes = new ArrayList<Long>();
         for (int i = 0; i < trace.length; i++)
         {
             if (type[i] >= 0)
@@ -268,7 +270,7 @@ public class LogFileHandler {
             for (int i = 0; i < logFile.size(); i++)
             {
                 IplinkNetworkLogEntry e = logFile.get(i);
-                    
+
                     if (!started)
                     {
                         long recordedTime = e.timestamp;
@@ -288,20 +290,40 @@ public class LogFileHandler {
                     {
                         long recordedTime = e.timestamp;
                         block.addEntry(e);
-                        if (nextTime <= recordedTime)
+                        if (true)
                         {
                             nextTime += interval/pointsPerInterval;
                             IplinkNetworkLogEntry nextEntry = e;
                             if (lastEntry[index] != null)
                             {
-                               
-                                for (int t = 0; t < trace.length; t++)
-                                {
-                                    if (type[t] >= 0)
-                                    {
-                                        trace[t].add(block.getTimestamp(), block.getValueForPlot(type[t],interval,pps));
-                                    }
-                                }
+                        		if(e.NaNEntry || inGap) {
+                        			if(inGap) {
+	                        			if(gapTimes.size() % 2 == 1 ) {
+	                        				gapTimes.add(e.timestamp);
+	                        				if(!e.NaNEntry) {
+	                        					inGap = false;
+	                        				}
+	                        			}
+	                        			else {
+	                        				if(gapTimes.size() > 0 && e.timestamp > gapTimes.get(gapTimes.size() -1)) {
+	                        					gapTimes.set(gapTimes.size() -1, e.timestamp);
+	                        				}
+	                        			}
+	                        		}
+	                        		else {
+	                        			gapTimes.add(e.timestamp);
+	                        			inGap = true;
+	                        		}
+                        		}
+                            	
+	                            for (int t = 0; t < trace.length; t++)
+	                            {
+	                                if (type[t] >= 0)
+	                                {
+	                                	if(block.getValueForPlot(type[t],interval,pps) > 1000)System.out.println(block.getTimestamp() + " " + block.getValueForPlot(type[t],interval,pps));
+	                            		trace[t].add(block.getTimestamp(), block.getValueForPlot(type[t],interval,pps));
+	                                }
+	                            }
                             }
                             lastEntry[index++] = nextEntry;
                             if (index == pointsPerInterval)
@@ -407,8 +429,7 @@ public class LogFileHandler {
         
         IplinkNetworkLogEntry lastEntry = null;
         try {
-            
-             pktInt = getRtpStrmInterval(logFile.getSR(),logFile.getPktInterval(),logFile.getCodec());    
+        	pktInt = 50;
             int i;
             for (i = 0; i < logFile.size(); i++)
             {

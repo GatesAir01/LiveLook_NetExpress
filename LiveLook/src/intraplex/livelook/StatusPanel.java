@@ -27,9 +27,9 @@ public class StatusPanel extends javax.swing.JPanel implements Runnable {
      */
     public static ActionListener reconnectListener;
     ArrayList<LogMapEntry> streamlist;
-    JDispatchMgr mgr;
+    SnmpMgr mgr;
     StatusListModel slm;
-    public StatusPanel(JDispatchMgr m) {
+    public StatusPanel(SnmpMgr m) {
         
         mgr = m;
         streamlist = new ArrayList<>();
@@ -53,7 +53,7 @@ public class StatusPanel extends javax.swing.JPanel implements Runnable {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
 
-        jTable1.setModel(slm = new StatusListModel(streamlist));
+        jTable1.setModel(slm = new StatusListModel(streamlist, mgr));
         jTable1.setDoubleBuffered(true);
         jTable1.setRowSelectionAllowed(false);
         jScrollPane1.setViewportView(jTable1);
@@ -97,7 +97,7 @@ public class StatusPanel extends javax.swing.JPanel implements Runnable {
             try {
                  Thread.currentThread().sleep(5000);
                 streamlist.clear();
-                streamlist.addAll(mgr.map.values());
+                streamlist.addAll(mgr.logMap.values());
                 slm.fireTableDataChanged();
             } catch (InterruptedException ex) {
                 Logger.getLogger(StatusPanel.class.getName()).log(Level.SEVERE, null, ex);

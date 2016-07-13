@@ -68,7 +68,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
     JFileChooser chooser;    
     Mutex traceMutex;
    // NetworkMonitor nm;
-    JDispatchMgr msgMgr;
+    SnmpMgr msgMgr;
     
     //Keys for String Lookups 
     TreeMap<String, Long> streamKeys;
@@ -90,7 +90,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
     private int numberpad;
     boolean lite;
     
-    public MultiLiveLookPanel(JDispatchMgr mgr, boolean lite) {
+    public MultiLiveLookPanel(SnmpMgr mgr, boolean lite) {
     	this.lite = lite;
         loadConfiguation();
         initComponents();
@@ -160,13 +160,17 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         }
                 
         streamKeys = new TreeMap<>();
-        addTrace(0, 0, 0, false);
-        addTrace(7, 0, 0, false);
-        addTrace(4, 1, 0, false);
-        addTrace(5, 1, 0, true);
+        addTrace(2, 0, 0, false);
+        addTrace(1, 0, 0, false);
+        addTrace(0, 1, 0, false);
+        addTrace(5, 1, 0, false);
+        //addTrace(0, 0, 0, false);
+        //addTrace(7, 0, 0, false);
+        //addTrace(4, 1, 0, false);
+       //addTrace(5, 1, 0, true);
         prepareMenus();
         
-        msgMgr.setNewStreamListener(this);
+        //msgMgr.setNewStreamListener(this);
         
         dataReceived = false;
         
@@ -174,6 +178,14 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         disconnectButton.setEnabled(false);
         waitDialog = null;
         QueueMonitor qm = new QueueMonitor(msgMgr, piq);
+        
+        if(msgMgr.map.size() > 0) {
+        	for(Long stream: msgMgr.map.keySet()) {
+        		Stream streams = msgMgr.map.get(stream);
+        		addStreamKey(stream, streams.streamName, streams.statusOnly);
+        	}
+        	disconnectButton.setEnabled(true);
+        }
     }
     
     public long nearestMinute()
@@ -426,20 +438,29 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
      {
          if (msgMgr.checkIfExisting(cipd.iPAddress, Integer.parseInt(cipd.stream)))
          {
-             JOptionPane.showMessageDialog(this, "LiveLook is already connected to this stream\nTry connecting to another stream");
+             JOptionPane.showMessageDialog(this, "LiveLook NetXpress is already connected to this stream\nTry connecting to another stream");
              return;
          }
      waitDialog = new WaitingForConnectionDialog(null,true);
     // waitDialog.enableLogging = cipd.enableLogging;
      int dport = Integer.parseInt(cipd.getDPort());
      LogMapEntry.next_DPort = dport;
-     JDispatchMgr.sendSetupMessage(cipd.iPAddress,Integer.parseInt(cipd.stream),1,dport);
+     Stream stream = msgMgr.addStream(cipd.iPAddress, cipd.stream, dport);
+     if (!msgMgr.checkIfMacAllowed(stream))
+     {
+         JOptionPane.showMessageDialog(this, "Mac is not registered for use");
+         msgMgr.disconnect(Long.parseLong(stream.ip.replace(".", "") + stream.dstPort));
+         return;
+     }
+     if(stream.opened)waitDialog.notifyConnection();
+     addStreamKey(Long.parseLong(stream.ip.replace(".", "")  + stream.dstPort), stream.streamName, stream.statusOnly);
+     //JDispatchMgr.sendSetupMessage(cipd.iPAddress,Integer.parseInt(cipd.stream),1,dport);
      waitDialog.setVisible(true);
      //waitDialog.enableLogging = cipd.enableLogging;
      //System.out.println(" enable logging in Wait Dialog is "+waitDialog.enableLogging);
         if (waitDialog.connected)
         {
-            if (streamKeys.size() <= 2)
+            if (streamKeys.size() <= 2 && !stream.statusOnly)
             {
                 long streamKey1 = 0;
                 long newKey = 0;
@@ -465,7 +486,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                 
                 if (newKey != 0)
                 { 
-                    int[] toAdd = new int[] {0,7};
+                    int[] toAdd = new int[] {1,2};
                     int added = 0;
                     for (int i = 0; i < 4; i++)
                     {
@@ -476,7 +497,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                             if (added == 2)break;
                         }
                     }
-                    toAdd = new int[] {4,5};
+                    toAdd = new int[] {0,5};
                     added = 0;
                     for (int i = 0; i < 4; i++)
                     {
@@ -500,7 +521,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
      }
      catch (Exception e)
      {
-         
+         System.out.println("ERROR");
      }
      
             
@@ -748,7 +769,6 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                 charts[1].getXYPlot().getDomainAxis().setFixedAutoRange(maxlength);
             }
             */
-
             if (updateNeeded > 0)
             {
                 charts[0].setNotify(false);
@@ -778,7 +798,6 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                 charts[1].setNotify(true);
             }
             int count = 0;
-            
                 while (p != null)
                 {
                     pointsQ--;
@@ -787,6 +806,11 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                         charts[0].setNotify(true);
                         charts[1].setNotify(true);
                     }
+                    Stream stream;
+                    boolean isReset;
+                    boolean isShutDown;
+                    boolean isNegative;
+                    boolean isZero;
                     for (int i = 0; i < traceTypes.length; i++)
                     {
                         if (traceTypes[i] >= 0)
@@ -801,10 +825,24 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                                     traces[i].setKey(name+" "+NetworkLogDataPoint.getTypeTitle(traceTypes[i],false));
                                     prepareMenus();
                                 }
+                                stream = msgMgr.map.get(streamId[i]);
+                                isReset = stream.liveViewReset;
+                                isShutDown = stream.adminState == 2;
+                            	isZero = p.isZeroOrNaN();
+                            	isNegative = p.isNegative();
                             }
-                            if (streamId[i] == p.getStreamId())
+                            else
                             {
-                                traces[i].add(p.getTimestamp(),p.getValueForPlot(traceTypes[i],intvl,false));
+                            	stream = msgMgr.map.get(streamId[i]);
+                                isReset = stream.liveViewReset;
+                                isShutDown = stream.adminState == 2;
+                            	isZero = p.isZeroOrNaN();
+                            	isNegative = p.isNegative();
+                            }
+                            
+                            if (streamId[i] == p.getStreamId() && isZero && !isNegative && !isReset && !isShutDown)
+                            {
+                            	traces[i].add(p.getTimestamp(),p.getValueForPlot(traceTypes[i],intvl,false));
                                 dataReceived = true;
                                 try {
                                     if (count % 10 == 0)Thread.sleep(10);
@@ -814,10 +852,14 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                                     Logger.getLogger(MultiLiveLookPanel.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
-                            
+                            else if(isReset) {
+                            	traces[i].add(p.getTimestamp(), null);
+                            }
                         }
                     }
                     
+                    if(msgMgr.map.get(p.streamId).liveViewReset2)msgMgr.map.get(p.streamId).liveViewReset2 = false;
+                    else if(msgMgr.map.get(p.streamId).liveViewReset1)msgMgr.map.get(p.streamId).liveViewReset1 = false;
                     p = msgMgr.getNextPoint();
                     count++;
                 }
@@ -830,6 +872,31 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
     public void newStreamAvailable(long key, String name) {
         
         streamKeys.put(name, key);
+        boolean retVal = true;
+        disconnectButton.setEnabled(true);
+        if (waitDialog != null)
+        {
+           // retVal = waitDialog.getEnableLogging();
+            //System.out.println("retVal is :" + retVal);
+            //msgMgr.setEnableLogging(key,retVal);
+            waitDialog.notifyConnection();
+            
+           // Logger.getLogger(MultiLiveLookPanel.class.getName()).log(Level.INFO, null, "Enable loging set to"+retVal);
+            
+        }
+        
+        prepareMenus();
+        this.repaint();
+        //return retVal;
+        
+    }
+    
+    
+    public void addStreamKey(long key, String name, boolean statusOnly) {
+        
+    	if(!statusOnly) 
+    		streamKeys.put(name, key);
+    	
         boolean retVal = true;
         disconnectButton.setEnabled(true);
         if (waitDialog != null)

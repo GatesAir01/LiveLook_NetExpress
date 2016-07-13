@@ -47,8 +47,8 @@ public class LogMapEntry implements Comparable{
     int SR;
     long lastEntry;
     long lastEntry_log;
-    InetAddress address;
-    int destPort;
+    public InetAddress address;
+    public int destPort;
     int daysSinceRoll;
     public static int daysPerLog = 1;
     int dataState;
@@ -74,7 +74,9 @@ public class LogMapEntry implements Comparable{
     public static boolean next_enableStreamLogging = true;
     public static boolean next_useDefault = true;
     public static int next_DPort = 50000;
+    public static int nextStreamType = 0;
     
+    public int streamType;
     public boolean enableLogging=true;
     public boolean lossRateAlarmEnabled = false;
     public boolean lossRateCorrectedAlarmEnabled = false;
@@ -101,7 +103,8 @@ public class LogMapEntry implements Comparable{
     int stateChangeFailCnt = 0;
     int ConnectionStatusGoodCnt = 0;
     int ConnectionStatusFailCnt = 0;
-    
+    boolean statReset = false;
+    static Stream stream;
     
     Color[] colors_dataState = new Color[]
     {
@@ -121,7 +124,7 @@ public class LogMapEntry implements Comparable{
     
     static final SimpleDateFormat format = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss");
  
-    LogMapEntry(InetAddress address, int dport) {
+    LogMapEntry(InetAddress address, int dport, Stream stream) {
         this.address = address;
         daysSinceRoll = 0;
         oldDataState = 1;
@@ -138,6 +141,8 @@ public class LogMapEntry implements Comparable{
         enableLogging = next_enableStreamLogging;
         useDefault = next_useDefault;
         destPort = dport;
+        streamType = nextStreamType;
+        this.stream = stream;
     }
 
     public int getOldDataState() {
@@ -163,13 +168,9 @@ public class LogMapEntry implements Comparable{
     {
         String s = streamName;
         s += ", "+index;
-        s += ", "+toIp(srcIpAddress);
-        s += ", "+toIp(dstIpAddress);
-        s += ", "+srcPort;
-        s += ", "+dstPort;
-        s += ", "+pktInterval;
-        s += ", "+codec;
-        s += ", "+SR;
+        s += ", "+address.toString().replace("/", "");
+        s += ", "+destPort;
+        s += ", "+streamType;
         return s;
     }
     
@@ -188,7 +189,7 @@ public class LogMapEntry implements Comparable{
     
     public void periodicCheckin()
     {
-        JDispatchMgr.sendSetupMessage(getReturnAddress(),index,1,destPort);
+        //JDispatchMgr.sendSetupMessage(getReturnAddress(),index,1,destPort);
     }
     
     void checkForLostConnections()
@@ -202,7 +203,7 @@ public class LogMapEntry implements Comparable{
             state = StatusListModel.dataState.length-1;
             //send a reconnect message
             //System.out.println("Sending a reconnect message to "+getReturnAddress()+" Strm Id "+ index);
-            JDispatchMgr.sendSetupMessage(getReturnAddress(),index,1,destPort);
+            //JDispatchMgr.sendSetupMessage(getReturnAddress(),index,1,destPort);
         }
         
         if (oldState != state && streamName != null)
@@ -260,15 +261,23 @@ public class LogMapEntry implements Comparable{
         
     }
     
-    
+    void writeNaNToLog(IplinkNetworkLogEntry inle) {
+    	try {
+			fos.write(inle.getNaNRow() + "\n");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
     
     void writeToLog(IplinkNetworkLogEntry inle) {
         
         dataState = inle.dataState;
-        if ( lossRateAlarmEnabled && lossRateAlarm < inle.getPktsLostLocalPct())
+        boolean shutDown = stream.adminState == 2;
+        if ( lossRateAlarmEnabled && lastLogEntry != null && lastLogEntry.pktsRcvd - inle.pktsRcvd == 0 && !shutDown)
         {        
             lossRateGoodCnt = 0;
-            lossRateFailCnt = lossRateFailCnt+5;
+            lossRateFailCnt = lossRateFailCnt+1;
             if ((lossRateFailCnt >= alarmThresholdStream) && !lossrateAlarmSent)
             {
                AlarmManager.generateAlarm(Level.WARNING,this,"Loss Rate is high");
@@ -277,10 +286,10 @@ public class LogMapEntry implements Comparable{
             }
            // lossRateOverThreshold=10;    
         }
-        else if (lossRateAlarmEnabled)
+        else if (lossRateAlarmEnabled && !shutDown)
         {
             //lossRateOverThreshold--;
-            lossRateGoodCnt = lossRateGoodCnt+5;
+            lossRateGoodCnt = lossRateGoodCnt+1;
             lossRateFailCnt= 0;
             if (lossRateGoodCnt>=alarmThresholdStream && lossrateAlarmSent)
             {      
@@ -290,13 +299,16 @@ public class LogMapEntry implements Comparable{
         }
         
        // System.out.println("the adjusted lost pct for stream name: "+this.streamName+" is " + getCurrentLossPCT(lastLogEntry, inle) );
-        if ( lossRateCorrectedAlarmEnabled && lossRateCorrectedAlarm < getCurrentLossPCT(lastLogEntry, inle))
+        //System.out.println(lastLogEntry.pktsRcvd);
+        //System.out.println(inle.pktsRcvd);
+        //System.out.println(lastLogEntry.pktsRcvd - inle.pktsRcvd == 0);
+        if ( lossRateCorrectedAlarmEnabled && lossrateCorrectionGoodCnt > 1)
         {
             lossrateCorrectionGoodCnt = 0;
             lossrateCorrectionsFailCnt = lossrateCorrectionsFailCnt + 5;
             if (lossrateCorrectionsFailCnt>=alarmThresholdStream && !lossrateCorrectionAlarmSent)
             {
-                AlarmManager.generateAlarm(Level.SEVERE,this, "After Correction Loss Rate is high");
+                AlarmManager.generateAlarm(Level.SEVERE,this, "Packet Loss is high");
                 //System.out.println("Loss rate correted alarm is "+lossRateCorrectedAlarm+ " The loss rate after correction is " +inle.getPktsLostPct() + " The loss rate before correction is " + inle.getPktsLostLocalPct() );
                 lossrateCorrectionAlarmSent = true;
             }
@@ -309,7 +321,7 @@ public class LogMapEntry implements Comparable{
             if (lossrateCorrectionGoodCnt >= alarmThresholdStream && lossrateCorrectionAlarmSent)
             {
                 
-                AlarmManager.generateAlarm(Level.INFO,this, "After Correction Loss Rate is now at an acceptable rate");
+                AlarmManager.generateAlarm(Level.INFO,this, "Packet Loss is now at an acceptable rate");
                 lossrateCorrectionAlarmSent = false;
             }
         }
@@ -328,7 +340,7 @@ public class LogMapEntry implements Comparable{
             stateChangeFailCnt= stateChangeFailCnt+5;
             if (stateChangeFailCnt >= alarmThresholdStream)
             {
-                AlarmManager.generateAlarm(Level.INFO,this, StatusListModel.dataState[state]);
+                //AlarmManager.generateAlarm(Level.INFO,this, StatusListModel.dataState[state] + "BLARR");
                 setOldDataState(state);
                 stateChangeFailCnt = 0;
             }
@@ -348,11 +360,12 @@ public class LogMapEntry implements Comparable{
             return;
         }
         
+        
         if (fos == null || fos2 == null)
         {
            // System.out.println("null file pointers");
-            String base = "logs/"+toIp(dstIpAddress)+"/"+ streamName+"-"+index+"-"+getDate(inle.timestamp);
-            String base2 = "logs/"+toIp(dstIpAddress)+"/Event_Log_"+ streamName+"-"+index+"-"+getDate(inle.timestamp);
+            String base = "logs/"+address.toString().replace("/", "")+"/"+ streamName+"-"+index+"-"+getDate(inle.timestamp);
+            String base2 = "logs/"+address.toString().replace("/", "")+"/Event_Log_"+ streamName+"-"+index+"-"+getDate(inle.timestamp);
             try {
                 File f = new File(base+".csv").getAbsoluteFile();
                 File f2 = new File(base2+".csv").getAbsoluteFile();
@@ -391,7 +404,7 @@ public class LogMapEntry implements Comparable{
                 if (!logDir.exists()) {
                     if (logDir.mkdir())System.out.println("The directory was created");
                 }
-                logDir = new File("logs/"+"/"+toIp(dstIpAddress)).getAbsoluteFile();
+                logDir = new File("logs/"+"/"+address.toString().replace("/", "")).getAbsoluteFile();
                 if (!logDir.exists()) {
                     if (logDir.mkdir())System.out.println("The directory was created");
                 }
@@ -402,8 +415,8 @@ public class LogMapEntry implements Comparable{
         }
         else if (createNewLog(inle.timestamp))
         {
-            String base = "logs/"+toIp(dstIpAddress)+"/"+ streamName+"-"+index+"-"+getDate(inle.timestamp);
-            String base2 = "logs/"+toIp(dstIpAddress)+"/Event_Log_"+ streamName+"-"+index+"-"+getDate(inle.timestamp);
+            String base = "logs/"+address.toString().replace("/", "")+"/"+ streamName+"-"+index+"-"+getDate(inle.timestamp);
+            String base2 = "logs/"+address.toString().replace("/", "")+"/Event_Log_"+ streamName+"-"+index+"-"+getDate(inle.timestamp);
             try {
                 if (fos != null)
                 {
@@ -452,7 +465,12 @@ public class LogMapEntry implements Comparable{
             if (fos != null)
             {
                 try {
-                        fos.write(inle.getEntryRow()+"\n");
+                		if(statReset) {
+                			statReset = false;
+                			fos.write(inle.getNaNRow() + "\n");
+                		}
+                		else
+                			fos.write(inle.getEntryRow()+"\n");
                         fos.flush();
                 } catch (IOException ex) {
 
@@ -497,6 +515,11 @@ public class LogMapEntry implements Comparable{
             Logger.getLogger(LogMapEntry.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    public void generateAlarm(String alarmString) {
+    	AlarmManager.generateAlarm(Level.INFO,this, alarmString);
+    }
+     
     public boolean createNewLog(long currentTime)
     {
       Calendar c1 = new GregorianCalendar();
@@ -507,10 +530,10 @@ public class LogMapEntry implements Comparable{
       if (c1.get(Calendar.DAY_OF_YEAR) != c2.get(Calendar.DAY_OF_YEAR))
       {
           daysSinceRoll++;
-         // System.out.println("Days since roll is " +daysSinceRoll );
+          //System.out.println("Days since roll is " +daysSinceRoll );
           if (daysSinceRoll == daysPerLog)
           {
-             // System.out.println("New file should be created");
+              //System.out.println("New file should be created");
               daysSinceRoll = 0;
               return true;
           }
@@ -538,6 +561,7 @@ public class LogMapEntry implements Comparable{
     public String toSaveString()
     {
         String s = address.getHostAddress()+", "+streamName;
+        s += ", " + streamType;
         s += ", "+index;
         s += ", "+srcIpAddress;
         s += ", "+dstIpAddress;
@@ -563,28 +587,29 @@ public class LogMapEntry implements Comparable{
         try {
             String[] parts = s.split(",");
             String dport = "50000";
-            if (parts.length > 18)
+            if (parts.length > 19)
             {
-                dport = parts[18].trim();
+                dport = parts[19].trim();
             }
-            LogMapEntry lme = new LogMapEntry(InetAddress.getByName(parts[0]),Integer.parseInt(dport));
+            LogMapEntry lme = new LogMapEntry(InetAddress.getByName(parts[0]),Integer.parseInt(dport), stream);
             lme.streamName = parts[1].trim();
-            lme.index = Integer.parseInt(parts[2].trim());
-            lme.srcIpAddress = Integer.parseInt(parts[3].trim());
-            lme.dstIpAddress = Integer.parseInt(parts[4].trim());
-            lme.srcPort = Integer.parseInt(parts[5].trim());
-            lme.dstPort = Integer.parseInt(parts[6].trim());
-            lme.pktInterval = Integer.parseInt(parts[7].trim());
-            lme.codec = Integer.parseInt(parts[8].trim());
-            lme.SR = Integer.parseInt(parts[9].trim());
-            lme.lossRateAlarmEnabled = parts[10].trim().equals("true");
-            lme.lossRateCorrectedAlarmEnabled = parts[11].trim().equals("true");
-            lme.enableEmail = parts[12].trim().equals("true");
-            lme.lossRateAlarm = Double.parseDouble(parts[13].trim());
-            lme.lossRateCorrectedAlarm = Double.parseDouble(parts[14].trim());
-            lme.useDefault = parts[15].trim().equals("true");
-            lme.enableLogging = parts[16].trim().equals("true");
-            lme.alarmThresholdStream = Integer.parseInt(parts[17].trim());
+            lme.streamType = Integer.parseInt(parts[2].trim());
+            lme.index = Integer.parseInt(parts[3].trim());
+            lme.srcIpAddress = Integer.parseInt(parts[4].trim());
+            lme.dstIpAddress = Integer.parseInt(parts[5].trim());
+            lme.srcPort = Integer.parseInt(parts[6].trim());
+            lme.dstPort = Integer.parseInt(parts[7].trim());
+            lme.pktInterval = Integer.parseInt(parts[8].trim());
+            lme.codec = Integer.parseInt(parts[9].trim());
+            lme.SR = Integer.parseInt(parts[10].trim());
+            lme.lossRateAlarmEnabled = parts[11].trim().equals("true");
+            lme.lossRateCorrectedAlarmEnabled = parts[12].trim().equals("true");
+            lme.enableEmail = parts[13].trim().equals("true");
+            lme.lossRateAlarm = Double.parseDouble(parts[14].trim());
+            lme.lossRateCorrectedAlarm = Double.parseDouble(parts[15].trim());
+            lme.useDefault = parts[16].trim().equals("true");
+            lme.enableLogging = parts[17].trim().equals("true");
+            lme.alarmThresholdStream = Integer.parseInt(parts[18].trim());
             
             return lme;
         } catch (UnknownHostException ex) {

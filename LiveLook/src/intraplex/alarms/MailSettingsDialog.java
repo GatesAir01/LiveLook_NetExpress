@@ -8,9 +8,12 @@ package intraplex.alarms;
 
 import intraplex.livelook.IPLinkNetworkTool;
 import intraplex.livelook.IPLinkNetworkTool_Lite;
-import intraplex.livelook.JDispatchMgr;
 import intraplex.livelook.LogMapEntry;
+import intraplex.livelook.SnmpMgr;
+import intraplex.livelook.Stream;
+
 import java.util.Collection;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import javax.swing.JOptionPane;
 
@@ -30,6 +33,8 @@ public class MailSettingsDialog extends javax.swing.JDialog {
     double [] lossRate;
     double [] lossRateAfterCorrection;
     boolean [] enablelossRate;
+    boolean [] StreamDown;
+    boolean [] ShutDown;
     boolean [] enablelossRateAfterCorrection;
     boolean [] enableDefault;
     boolean [] enableEmail;
@@ -44,6 +49,8 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         lossRateAfterCorrection = new double[streams.size()+1];
         alarmthreshold = new int [streams.size()+1];
         enablelossRate = new boolean[streams.size()+1];
+        StreamDown = new boolean[streams.size()+1];
+        ShutDown = new boolean[streams.size()+1];
         enablelossRateAfterCorrection = new boolean[streams.size()+1];
         enableDefault = new boolean[streams.size()+1];
         enableEmail = new boolean[streams.size()+1];
@@ -53,6 +60,8 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         lossRateAfterCorrection[0] = LogMapEntry.default_lossRateCorrectedAlarm*100;
         alarmthreshold[0] = LogMapEntry.default_alarmthresholdTime;
         enablelossRate[0] = LogMapEntry.default_lossRateAlarmEnabled;
+        ShutDown[0] = SnmpMgr.DefaultShutDownAlarm;
+        StreamDown[0] = SnmpMgr.DefaultStreamDownAlarm;
         enablelossRateAfterCorrection[0] = LogMapEntry.default_lossRateCorrectedAlarmEnabled;
         enableDefault[0] = true;
         enableEmail[0] = true;
@@ -61,6 +70,14 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         int i = 1;
         for (LogMapEntry e : streams)
         {
+        	IPLinkNetworkTool ip = (IPLinkNetworkTool) super.getParent();
+        	Stream stream = ip.mgr.getStream("" + e.address.toString().replace("/", "").replace(".", ""), "" + e.destPort);
+	    	
+	    	if(stream != null) {
+	    		ShutDown[i] = stream.ShutDownAlarm;
+	    		StreamDown[i] = stream.StreamDownAlarm;
+	    	}
+        	
            streamList[i] = e.streamName;
            lossRate[i] = e.lossRateAlarm*100;
            lossRateAfterCorrection[i] = e.lossRateCorrectedAlarm*100;
@@ -81,11 +98,14 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         serverAddress.setText(mailer.getServerAddress());
         serverPort.setText(mailer.getPort());
         enableEmailAlarms.setSelected(LogMapEntry.default_enableEmail);
-        lossRatePercent.setText(LogMapEntry.default_lossRateAlarm*100 + "");
-        afterCorrectPer.setText(LogMapEntry.default_lossRateCorrectedAlarm*100 + "");
         alarmThresholdTime.setText(LogMapEntry.default_alarmthresholdTime + "");
-        enableLossRateAlarm.setSelected(LogMapEntry.default_lossRateAlarmEnabled);
-        enableLossRateCorAlarm.setSelected(LogMapEntry.default_lossRateCorrectedAlarmEnabled);
+        if(SnmpMgr.statusOnly) {
+        	StreamDownAlarm.setSelected(SnmpMgr.DefaultStreamDownAlarm);
+        }
+        else {
+        	StreamDownAlarm.setSelected(LogMapEntry.default_lossRateAlarmEnabled);
+        }
+        ShutDownAlarm.setSelected(SnmpMgr.DefaultShutDownAlarm);
         enableDataLogging.setSelected(LogMapEntry.default_enableStreamLogging);
         useDefaultBox.setSelected(true);
         emailAlarmsSet(man.isSendEmailAlarms());
@@ -112,6 +132,8 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         lossRateAfterCorrection[0] = LogMapEntry.default_lossRateCorrectedAlarm*100;
         alarmthreshold[0] = LogMapEntry.default_alarmthresholdTime;
         enablelossRate[0] = LogMapEntry.default_lossRateAlarmEnabled;
+        ShutDown[0] = SnmpMgr.DefaultShutDownAlarm;
+        StreamDown[0] = SnmpMgr.DefaultStreamDownAlarm;
         enablelossRateAfterCorrection[0] = LogMapEntry.default_lossRateCorrectedAlarmEnabled;
         enableDefault[0] = true;
         enableEmail[0] = true;
@@ -120,6 +142,14 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         int i = 1;
         for (LogMapEntry e : streams)
         {
+        	IPLinkNetworkTool ip = (IPLinkNetworkTool) super.getParent();
+        	Stream stream = ip.mgr.getStream("" + e.address.toString().replace("/", "").replace(".", ""), "" + e.destPort);
+	    	
+	    	if(stream != null) {
+	    		ShutDown[i] = stream.ShutDownAlarm;
+	    		StreamDown[i] = stream.StreamDownAlarm;
+	    	}
+	    	
            streamList[i] = e.streamName;
            lossRate[i] = e.lossRateAlarm*100;
            lossRateAfterCorrection[i] = e.lossRateCorrectedAlarm*100;
@@ -140,11 +170,14 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         serverAddress.setText(mailer.getServerAddress());
         serverPort.setText(mailer.getPort());
         enableEmailAlarms.setSelected(LogMapEntry.default_enableEmail);
-        lossRatePercent.setText(LogMapEntry.default_lossRateAlarm*100 + "");
-        afterCorrectPer.setText(LogMapEntry.default_lossRateCorrectedAlarm*100 + "");
         alarmThresholdTime.setText(LogMapEntry.default_alarmthresholdTime + "");
-        enableLossRateAlarm.setSelected(LogMapEntry.default_lossRateAlarmEnabled);
-        enableLossRateCorAlarm.setSelected(LogMapEntry.default_lossRateCorrectedAlarmEnabled);
+        if(SnmpMgr.statusOnly) {
+        	StreamDownAlarm.setSelected(SnmpMgr.DefaultStreamDownAlarm);
+        }
+        else {
+        	StreamDownAlarm.setSelected(LogMapEntry.default_lossRateAlarmEnabled);
+        }
+        ShutDownAlarm.setSelected(SnmpMgr.DefaultShutDownAlarm);
         enableDataLogging.setSelected(LogMapEntry.default_enableStreamLogging);
         useDefaultBox.setSelected(true);
         emailAlarmsSet(man.isSendEmailAlarms());
@@ -193,12 +226,6 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         emailPassword = new javax.swing.JPasswordField();
         testMessage = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
-        lossRatePercent = new javax.swing.JTextField();
-        enableLossRateAlarm = new javax.swing.JCheckBox();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        enableLossRateCorAlarm = new javax.swing.JCheckBox();
-        afterCorrectPer = new javax.swing.JTextField();
         streamBox = new javax.swing.JComboBox();
         jLabel14 = new javax.swing.JLabel();
         enableEmailAlarms = new javax.swing.JCheckBox();
@@ -207,6 +234,8 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         alarmThresholdTime = new javax.swing.JTextField();
         AlarmThresholdLabel1 = new javax.swing.JLabel();
         alarmThresholdLabel2 = new javax.swing.JLabel();
+        StreamDownAlarm = new javax.swing.JCheckBox();
+        ShutDownAlarm = new javax.swing.JCheckBox();
         globalEnableEmail = new javax.swing.JCheckBox();
 
         jTextField3.setText("jTextField1");
@@ -430,33 +459,6 @@ public class MailSettingsDialog extends javax.swing.JDialog {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Stream Alerts"));
 
-        lossRatePercent.setText("5");
-        lossRatePercent.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lossRatePercentActionPerformed(evt);
-            }
-        });
-
-        enableLossRateAlarm.setText("% Loss Rate greater than ");
-        enableLossRateAlarm.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enableLossRateAlarmActionPerformed(evt);
-            }
-        });
-
-        jLabel7.setText("%");
-
-        jLabel8.setText("%");
-
-        enableLossRateCorAlarm.setText("% Loss Rate after correction greater than ");
-        enableLossRateCorAlarm.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enableLossRateCorAlarmActionPerformed(evt);
-            }
-        });
-
-        afterCorrectPer.setText("1");
-
         streamBox.setModel(new javax.swing.DefaultComboBoxModel(streamList));
         streamBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -498,6 +500,10 @@ public class MailSettingsDialog extends javax.swing.JDialog {
 
         alarmThresholdLabel2.setText("seconds");
 
+        StreamDownAlarm.setText("Stream Down");
+
+        ShutDownAlarm.setText("Stream Shut Down");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -511,7 +517,15 @@ public class MailSettingsDialog extends javax.swing.JDialog {
                         .addGap(0, 55, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addComponent(enableEmailAlarms, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(40, 40, 40)
+                        .addComponent(enableDataLogging)
+                        .addGap(28, 28, 28))
                     .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(useDefaultBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(203, 203, 203))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addComponent(AlarmThresholdLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(alarmThresholdTime, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -519,54 +533,31 @@ public class MailSettingsDialog extends javax.swing.JDialog {
                         .addComponent(alarmThresholdLabel2)
                         .addGap(88, 88, 88))
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(useDefaultBox)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addComponent(enableLossRateCorAlarm)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(afterCorrectPer, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel3Layout.createSequentialGroup()
-                                        .addComponent(enableLossRateAlarm)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(lossRatePercent, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jLabel7)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel8))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(enableEmailAlarms)
-                                .addGap(40, 40, 40)
-                                .addComponent(enableDataLogging, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap())))
+                        .addComponent(StreamDownAlarm)
+                        .addGap(18, 18, 18)
+                        .addComponent(ShutDownAlarm)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(enableLossRateAlarm)
-                    .addComponent(lossRatePercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel7)
-                    .addComponent(jLabel14))
+                    .addComponent(jLabel14)
+                    .addComponent(StreamDownAlarm)
+                    .addComponent(ShutDownAlarm))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(afterCorrectPer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8)
-                    .addComponent(enableLossRateCorAlarm)
-                    .addComponent(streamBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(streamBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(AlarmThresholdLabel1)
                     .addComponent(alarmThresholdTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(alarmThresholdLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(enableEmailAlarms)
                     .addComponent(enableDataLogging))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 4, Short.MAX_VALUE)
+                .addGap(8, 8, 8)
                 .addComponent(useDefaultBox)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         globalEnableEmail.setText("Enable Email");
@@ -605,8 +596,8 @@ public class MailSettingsDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(globalEnableEmail)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -718,11 +709,22 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         LogMapEntry.default_enableEmail = enableEmail[0];
         LogMapEntry.default_enableStreamLogging = enableStreamLogging[0];
         LogMapEntry.default_alarmthresholdTime = alarmthreshold[0];
+        SnmpMgr.DefaultShutDownAlarm = ShutDown[0];
+        SnmpMgr.DefaultStreamDownAlarm = StreamDown[0];
         
         int i = 1;
         for (LogMapEntry e : streams)
         {
-            int index = i;
+	    	IPLinkNetworkTool ip = (IPLinkNetworkTool) super.getParent();
+	    	Stream stream = ip.mgr.getStream("" + e.address.toString().replace("/", "").replace(".", ""), "" + e.destPort);
+	    	
+	    	int index = i;
+	    	
+	    	if(stream != null) {
+		    	stream.ShutDownAlarm = ShutDown[index];
+		    	stream.StreamDownAlarm = StreamDown[index];
+	    	}
+	    	
            e.useDefault = enableDefault[index];
            if (e.useDefault)index = 0;
            e.lossRateAlarm = lossRate[index]/100;
@@ -749,10 +751,6 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         
     }//GEN-LAST:event_enableEmailAlarmsActionPerformed
 
-    private void enableLossRateAlarmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableLossRateAlarmActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_enableLossRateAlarmActionPerformed
-
     private void enableLossRateCorAlarmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableLossRateCorAlarmActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_enableLossRateCorAlarmActionPerformed
@@ -771,22 +769,6 @@ public class MailSettingsDialog extends javax.swing.JDialog {
        //JOptionPane.showMessageDialog(this.getParent(),"New Index: "+ newIndex + " Old Index :" +oldIndex);
        
         enableEmail[oldIndex] = enableEmailAlarms.isSelected();
-         try 
-        {
-            lossRate[oldIndex] = Double.parseDouble(lossRatePercent.getText());
-        }
-        catch (Exception e)
-        {
-            lossRate[oldIndex] = lossRate[0];
-        }
-        try 
-        {
-            lossRateAfterCorrection[oldIndex] = Double.parseDouble(afterCorrectPer.getText());
-        }
-        catch (Exception e)
-        {
-            lossRateAfterCorrection[oldIndex] = lossRateAfterCorrection[0];  
-        }
         
         try
         {
@@ -813,19 +795,16 @@ public class MailSettingsDialog extends javax.swing.JDialog {
         {
             alarmthreshold[oldIndex] = alarmthreshold[0];
         }
-        enablelossRate[oldIndex] = enableLossRateAlarm.isSelected();
-        enablelossRateAfterCorrection[oldIndex] = enableLossRateCorAlarm.isSelected();
+        enablelossRate[oldIndex] = StreamDownAlarm.isSelected();
+        StreamDown[oldIndex] = StreamDownAlarm.isSelected();
+        ShutDown[oldIndex] = ShutDownAlarm.isSelected();
         enableDefault[oldIndex] = useDefaultBox.isSelected();
         enableStreamLogging[oldIndex] = enableDataLogging.isSelected();
         //System.out.println ("Enable Stream logging for oldIndex  "+oldIndex + " is " + enableStreamLogging[oldIndex]);
         
         
         enableEmailAlarms.setSelected(enableEmail[newIndex]);
-        lossRatePercent.setText(lossRate[newIndex] + "");
-        afterCorrectPer.setText(lossRateAfterCorrection[newIndex] + "");
         alarmThresholdTime.setText(alarmthreshold[newIndex] + "");
-        enableLossRateAlarm.setSelected(enablelossRate[newIndex]);
-        enableLossRateCorAlarm.setSelected(enablelossRateAfterCorrection[newIndex]);
         useDefaultBox.setSelected(enableDefault[newIndex]);
         enableDataLogging.setSelected(enableStreamLogging[newIndex]);
         
@@ -836,11 +815,22 @@ public class MailSettingsDialog extends javax.swing.JDialog {
            //not a default profile
            useDefaultSet(!enableDefault[newIndex]);
            useDefaultBox.setVisible(true);
+           
+           if(useDefaultBox.isSelected()) {
+        	   StreamDownAlarm.setSelected(StreamDown[0]);
+        	   ShutDownAlarm.setSelected(ShutDown[0]);
+           }
+           else {
+        	   StreamDownAlarm.setSelected(StreamDown[newIndex]);
+        	   ShutDownAlarm.setSelected(ShutDown[newIndex]);
+           }
         }
         else
         {
            useDefaultSet(true);
            useDefaultBox.setVisible(false);
+    	   StreamDownAlarm.setSelected(StreamDown[0]);
+    	   ShutDownAlarm.setSelected(ShutDown[0]);
         }
        oldIndex = newIndex;
     }//GEN-LAST:event_streamBoxActionPerformed
@@ -884,10 +874,8 @@ public class MailSettingsDialog extends javax.swing.JDialog {
 
     private void useDefaultSet (boolean b)
     {
-        enableLossRateAlarm.setEnabled(b);
-        enableLossRateCorAlarm.setEnabled(b);
-        lossRatePercent.setEnabled(b);
-        afterCorrectPer.setEnabled(b);
+        StreamDownAlarm.setEnabled(b);
+        ShutDownAlarm.setEnabled(b);
         enableEmailAlarms.setEnabled(b);
         enableDataLogging.setEnabled(b);
         alarmThresholdTime.setEnabled(b);
@@ -912,7 +900,8 @@ public class MailSettingsDialog extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel AlarmThresholdLabel1;
-    private javax.swing.JTextField afterCorrectPer;
+    private javax.swing.JCheckBox ShutDownAlarm;
+    private javax.swing.JCheckBox StreamDownAlarm;
     private javax.swing.JLabel alarmThresholdLabel2;
     private javax.swing.JTextField alarmThresholdTime;
     private javax.swing.JButton cancelButton;
@@ -923,8 +912,6 @@ public class MailSettingsDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox enableDataLogging;
     private javax.swing.JCheckBox enableEmailAlarms;
     private javax.swing.JCheckBox enableEmailAlarms1;
-    private javax.swing.JCheckBox enableLossRateAlarm;
-    private javax.swing.JCheckBox enableLossRateCorAlarm;
     private javax.swing.JCheckBox globalEnableEmail;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -937,14 +924,11 @@ public class MailSettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField lossRatePercent;
     private javax.swing.JButton saveButton;
     private javax.swing.JTextField serverAddress;
     private javax.swing.JTextField serverAddress1;

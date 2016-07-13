@@ -70,10 +70,15 @@ public class IplinkNetworkLogEntry implements Comparable{
     protected int ExpectedQ;
     protected int recoBufferDelay;
     protected int version;
-    
+    protected boolean NaNEntry;
         
     protected int dataState;
     //int pktInterval;
+    public IplinkNetworkLogEntry() {
+    	NaNEntry = true;
+    	timestamp = System.currentTimeMillis();
+    }
+    
     public IplinkNetworkLogEntry(int[] v, int pktInterval) {
         int i = 0;
         timestamp = System.currentTimeMillis();
@@ -161,6 +166,17 @@ public class IplinkNetworkLogEntry implements Comparable{
        
     }
     
+    public IplinkNetworkLogEntry(Stream stream)
+    {
+    	timestamp = System.currentTimeMillis();
+    	pktsRcvd = stream.packetsReceived;
+    	pktsLost = stream.packetsLost;
+    	pktsRecvd = stream.packetsRecovered;
+    	currQLen = stream.currentQueueLength;
+    	pktsLate = stream.packetsLate;
+    	pktsEarly = stream.packetsEarly;
+    }
+    
     public IplinkNetworkLogEntry(IplinkNetworkLogEntry c) {
     
         timestamp = c.timestamp;
@@ -233,62 +249,25 @@ public class IplinkNetworkLogEntry implements Comparable{
     
     public IplinkNetworkLogEntry(String[] s, boolean skipJitter) {
         int i = 0;
-        timestamp = Long.parseLong(s[i++]);
-        pktSent= Integer.parseInt(s[i++]);	
-        bytesSent= Integer.parseInt(s[i++]);		
-        pktsRcvd= Integer.parseInt(s[i++]);	
-        pktsRcvdPer= Integer.parseInt(s[i++]);		
-        bytesRcvd= Integer.parseInt(s[i++]);		
-        pktsLost= Integer.parseInt(s[i++]);		
-        pktsLostLocal= Integer.parseInt(s[i++]);		
-        pktsLostPct=Float.parseFloat(s[i++]);
-        pktsLostLocalPct=Float.parseFloat(s[i++]);
-        pktsLostPctCum=Float.parseFloat(s[i++]);
-        pktsLostLocalPctCum=Float.parseFloat(s[i++]);       
-        pktsRecvd= Integer.parseInt(s[i++]);	 
-        pktsLate= Integer.parseInt(s[i++]);	 
-        pktsEarly= Integer.parseInt(s[i++]);
-        currQLen= Integer.parseInt(s[i++]);
-        currQLenMsec= Integer.parseInt(s[i++]);
-        rxJitterInMsec= Integer.parseInt(s[i++]);
-        numjBufResets= Integer.parseInt(s[i++]); 
-        c11= Integer.parseInt(s[i++]); 
-        c13= Integer.parseInt(s[i++]); 
-        c14= Integer.parseInt(s[i++]); 
-        c22= Integer.parseInt(s[i++]); 
-        c23= Integer.parseInt(s[i++]); 
-        c33= Integer.parseInt(s[i++]); 
-        lost_count= Integer.parseInt(s[i++]); 
-        pkt_count= Integer.parseInt(s[i++]); 
-        if (!skipJitter)
+        timestamp = Long.parseLong(s[i++]);	
+        if(s[i].equals("NaN")) 
         {
-           
-            AvgJitter = Float.parseFloat(s[i++]);
-            MaxJitter = Float.parseFloat(s[i++]);
-            
-            recoBufferDelay = Integer.parseInt(s[i++]);
-            try{
-            GrpDelay = Float.parseFloat(s[i++]);
-            ExpectedQ = Integer.parseInt(s[i++]);
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                GrpDelay = 0;
-                ExpectedQ = recoBufferDelay;
-            }
-           // System.out.println("ExpectedQ is "+ ExpectedQ);
+        	NaNEntry = true;
+	        pktsRcvd= 0;		
+	        pktsLost= 0;		      
+	        pktsRecvd= 0;	 
+	        pktsLate= 0;	 
+	        pktsEarly= 0;
+	        currQLen= 0;
         }
-        else
-        {
-            //skip jitter, pad it with zero's
-            AvgJitter = 0;
-            MaxJitter = 0;
-            GrpDelay = 0;
-            recoBufferDelay = currQLenMsec;
-            ExpectedQ = currQLenMsec;
-            
+        else {
+        	pktsRcvd= Integer.parseInt(s[i++]);		
+	        pktsLost= Integer.parseInt(s[i++]);		      
+	        pktsRecvd= Integer.parseInt(s[i++]);	 
+	        pktsLate= Integer.parseInt(s[i++]);	 
+	        pktsEarly= Integer.parseInt(s[i++]);
+	        currQLen= Integer.parseInt(s[i++]);
         }
-        
     }   
 
     public long getTimestamp() {
@@ -549,39 +528,38 @@ public class IplinkNetworkLogEntry implements Comparable{
     {
         String s  = "";
         s+=timestamp+",";
-        s+=pktSent+",";	
-        s+=bytesSent+",";	
         s+=pktsRcvd+",";	
-        s+=pktsRcvdPer+",";	
-        s+=bytesRcvd+",";	
-        s+=pktsLost+",";	
-        s+=pktsLostLocal+",";	
-        s+=pktsLostPct+",";	
-        s+=pktsLostLocalPct+",";	
-        s+=pktsLostPctCum+",";	
-        s+=pktsLostLocalPctCum+",";	         
+        s+=pktsLost+",";	         
         s+=pktsRecvd+",";	 
         s+=pktsLate+",";	 
         s+=pktsEarly+",";	 
-        s+=currQLen+",";	  
-        s+=currQLenMsec+",";	 
-        s+=rxJitterInMsec+",";	 
-        s+=numjBufResets+",";	 
-        s+=c11+",";
-        s+=c13+",";	
-        s+=c14+",";	
-        s+=c22+",";
-        s+=c23+",";
-        s+=c33+",";
-        s+=lost_count+",";	 
-        s+=pkt_count+",";
-        s+=AvgJitter+",";
-        s+=MaxJitter+",";
-        s+=recoBufferDelay+",";
-        s+=GrpDelay+",";
-        s+=ExpectedQ;
+        s+=currQLen+",";	 
         
         return s;
+    }
+    
+    public String getNaNRow()
+    {
+        String s  = "";
+        s+=timestamp+",";
+        s+=Double.NaN+",";	
+        s+=Double.NaN+",";	         
+        s+=Double.NaN+",";	 
+        s+=Double.NaN+",";	 
+        s+=Double.NaN+",";	 
+        s+=Double.NaN+",";	 
+        
+        return s;
+    }
+    
+    public boolean isDifference(IplinkNetworkLogEntry inle) {
+    	if(	(this.pktsRcvd - inle.pktsRcvd) != 0 || (this.pktsLost - inle.pktsLost) != 0 || 
+    			(this.pktsRecvd - inle.pktsRecvd) != 0 || (this.pktsLate - inle.pktsLate) != 0 || 
+    					(this.pktsEarly - inle.pktsEarly) != 0) 
+    	{
+    		return true;
+    	}
+    	return false;
     }
 
     @Override
@@ -595,6 +573,26 @@ public class IplinkNetworkLogEntry implements Comparable{
         }
         return 0;
     }
+
+	public boolean checkForNegatives() {
+		boolean val = false;
+		if(pktsRcvd < 0) {
+			val = true;
+		}
+		if(pktsLost < 0) {
+			val = true;
+		}
+		if(pktsRecvd < 0) {
+			val = true;
+		}
+		if(pktsLate < 0) {
+			val = true;
+		}
+		if(pktsEarly < 0) {
+			val = true;
+		}
+		return val;
+	}
     
     
     

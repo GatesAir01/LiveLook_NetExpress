@@ -106,7 +106,7 @@ public class AlarmManager{
   
   public static void generateAlarm(Level level, LogMapEntry e, String message)
     {
-        String subject =  "LiveLook Alarm: "+" Stream: "+e.streamName+";" + " State: "+message;
+        String subject =  "LiveLook NetXpress Alarm: "+" Stream: "+e.streamName+";" + " State: "+message;
         StringBuilder buf = new StringBuilder();
         Date d = new Date(System.currentTimeMillis());
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");

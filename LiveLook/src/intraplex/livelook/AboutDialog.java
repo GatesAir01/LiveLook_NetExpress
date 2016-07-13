@@ -11,13 +11,15 @@ package intraplex.livelook;
  * @author jschreiv
  */
 public class AboutDialog extends javax.swing.JDialog {
+	static boolean lite;
 
     /**
      * Creates new form AboutDialog
      */
     public static final String version = "V1.4";
-    public AboutDialog(java.awt.Frame parent, boolean modal) {
+    public AboutDialog(java.awt.Frame parent, boolean modal, boolean lite) {
         super(parent, modal);
+        this.lite = lite;
         initComponents();
         versionLabel.setText(version);
     }
@@ -38,10 +40,10 @@ public class AboutDialog extends javax.swing.JDialog {
         jTextArea1 = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("About Intraplex LiveLook");
+        setTitle("About Intraplex " + ((lite)?"LiveLook Lite NetXpress":"LiveLook NetXpress"));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel1.setText("Intraplex LiveLook");
+        jLabel1.setText("Intraplex " + ((lite)?"LiveLook Lite NetXpress":"LiveLook NetXpress"));
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel2.setText("Version: ");
@@ -58,7 +60,7 @@ public class AboutDialog extends javax.swing.JDialog {
         jTextArea1.setForeground(new java.awt.Color(255, 255, 255));
         jTextArea1.setLineWrap(true);
         jTextArea1.setRows(5);
-        jTextArea1.setText("Intraplex LiveLook is a software application to assist the Intraplex IPLink in stream statistics logging. \n\nLiveLook provides advanced analysis of stream data to provide feedback on proper mitigation techniques for packet loss. LiveLook helps takes the guessing out of loss mitigation and makes it easy to get the most out of your networks.\n\nThis software is licensed, not sold, under GatesAir Inc. or its subsidiaries' terms of use or such other terms agreed to by GatesAir, Inc. Unauthorised use or reproduction of this software is prohibited.\n\n© 2015 GatesAir, Inc");
+        jTextArea1.setText("Intraplex " + ((lite)?"LiveLook Lite NetXpress":"LiveLook NetXpress") + " is a software application to assist the Intraplex IPLink in stream statistics logging. \n\n" + ((lite)?"LiveLook Lite NetXpress":"LiveLook NetXpress") + " provides advanced analysis of stream data to provide feedback on proper mitigation techniques for packet loss. " + ((lite)?"LiveLook Lite NetXpress":"LiveLook NetXpress") + " helps takes the guessing out of loss mitigation and makes it easy to get the most out of your networks.\n\nThis software is licensed, not sold, under GatesAir Inc. or its subsidiaries' terms of use or such other terms agreed to by GatesAir, Inc. Unauthorised use or reproduction of this software is prohibited.\n\n© 2015 GatesAir, Inc");
         jTextArea1.setWrapStyleWord(true);
         jTextArea1.setBorder(null);
         jTextArea1.setDisabledTextColor(new java.awt.Color(0, 0, 0));
@@ -107,7 +109,7 @@ public class AboutDialog extends javax.swing.JDialog {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -130,7 +132,7 @@ public class AboutDialog extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                AboutDialog dialog = new AboutDialog(new javax.swing.JFrame(), true);
+                AboutDialog dialog = new AboutDialog(new javax.swing.JFrame(), true, lite);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {

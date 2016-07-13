@@ -12,46 +12,45 @@ package intraplex.livelook;
  */
 public class NetworkLogDataPoint{
     
-    public static final int LOSS_RATE = 0;
-    public static final int BURST_DENSITY = LOSS_RATE+1;
-    public static final int BURST_SIZE = BURST_DENSITY+1;
-    public static final int GAP_DENSITY = BURST_SIZE+1;
-    public static final int ISOLATED_LOSSES = GAP_DENSITY+1;
-    public static final int BURST_LOSSES = ISOLATED_LOSSES+1;
-    public static final int BURST_RATIO = BURST_LOSSES+1;
-    //public static final int LOSS_RATE_2 = 7;
-    public static final int LOSS_RATE_ADJ = BURST_RATIO+1;
-    public static final int JBUFF_RESETS = LOSS_RATE_ADJ+1;
-    public static final int PACKETS_RECOVERED = JBUFF_RESETS+1;
-    public static final int PACKETS_LATE = PACKETS_RECOVERED+1;
-    public static final int PACKETS_EARLY = PACKETS_LATE+1;
-    public static final int GROUP_LOSSES = PACKETS_EARLY+1;
-    public static final int PACKET_LOSSES = GROUP_LOSSES+1;
+//    public static final int LOSS_RATE = 0;
+//    public static final int BURST_DENSITY = LOSS_RATE+1;
+//    public static final int BURST_SIZE = BURST_DENSITY+1;
+//    public static final int GAP_DENSITY = BURST_SIZE+1;
+//    public static final int ISOLATED_LOSSES = GAP_DENSITY+1;
+//    public static final int BURST_LOSSES = ISOLATED_LOSSES+1;
+//    public static final int BURST_RATIO = BURST_LOSSES+1;
+//    //public static final int LOSS_RATE_2 = 7;
+//    public static final int LOSS_RATE_ADJ = BURST_RATIO+1;
+//    public static final int JBUFF_RESETS = LOSS_RATE_ADJ+1;
+	  public static final int PACKETS_RECOVERED = 0;
+      public static final int PACKETS_LATE = 5;
+      public static final int PACKETS_EARLY = 4;
+//    public static final int GROUP_LOSSES = PACKETS_EARLY+1;
+      public static final int PACKET_LOSSES = 1;
+      public static final int PACKET_RECEIVED = 2;
+      public static final int CURRENT_Q_LENGTH = 3;
     //public static final int PACKET_LOSSES_ALT = PACKET_LOSSES+1;
-    public static final int NET_LOSS = PACKET_LOSSES+1;
-    public static final int BUFFER_DELAY = NET_LOSS+1;
-    public static final int AVG_JITTER = BUFFER_DELAY+1;
-   // public static final int MAX_JITTER =  AVG_JITTER+1;
-    public static final int GRP_DELAY  = AVG_JITTER+1;
+    //public static final int NET_LOSS = PACKET_LOSSES+1;
+//    public static final int BUFFER_DELAY = NET_LOSS+1;
+//    public static final int AVG_JITTER = BUFFER_DELAY+1;
+//   // public static final int MAX_JITTER =  AVG_JITTER+1;
+//    public static final int GRP_DELAY  = AVG_JITTER+1;
+//    
+//    public static final int EXP_QUEUE  = GRP_DELAY+1;
+//    public static final int RECO_QUEUE  = EXP_QUEUE+1;
+//    
+//    
+//    public static final int MIN_LOSS_RATE = RECO_QUEUE+1;
+//    
+//    public static final int MAX_LOSS_RATE = MIN_LOSS_RATE+1;
+//    public static final int MAX_LOSS_RATE_AFTER_CORRECTION = MAX_LOSS_RATE+1;
+//    public static final int DATA_GAP = MAX_LOSS_RATE_AFTER_CORRECTION+1;
+//    public static final int RX_JITTER_IN_MSEC = DATA_GAP+1;
+    public static int NUM_TRACES_LIVE = 6;
+    public static int NUM_TRACES = 6;
     
-    public static final int EXP_QUEUE  = GRP_DELAY+1;
-    public static final int RECO_QUEUE  = EXP_QUEUE+1;
-    
-    
-    public static final int MIN_LOSS_RATE = RECO_QUEUE+1;
-    
-    public static final int MAX_LOSS_RATE = MIN_LOSS_RATE+1;
-    public static final int MAX_LOSS_RATE_AFTER_CORRECTION = MAX_LOSS_RATE+1;
-    public static final int DATA_GAP = MAX_LOSS_RATE_AFTER_CORRECTION+1;
-    public static final int RX_JITTER_IN_MSEC = DATA_GAP+1;
-    public static int NUM_TRACES_LIVE = RECO_QUEUE+1;
-    public static int NUM_TRACES = DATA_GAP+1;
-    
-    public static String[] possibilities = { "Loss Rate", "Burst Density", "Burst Size", 
-            "Gap Density", "Isolated Losses", "Burst Losses", "Burst Ratio", 
-            "Loss Rate After Correction",
-            "Jitter Buffer Resets", "Packets Recovered", "Packets Late",
-            "Packets Early", "Group Losses", "Packets Lost", "Net Loss", "Buffer Delay", "Average Jitter","Group Delay","Expected Buffer Delay","Recommended Buffer Delay","Min Loss Rate", "Max Loss Rate", "Max Loss Rate after Correction", "Data Gaps","Jitter"};
+    public static String[] possibilities = { "Packets Recovered", "Packets Lost",
+            "Packets Received", "Current Queue Length", "Packets Early", "Packets Late"};
     
     
                
@@ -454,184 +453,198 @@ public class NetworkLogDataPoint{
    
     public NetworkLogDataPoint(IplinkNetworkLogEntry e,IplinkNetworkLogEntry e1, long id)
     {
+    	
         timestamp = e.timestamp / 2 + e1.timestamp/2;
-        packetNumber = e.packetNumber;
-        averageDelay = e.averageDelay/2 + e1.averageDelay/2;
-        c11 = e1.c11-e.c11;
-        c13 = e1.c13-e.c13;	
-        c14 = e1.c14-e.c14;	
-        c22 = e1.c22-e.c22;
-        c23 = e1.c23-e.c23;
-        c33 = e1.c33-e.c33;
-        lost_count = e1.lost_count-e.lost_count;	 
-        pkt_count = e1.pkt_count-e.pkt_count;
-        
-        pktsRcvd = e1.pktsRcvd - e.pktsRcvd;
-        pktsRcvdPer = e1.pktsRcvdPer - e.pktsRcvdPer;
-        bytesRcvd = e1.bytesRcvd - e.bytesRcvd;
-        pktsLost = e1.pktsLost - e.pktsLost;
-        pktsLostLocal = e1.pktsLostLocal - e.pktsLostLocal;
-        pktsLostPct = e1.pktsLostPct/2 + e.pktsLostPct/2;
-        pktsLostLocalPct = e1.pktsLostLocalPct/2 + e.pktsLostLocalPct/2;   
-        pktsLostPctCum = e1.pktsLostPctCum/2 + e.pktsLostPctCum/2;	
-        pktsLostLocalPctCum = e1.pktsLostLocalPctCum/2 + e.pktsLostLocalPctCum/2;                                                            
-        pktsRecvd = e1.pktsRecvd - e.pktsRecvd;
-        pktsLate = e1.pktsLate - e.pktsLate;
-        pktsEarly = e1.pktsEarly - e.pktsEarly;
-        currQLen = e1.currQLen/2 + e.currQLen/2;
-        currQLenMsec = e1.currQLenMsec/2 + e.currQLenMsec/2;
-        rxJitterInMsec = e1.rxJitterInMsec/2+e.rxJitterInMsec/2;
-        numjBufResets = e1.numjBufResets - e.numjBufResets;
-        AvgJitter = e1.AvgJitter/2 + e.AvgJitter/2;
-        MaxJitter = e1.MaxJitter/2 + e.MaxJitter/2;
-        GrpDelay = e1.GrpDelay/2 + e.GrpDelay/2;
-        recoBufferDelay = e1.recoBufferDelay/2 + e.recoBufferDelay/2;
-        ExpectedQ = e1.ExpectedQ/2 + e.ExpectedQ/2;
-        
-        
-        if (pktsRcvd < 0 || pktsLost < 0 || pktsLostLocal < 0 || pktsRecvd < 0 ||
-            numjBufResets < 0 || pktsLate < 0 || pktsEarly < 0)
-        {
-            invalidPacket = true;
-            streamId = id;
+        if(e.NaNEntry || e1.NaNEntry){
+        	invalidPacket = true;
         }
-        else
-        {
-            if (pktsRcvd == 0 && c33 == 0 && pktsLost > 0)
-            {
-                c33 = pktsLost;
-            }
-            invalidPacket = false;
-            c_total = c11+2*c13+c14+c22+2*c23+c33;
-            double p32 = ((double)c23)/(c13+c23+c33);
-            double p23 = 1;
-            if (c22+c23 >= 1)
-            {
-                p23 = 1-(((double)c22)/(c22+c23));
-            }
-
-            burstDensity = p23/(p23+p32);
-            if (c13+c23+c33 == 0)
-            {
-                burstDensity = 0;
-            }
-
-            gapDensity = ((double)c14) / (c11 + c14);
-
-            averageGap = ((double)(c11 + c14 + c13)) / c13;
-            averageBurst = ((double)c_total)  / c13 - averageGap;
-
-            if (c11 + c14 == 0)
-            {
-                gapDensity = 0;
-            }
-            if (c13 == 0)
-            {
-                averageGap = c11 + c14;
-                averageBurst = 0;
-            }
-            lossRate = ((double)lost_count)/pkt_count;
-
-            isolatedLosses = c14;
-            busrtLosses =c13+c23+c33;
-            lossRate2 = ((double)pktsLostLocal)/(pktsLostLocal+pktsRcvd);
-            adjustedLossRate = ((double)(pktsLost - pktsRecvd))/(pktsLostLocal+pktsRcvd);
-            streamId = id;
-
-            interval = (int)(e1.timestamp- e.timestamp);
+        else {
+        	
+	        packetNumber = e.packetNumber;
+	        averageDelay = e.averageDelay/2 + e1.averageDelay/2;
+	        c11 = e1.c11-e.c11;
+	        c13 = e1.c13-e.c13;	
+	        c14 = e1.c14-e.c14;	
+	        c22 = e1.c22-e.c22;
+	        c23 = e1.c23-e.c23;
+	        c33 = e1.c33-e.c33;
+	        lost_count = e1.lost_count-e.lost_count;	 
+	        pkt_count = e1.pkt_count-e.pkt_count;
+	        
+	        pktsRcvd = e1.pktsRcvd - e.pktsRcvd;
+	        pktsRcvdPer = e1.pktsRcvdPer - e.pktsRcvdPer;
+	        bytesRcvd = e1.bytesRcvd - e.bytesRcvd;
+	        pktsLost = e1.pktsLost - e.pktsLost;
+	        pktsLostLocal = e1.pktsLostLocal - e.pktsLostLocal;
+	        pktsLostPct = e1.pktsLostPct/2 + e.pktsLostPct/2;
+	        pktsLostLocalPct = e1.pktsLostLocalPct/2 + e.pktsLostLocalPct/2;   
+	        pktsLostPctCum = e1.pktsLostPctCum/2 + e.pktsLostPctCum/2;	
+	        pktsLostLocalPctCum = e1.pktsLostLocalPctCum/2 + e.pktsLostLocalPctCum/2;
+	        pktsRecvd = e1.pktsRecvd - e.pktsRecvd;
+	        pktsLate = e1.pktsLate - e.pktsLate;
+	        pktsEarly = e1.pktsEarly - e.pktsEarly;
+	        currQLen = e1.currQLen/2 + e.currQLen/2;
+	        currQLenMsec = e1.currQLenMsec/2 + e.currQLenMsec/2;
+	        rxJitterInMsec = e1.rxJitterInMsec/2+e.rxJitterInMsec/2;
+	        numjBufResets = e1.numjBufResets - e.numjBufResets;
+	        AvgJitter = e1.AvgJitter/2 + e.AvgJitter/2;
+	        MaxJitter = e1.MaxJitter/2 + e.MaxJitter/2;
+	        GrpDelay = e1.GrpDelay/2 + e.GrpDelay/2;
+	        recoBufferDelay = e1.recoBufferDelay/2 + e.recoBufferDelay/2;
+	        ExpectedQ = e1.ExpectedQ/2 + e.ExpectedQ/2;
+	        
+	        
+	        if (pktsRcvd < 0 || pktsLost < 0 || pktsLostLocal < 0 || pktsRecvd < 0 ||
+	            numjBufResets < 0 || pktsLate < 0 || pktsEarly < 0)
+	        {
+	            invalidPacket = true;
+	            streamId = id;
+	        }
+	        else
+	        {
+	            if (pktsRcvd == 0 && c33 == 0 && pktsLost > 0)
+	            {
+	                c33 = pktsLost;
+	            }
+	            invalidPacket = false;
+	            c_total = c11+2*c13+c14+c22+2*c23+c33;
+	            double p32 = ((double)c23)/(c13+c23+c33);
+	            double p23 = 1;
+	            if (c22+c23 >= 1)
+	            {
+	                p23 = 1-(((double)c22)/(c22+c23));
+	            }
+	
+	            burstDensity = p23/(p23+p32);
+	            if (c13+c23+c33 == 0)
+	            {
+	                burstDensity = 0;
+	            }
+	
+	            gapDensity = ((double)c14) / (c11 + c14);
+	
+	            averageGap = ((double)(c11 + c14 + c13)) / c13;
+	            averageBurst = ((double)c_total)  / c13 - averageGap;
+	
+	            if (c11 + c14 == 0)
+	            {
+	                gapDensity = 0;
+	            }
+	            if (c13 == 0)
+	            {
+	                averageGap = c11 + c14;
+	                averageBurst = 0;
+	            }
+	            lossRate = ((double)lost_count)/pkt_count;
+	
+	            isolatedLosses = c14;
+	            busrtLosses =c13+c23+c33;
+	            lossRate2 = ((double)pktsLostLocal)/(pktsLostLocal+pktsRcvd);
+	            adjustedLossRate = ((double)(pktsLost - pktsRecvd))/(pktsLostLocal+pktsRcvd);
+	            streamId = id;
+	
+	            interval = (int)(e1.timestamp- e.timestamp);
+	        }
         }
-        
     }
     
     public void setValues(IplinkNetworkLogEntry e,IplinkNetworkLogEntry e1, long id)
     {
-        timestamp = e.timestamp / 2 + e1.timestamp/2;
-        packetNumber = e.packetNumber;
-        averageDelay = e.averageDelay/2 + e1.averageDelay/2;
-        c11 = e1.c11-e.c11;
-        c13 = e1.c13-e.c13;	
-        c14 = e1.c14-e.c14;	
-        c22 = e1.c22-e.c22;
-        c23 = e1.c23-e.c23;
-        c33 = e1.c33-e.c33;
-        lost_count = e1.lost_count-e.lost_count;	 
-        pkt_count = e1.pkt_count-e.pkt_count;
-        
-        pktsRcvd = e1.pktsRcvd - e.pktsRcvd;
-        pktsRcvdPer = e1.pktsRcvdPer - e.pktsRcvdPer;
-        bytesRcvd = e1.bytesRcvd - e.bytesRcvd;
-        pktsLost = e1.pktsLost - e.pktsLost;
-        pktsLostLocal = e1.pktsLostLocal - e.pktsLostLocal;
-        pktsLostPct = e1.pktsLostPct/2 + e.pktsLostPct/2;
-        pktsLostLocalPct = e1.pktsLostLocalPct/2 + e.pktsLostLocalPct/2;   
-        pktsLostPctCum = e1.pktsLostPctCum/2 + e.pktsLostPctCum/2;	
-        pktsLostLocalPctCum = e1.pktsLostLocalPctCum/2 + e.pktsLostLocalPctCum/2;                                                            
-        pktsRecvd = e1.pktsRecvd - e.pktsRecvd;
-        pktsLate = e1.pktsLate - e.pktsLate;
-        pktsEarly = e1.pktsEarly - e.pktsEarly;
-        currQLen = e1.currQLen/2 + e.currQLen/2;
-        currQLenMsec = e1.currQLenMsec/2 + e.currQLenMsec/2;
-        rxJitterInMsec = e1.rxJitterInMsec/2+e.rxJitterInMsec/2;
-        numjBufResets = e1.numjBufResets - e.numjBufResets;
-        AvgJitter = e1.AvgJitter/2 + e.AvgJitter/2;
-        MaxJitter = e1.MaxJitter/2 + e.MaxJitter/2;
-        GrpDelay = e1.GrpDelay/2 + e.GrpDelay/2;
-        recoBufferDelay = e1.recoBufferDelay/2 + e.recoBufferDelay/2;
-        ExpectedQ = e1.ExpectedQ/2 + e.ExpectedQ/2;
-        //System.out.println("SetValues: ExpectedQ " + ExpectedQ);
-        
-        if (pktsRcvd < 0 || pktsLost < 0 || pktsLostLocal < 0 || pktsRecvd < 0 ||
-            numjBufResets < 0 || pktsLate < 0 || pktsEarly < 0)
-        {
-            invalidPacket = true;
-            streamId = id;
+    	
+    	if(e.NaNEntry || e1.NaNEntry){
+        	invalidPacket = true;
         }
-        else
-        {
-            if (pktsRcvd == 0 && c33 == 0 && pktsLost > 0)
-            {
-                c33 = pktsLost;
-            }
-            invalidPacket = false;
-            c_total = c11+2*c13+c14+c22+2*c23+c33;
-            double p32 = ((double)c23)/(c13+c23+c33);
-            double p23 = 1;
-            if (c22+c23 >= 1)
-            {
-                p23 = 1-(((double)c22)/(c22+c23));
-            }
-
-            burstDensity = p23/(p23+p32);
-            if (c13+c23+c33 == 0)
-            {
-                burstDensity = 0;
-            }
-
-            gapDensity = ((double)c14) / (c11 + c14);
-
-            averageGap = ((double)(c11 + c14 + c13)) / c13;
-            averageBurst = ((double)c_total)  / c13 - averageGap;
-
-            if (c11 + c14 == 0)
-            {
-                gapDensity = 0;
-            }
-            if (c13 == 0)
-            {
-                averageGap = c11 + c14;
-                averageBurst = 0;
-            }
-            lossRate = ((double)lost_count)/pkt_count;
-
-            isolatedLosses = c14;
-            busrtLosses =c13+c23+c33;
-            lossRate2 = ((double)pktsLostLocal)/(pktsLostLocal+pktsRcvd);
-            adjustedLossRate = ((double)(pktsLost - pktsRecvd))/(pktsLostLocal+pktsRcvd);
-            streamId = id;
-
-            interval = (int)(e1.timestamp- e.timestamp);
-        }
-        
+    	else {
+	        timestamp = e.timestamp / 2 + e1.timestamp/2;
+	        packetNumber = e.packetNumber;
+	        averageDelay = e.averageDelay/2 + e1.averageDelay/2;
+	        c11 = e1.c11-e.c11;
+	        c13 = e1.c13-e.c13;	
+	        c14 = e1.c14-e.c14;	
+	        c22 = e1.c22-e.c22;
+	        c23 = e1.c23-e.c23;
+	        c33 = e1.c33-e.c33;
+	        lost_count = e1.lost_count-e.lost_count;	 
+	        pkt_count = e1.pkt_count-e.pkt_count;
+	        
+	        pktsRcvd = e1.pktsRcvd - e.pktsRcvd;
+	        if(pktsRcvd > 200) {
+	        	//System.out.println(e1.pktsRcvd + " - " + e.pktsRcvd);
+	        }
+	        pktsRcvdPer = e1.pktsRcvdPer - e.pktsRcvdPer;
+	        bytesRcvd = e1.bytesRcvd - e.bytesRcvd;
+	        pktsLost = e1.pktsLost - e.pktsLost;
+	        pktsLostLocal = e1.pktsLostLocal - e.pktsLostLocal;
+	        pktsLostPct = e1.pktsLostPct/2 + e.pktsLostPct/2;
+	        pktsLostLocalPct = e1.pktsLostLocalPct/2 + e.pktsLostLocalPct/2;   
+	        pktsLostPctCum = e1.pktsLostPctCum/2 + e.pktsLostPctCum/2;	
+	        pktsLostLocalPctCum = e1.pktsLostLocalPctCum/2 + e.pktsLostLocalPctCum/2;                                                            
+	        pktsRecvd = e1.pktsRecvd - e.pktsRecvd;
+	        pktsLate = e1.pktsLate - e.pktsLate;
+	        pktsEarly = e1.pktsEarly - e.pktsEarly;
+	        currQLen = e1.currQLen/2 + e.currQLen/2;
+	        currQLenMsec = e1.currQLenMsec/2 + e.currQLenMsec/2;
+	        rxJitterInMsec = e1.rxJitterInMsec/2+e.rxJitterInMsec/2;
+	        numjBufResets = e1.numjBufResets - e.numjBufResets;
+	        AvgJitter = e1.AvgJitter/2 + e.AvgJitter/2;
+	        MaxJitter = e1.MaxJitter/2 + e.MaxJitter/2;
+	        GrpDelay = e1.GrpDelay/2 + e.GrpDelay/2;
+	        recoBufferDelay = e1.recoBufferDelay/2 + e.recoBufferDelay/2;
+	        ExpectedQ = e1.ExpectedQ/2 + e.ExpectedQ/2;
+	        //System.out.println("SetValues: ExpectedQ " + ExpectedQ);
+	        
+	        if (pktsRcvd < 0 || pktsLost < 0 || pktsLostLocal < 0 || pktsRecvd < 0 ||
+	            numjBufResets < 0 || pktsLate < 0 || pktsEarly < 0)
+	        {
+	            invalidPacket = true;
+	            streamId = id;
+	        }
+	        else
+	        {
+	            if (pktsRcvd == 0 && c33 == 0 && pktsLost > 0)
+	            {
+	                c33 = pktsLost;
+	            }
+	            invalidPacket = false;
+	            c_total = c11+2*c13+c14+c22+2*c23+c33;
+	            double p32 = ((double)c23)/(c13+c23+c33);
+	            double p23 = 1;
+	            if (c22+c23 >= 1)
+	            {
+	                p23 = 1-(((double)c22)/(c22+c23));
+	            }
+	
+	            burstDensity = p23/(p23+p32);
+	            if (c13+c23+c33 == 0)
+	            {
+	                burstDensity = 0;
+	            }
+	
+	            gapDensity = ((double)c14) / (c11 + c14);
+	
+	            averageGap = ((double)(c11 + c14 + c13)) / c13;
+	            averageBurst = ((double)c_total)  / c13 - averageGap;
+	
+	            if (c11 + c14 == 0)
+	            {
+	                gapDensity = 0;
+	            }
+	            if (c13 == 0)
+	            {
+	                averageGap = c11 + c14;
+	                averageBurst = 0;
+	            }
+	            lossRate = ((double)lost_count)/pkt_count;
+	
+	            isolatedLosses = c14;
+	            busrtLosses =c13+c23+c33;
+	            lossRate2 = ((double)pktsLostLocal)/(pktsLostLocal+pktsRcvd);
+	            adjustedLossRate = ((double)(pktsLost - pktsRecvd))/(pktsLostLocal+pktsRcvd);
+	            streamId = id;
+	
+	            interval = (int)(e1.timestamp- e.timestamp);
+	        }
+    	}
     }
 
     public long getStreamId() {
@@ -651,9 +664,12 @@ public class NetworkLogDataPoint{
             return getValue(type, intVal, pps);
         if (interval > intVal*2) 
             return Double.NaN;
+        if(invalidPacket)
+        	return Double.NaN;
         
         return getValue(type, intVal, pps);
     }
+
     public double getValue(int type, long intVal, boolean pps)
     {
         if (invalidPacket)
@@ -663,228 +679,54 @@ public class NetworkLogDataPoint{
         }
         switch (type)
         {
-            case LOSS_RATE:
-                return getLossRate2()*100;
-            case BURST_DENSITY:
-                return getBurstDensity()*100;
-            case BURST_SIZE:
-                return getAverageBurst();
-            case GAP_DENSITY:
-                return getGapDensity()*100;
-            case ISOLATED_LOSSES:
-                if (!pps)
-                    return getIsolatedLosses();
-                else
-                    return ppsInterval*getIsolatedLosses()/(intVal/1000.0);
-            case BURST_LOSSES:
-                if (!pps)
-                    return getBusrtLosses();
-                else
-                    return ppsInterval*getBusrtLosses()/(intVal/1000.0);
-            case BURST_RATIO:
-                return getBurstRatio()*100;
-            //case LOSS_RATE_2:
-            //    return getLossRate2()*100;
-            case LOSS_RATE_ADJ:
-                return getAdjustedLossRate()*100;
-            case JBUFF_RESETS:
-                return this.getNumjBufResets();
             case PACKETS_RECOVERED:
-                if (!pps)
-                    return this.getPktsRecvd();
-                else
-                    return ppsInterval*this.getPktsRecvd()/(intVal/1000.0);
-            case PACKETS_LATE:
-                if (!pps)
-                    return this.getPktsLate();
-                else
-                    return ppsInterval*this.getPktsLate()/(intVal/1000.0);
-            case PACKETS_EARLY:
-                if (!pps)
-                    return this.getPktsEarly();
-                else
-                    return ppsInterval*this.getPktsEarly()/(intVal/1000.0);
-            case GROUP_LOSSES:
-                if (!pps)
-                    return this.getPktsLost();
-                else
-                    return ppsInterval*this.getPktsLost()/(intVal/1000.0);
+            	//System.out.println("Packets Recovered: " + pktsRecvd);
+                return this.pktsRecvd;
             case PACKET_LOSSES:
-                if (!pps)
-                    return this.pktsLostLocal;
-                else
-                    return ppsInterval*this.pktsLostLocal/(intVal/1000.0);
-            //case PACKET_LOSSES_ALT:
-            //    return getIsolatedLosses()+getBusrtLosses();
-            case NET_LOSS:
-                if (!pps)
-                    return this.getPktsLost()-this.getPktsRecvd();
-                else
-                    return ppsInterval*(this.getPktsLost()-this.getPktsRecvd())/(intVal/1000.0);
-            case BUFFER_DELAY:
-                return this.currQLenMsec;
-            case RX_JITTER_IN_MSEC:
-                return this.rxJitterInMsec;
-                
-            case AVG_JITTER:
-                return this.AvgJitter;
-           // case MAX_JITTER:
-                //return this.MaxJitter;
-            case GRP_DELAY:
-                return this.GrpDelay;
-            case EXP_QUEUE:
-                return this.ExpectedQ;
-                
-            case RECO_QUEUE:
-            {
-                //System.out.println("Recommended Q delay is "+this.recoBufferDelay);
-                
-                return this.recoBufferDelay;
-            }
-            
-                
+            	//System.out.println("Packets Lost: " + pktsLost);
+                return this.pktsLost;
+            case PACKET_RECEIVED:
+            	//System.out.println("Packets Received: " + pktsRcvd);
+                return this.pktsRcvd;
+            case CURRENT_Q_LENGTH:
+            	//System.out.println("Current Q Length: " + currQLen);
+            	return this.currQLen;
+            case PACKETS_EARLY:
+            	//System.out.println("Packets Early: " + pktsEarly);
+            	return this.pktsEarly;
+            case PACKETS_LATE:
+            	//System.out.println("Packets Late: " + pktsLate);
+            	return this.pktsLate;	
         }
         return 0;
     }
     
     public static String getTypeTitle(int chartType, boolean pps)
     {
-        if (chartType == LOSS_RATE)
+        
+    	if (chartType == PACKETS_RECOVERED  )
         {
-            return "Loss Rate (%)";
-        }
-        else if (chartType == BURST_DENSITY)
-        {
-            return "Burst Density(%)";
-        }
-        else if (chartType == BURST_SIZE)
-        {
-            return "Burst Size";
-        }
-        else if (chartType == GAP_DENSITY)
-        {
-            return "Gap Density (%)";
-        }
-        else if (chartType == ISOLATED_LOSSES)
-        {
-            if (!pps)
-                return "Isolated Losses";
-            else
-                return "Isolated Losses (pps)";
-        }
-        else if (chartType == BURST_LOSSES)
-        {
-            if (!pps)
-                return "Burst Losses";
-            else
-                return "Burst Losses (pps)";
-        }
-        else if (chartType == BURST_RATIO)
-        {
-            return "Burst Ratio (%)";
-        }
-        //else if (chartType == LOSS_RATE_2)
-        //{
-        //    return "Loss Rate (%)";
-        //}
-        else if (chartType == LOSS_RATE_ADJ )
-        {
-            return "Loss Rate After Correction (%)";
-        }
-        else if (chartType == JBUFF_RESETS )
-        {
-            return "Buffer Resets";
-        }
-        else if (chartType == PACKETS_RECOVERED  )
-        {
-            
-            if (!pps)
-                return "Packets Recovered";
-            else
-                return "Packets Recovered (pps)";
-        }
-        else if (chartType == PACKETS_LATE  )
-        {
-            if (!pps)
-                return "Packets Late";
-            else
-                return "Packets Late (pps)";
-        }
-        else if (chartType == PACKETS_EARLY  )
-        {
-            if (!pps)
-                return "Packets Early";
-            else
-                return "Packets Early (pps)";
-        }
-        else if (chartType == GROUP_LOSSES  )
-        {
-            if (!pps)
-                return "Group Losses";
-            else
-                return "Group Losses (pps)";
+            return "Packets Recovered";
         }
         else if (chartType == PACKET_LOSSES  )
         {
-            if (!pps)
-                return "Packets Lost";
-            else
-                return "Packets Lost (pps)";
+        	return "Packets Lost";
         }
-        //else if (chartType == PACKET_LOSSES_ALT  )
-        //{
-        //    return "Packets Lost(Burst+Iso)";
-        //}
-        else if (chartType == NET_LOSS  )
+        else if (chartType == PACKET_RECEIVED  )
         {
-            if (!pps)
-                return "Net Losses";
-            else
-                return "Net Losses (pps)";
+            return "Packets Received";
         }
-        else if (chartType == BUFFER_DELAY  )
+        else if (chartType == CURRENT_Q_LENGTH  )
         {
-            return "Current Buffer Delay (ms)";
+            return "Current Queue Length";
         }
-        else if (chartType == RX_JITTER_IN_MSEC  )
+        else if (chartType == PACKETS_EARLY  )
         {
-            return "Jitter (ms)";
+            return "Packets Early";
         }
-        else if (chartType == MIN_LOSS_RATE  )
+        else if (chartType == PACKETS_LATE  )
         {
-            return "Min Loss Rate (%)";
-        }
-        else if (chartType == MAX_LOSS_RATE  )
-        {
-            return "Max Loss Rate (%)";
-        }
-        else if (chartType == MAX_LOSS_RATE_AFTER_CORRECTION  )
-        {
-            return "Max Loss Rate after Correction (%)";
-        }
-        else if (chartType == DATA_GAP  )
-        {
-            return "Data Gap";
-        }
-        else if (chartType == AVG_JITTER)
-        {
-            return "Average Jitter (ms)";
-        }
-        /*else if (chartType == MAX_JITTER)
-        {
-            return "Maximum Jitter (ms)";
-        }*/
-        else if (chartType == GRP_DELAY)
-        {
-            return "Group Delay (ms)";
-        }
-        else if (chartType == EXP_QUEUE)
-        {
-            return "Configured Buffer Delay (ms)";
-        }
-        else if (chartType == RECO_QUEUE)
-        {
-            return "Recommended Buffer Delay (ms)";
+            return "Packets Late";
         }
     
     return "";
@@ -895,7 +737,6 @@ public class NetworkLogDataPoint{
     {
         for (int i = 0; i < NUM_TRACES; i++)
         {
-            
             if (possibilities[i].equals(s))
             {
                 return i;
@@ -904,6 +745,21 @@ public class NetworkLogDataPoint{
         return 0;
     }
 
-    
+    public boolean isZeroOrNaN() {
+    	if(	pktsRcvd != 0 || pktsLost != 0 || pktsRecvd != 0 || 
+    			pktsLate != 0 || pktsEarly != 0) 
+    	{
+    		return true;
+    	}
+    	return false;
+    }
+    public boolean isNegative() {
+    	if(	pktsRcvd <= 0 && pktsLost <= 0 && pktsRecvd <= 0 && 
+    			pktsLate <= 0 && pktsEarly <= 0) 
+    	{
+    		return true;
+    	}
+    	return false;
+    }
     
 }

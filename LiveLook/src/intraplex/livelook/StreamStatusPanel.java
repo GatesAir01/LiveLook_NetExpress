@@ -26,9 +26,11 @@ public class StreamStatusPanel extends javax.swing.JPanel implements TableCellRe
      */
     
     static SimpleDateFormat sdf = new SimpleDateFormat("EEE hh:mm:ss aa MM/dd/yyyy");
-
+    SnmpMgr mgr;
     
-    public StreamStatusPanel() {
+    public StreamStatusPanel(SnmpMgr mgr) {
+    	this.mgr = mgr;
+    	
         initComponents();
     }
     /**
@@ -77,26 +79,12 @@ public class StreamStatusPanel extends javax.swing.JPanel implements TableCellRe
      {
          LogMapEntry e = (LogMapEntry)value;
          nameLabel.setText(e.streamName + " - "+sdf.format(e.lastEntry));
-         boolean failed = System.currentTimeMillis() - e.lastEntry > 30000;
+         Color failed = mgr.checkForStreamStatus("" + e.address.toString().replace("/", ""), "" + e.destPort);
          if (isSelected) {
-             if (failed)
-             {
-                setBackground(Color.red);
-             }
-             else
-             {
-                setBackground(Color.green);
-             }
+             setBackground(failed);
              setForeground(list.getSelectionForeground());
          } else {
-             if (failed)
-             {
-                setBackground(new Color(185,0,0));
-             }
-             else
-             {
-                setBackground(new Color(28,142,62));
-             }
+        	 setBackground(failed);
              setForeground(list.getForeground());
              
          }
@@ -118,26 +106,12 @@ public class StreamStatusPanel extends javax.swing.JPanel implements TableCellRe
         else
             text = e.fileName;
          nameLabel.setText(text);
-         boolean failed = System.currentTimeMillis() - e.lastEntry > 30000;
+         Color failed = mgr.checkForStreamStatus("" + e.address.toString().replace("/", ""), "" + e.destPort);
          if (isSelected) {
-             if (failed)
-             {
-                setBackground(Color.red);
-             }
-             else
-             {
-                setBackground(Color.green);
-             }
+        	 setBackground(failed);
              setForeground(jtable.getSelectionForeground());
          } else {
-             if (failed)
-             {
-                setBackground(new Color(185,0,0));
-             }
-             else
-             {
-                setBackground(new Color(28,142,62));
-             }
+        	 setBackground(failed);
              setForeground(jtable.getForeground());
          }
          setEnabled(jtable.isEnabled());

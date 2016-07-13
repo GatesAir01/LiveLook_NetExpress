@@ -20,7 +20,7 @@ public class AskRecoverDialog extends javax.swing.JDialog {
     
     public AskRecoverDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        initComponents();
+        //initComponents();
     }
 
     /**
