@@ -1,0 +1,36 @@
+<html>
+<h1>Stream Stats Summary</h1>
+
+<strong>Loss Rate: </strong><livelookstat>Loss Rate (Test Only)</livelookstat><br>
+<strong>Loss Rate After Correction: </strong><livelookstat>Loss Rate After Correction</livelookstat><br>
+<strong>Packets Lost: </strong><livelookstat><numberformat>sfsfert</numberformat>Packets Lost</livelookstat><br>
+<strong>Packets Lost(Group): </strong><livelookstat>Group Losses</livelookstat><br>
+<strong>Packets Recovered: </strong><livelookstat>Packets Recovered</livelookstat><br>
+<strong>Net Loss: </strong><livelookstat>Net Loss</livelookstat><br>
+			
+			
+<strong>Largest Loss Rate: </strong><livelookstat>Greatest Loss Rate</livelookstat><br>	
+
+<h1>Network Packet Stats</h1>
+<strong>Isolated Losses: </strong><livelookstat>Isolated Losses</livelookstat><br>
+<strong>Burst Losses: </strong><livelookstat>Burst Losses</livelookstat><br>
+
+<h2>Burst Stats</h2>
+<strong>Max Burst: </strong><livelookstat>Max Burst</livelookstat><br>
+<strong>Avg Burst: </strong><livelookstat>Burst Size</livelookstat><br>
+<strong>Min Burst: </strong><livelookstat>Min Burst</livelookstat><br>
+<strong>Avg Burst Density: </strong><livelookstat>Burst Density</livelookstat><br>
+
+<h1>Loss Rate vs Loss Rate After Correction (<livelookstat>Interval</livelookstat> second intervals)</h1>
+<livelookchart><timeformat>h:mm a MM/dd/yyyy</timeformat><livelooktrace>Loss Rate</livelooktrace><livelooktrace>Loss Rate After Correction</livelooktrace></livelookchart><br>
+
+<h1>Burst Losses vs Isolated Losses (<livelookstat>Interval</livelookstat> second intervals)</h1>
+<livelookchart><timeformat>h:mm a MM/dd/yyyy</timeformat><livelooktrace>Burst Losses</livelooktrace><livelooktrace>Isolated Losses</livelooktrace></livelookchart><br>
+
+
+<h1>Recommendations</h1>
+<h2><livelookstat>TimeOrFEC</livelookstat></h2>
+<strong>Time Diversity Required for .5%: </strong><livelookstat>RecommendedTimeDiversity=.5</livelookstat><br>
+<strong>Time Diversity Required for .1%: </strong><livelookstat>RecommendedTimeDiversity=.1</livelookstat><br>
+<strong>Time Diversity Required for .05%: </strong><livelookstat>RecommendedTimeDiversity=.05</livelookstat><br>
+</html>
