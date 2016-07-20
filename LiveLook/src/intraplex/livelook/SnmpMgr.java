@@ -53,9 +53,8 @@ public class SnmpMgr implements Runnable{
         new Thread(this, "SnmpMgr").start();
 	}
 	
-	
-	public Stream addStream(String ip, String streamID, int port) {
-		Stream stream = new Stream(ip, streamID, port, nextStreamType, true, statusOnly);
+	public Stream addStream(String ip, String streamID, int port, String readCommunity) {
+		Stream stream = new Stream(ip, streamID, port, nextStreamType, true, statusOnly, readCommunity);
 		stream.StreamDownAlarm = StreamDownAlarm;
 		stream.ShutDownAlarm = ShutDownAlarm;
 		Long temp = Long.parseLong(ip.replace(".", "") + stream.dstPort);
@@ -315,7 +314,8 @@ public class SnmpMgr implements Runnable{
         String s = "";
         for (LogMapEntry e : c)
         {
-            s += "{"+e.toSaveString()+"}\t";
+        	Stream stream = map.get(Long.parseLong(e.address.toString().replace(".", "").replace("/", "") + e.destPort));
+            s += "{"+e.toSaveString()+ ", " + stream.statusOnly + ", " + stream.readCommunity + "}\t";
         }
         return s;
     }
@@ -324,6 +324,7 @@ public class SnmpMgr implements Runnable{
 		String[] entries = s.split("\t");
         for (int i = 0; i < entries.length; i++)
         {
+        	System.out.println(i);
             String e = entries[i].substring(1,entries[i].length()-1);
             Stream newStream = Stream.createFromString(e);
             LogMapEntry newEntry = LogMapEntry.createFromString(e);

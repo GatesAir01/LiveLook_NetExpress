@@ -27,7 +27,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane1" pref="0" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="374" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -113,7 +113,7 @@
             </Property>
             <Property name="lineWrap" type="boolean" value="true"/>
             <Property name="rows" type="int" value="5"/>
-            <Property name="text" type="java.lang.String" value="Intraplex LiveLook is a software application to assist the Intraplex IPLink in stream statistics logging. &#xa;&#xa;LiveLook provides advanced analysis of stream data to provide feedback on proper mitigation techniques for packet loss. LiveLook helps takes the guessing out of loss mitigation and makes it easy to get the most out of your networks.&#xa;&#xa;This software is licensed, not sold, under GatesAir Inc. or its subsidiaries&apos; terms of use or such other terms agreed to by GatesAir, Inc. Unauthorised use or reproduction of this software is prohibited.&#xa;&#xa;&#xa9; 2015 GatesAir, Inc"/>
+            <Property name="text" type="java.lang.String" value="Intraplex&#xae; LiveLook for NetXpress is a software application to assist in monitoring the performance and state of the NetXpress IP streams in the network.  LiveLook NetXpress provides two modes of stream monitoring: Full Monitoring and State Monitoring. Full monitoring will collect, plot and log the receive side statistics of the stream along with the current operational state. The state monitoring capability only monitors and logs the current operational state of the stream. In addition to monitoring, the application has the capability to optionally notify the user of operational state changes of a stream via email.&#xa;&#xa;This software is licensed, not sold, under GatesAir Inc. or its subsidiaries&apos; terms of use or such other terms agreed to by GatesAir, Inc. Unauthorised use or reproduction of this software is prohibited.  &#xa9; 2015 GatesAir, Inc&#xa;"/>
             <Property name="wrapStyleWord" type="boolean" value="true"/>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="null"/>

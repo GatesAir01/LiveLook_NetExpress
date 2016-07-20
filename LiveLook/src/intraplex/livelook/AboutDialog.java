@@ -16,7 +16,7 @@ public class AboutDialog extends javax.swing.JDialog {
     /**
      * Creates new form AboutDialog
      */
-    public static final String version = "V1.4";
+    public static final String version = "B1.0";
     public AboutDialog(java.awt.Frame parent, boolean modal, boolean lite) {
         super(parent, modal);
         this.lite = lite;
@@ -40,10 +40,10 @@ public class AboutDialog extends javax.swing.JDialog {
         jTextArea1 = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("About Intraplex " + ((lite)?"LiveLook Lite NetXpress":"LiveLook NetXpress"));
+        setTitle("About Intraplex LiveLook");
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel1.setText("Intraplex " + ((lite)?"LiveLook Lite NetXpress":"LiveLook NetXpress"));
+        jLabel1.setText("Intraplex LiveLook");
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel2.setText("Version: ");
@@ -60,7 +60,7 @@ public class AboutDialog extends javax.swing.JDialog {
         jTextArea1.setForeground(new java.awt.Color(255, 255, 255));
         jTextArea1.setLineWrap(true);
         jTextArea1.setRows(5);
-        jTextArea1.setText("Intraplex " + ((lite)?"LiveLook Lite NetXpress":"LiveLook NetXpress") + " is a software application to assist the Intraplex IPLink in stream statistics logging. \n\n" + ((lite)?"LiveLook Lite NetXpress":"LiveLook NetXpress") + " provides advanced analysis of stream data to provide feedback on proper mitigation techniques for packet loss. " + ((lite)?"LiveLook Lite NetXpress":"LiveLook NetXpress") + " helps takes the guessing out of loss mitigation and makes it easy to get the most out of your networks.\n\nThis software is licensed, not sold, under GatesAir Inc. or its subsidiaries' terms of use or such other terms agreed to by GatesAir, Inc. Unauthorised use or reproduction of this software is prohibited.\n\n© 2015 GatesAir, Inc");
+        jTextArea1.setText("Intraplex® LiveLook for NetXpress is a software application to assist in monitoring the performance and state of the NetXpress IP streams in the network.  LiveLook NetXpress provides two modes of stream monitoring: Full Monitoring and State Monitoring. Full monitoring will collect, plot and log the receive side statistics of the stream along with the current operational state. The state monitoring capability only monitors and logs the current operational state of the stream. In addition to monitoring, the application has the capability to optionally notify the user of operational state changes of a stream via email.\n\nThis software is licensed, not sold, under GatesAir Inc. or its subsidiaries' terms of use or such other terms agreed to by GatesAir, Inc. Unauthorised use or reproduction of this software is prohibited.  © 2015 GatesAir, Inc\n");
         jTextArea1.setWrapStyleWord(true);
         jTextArea1.setBorder(null);
         jTextArea1.setDisabledTextColor(new java.awt.Color(0, 0, 0));
@@ -74,7 +74,7 @@ public class AboutDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)

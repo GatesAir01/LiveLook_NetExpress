@@ -441,11 +441,12 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
              JOptionPane.showMessageDialog(this, "LiveLook NetXpress is already connected to this stream\nTry connecting to another stream");
              return;
          }
+         
      waitDialog = new WaitingForConnectionDialog(null,true);
     // waitDialog.enableLogging = cipd.enableLogging;
      int dport = Integer.parseInt(cipd.getDPort());
      LogMapEntry.next_DPort = dport;
-     Stream stream = msgMgr.addStream(cipd.iPAddress, cipd.stream, dport);
+     Stream stream = msgMgr.addStream(cipd.iPAddress, cipd.stream, dport, cipd.readCom);
      if (!msgMgr.checkIfMacAllowed(stream))
      {
          JOptionPane.showMessageDialog(this, "Mac is not registered for use");

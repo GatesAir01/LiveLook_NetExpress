@@ -19,6 +19,7 @@ import javax.swing.JOptionPane;
 public class ConnectIPLinkDialog extends javax.swing.JDialog {
     private String dPort;
     boolean lite;
+    public String readCom;
 
     /**
      * Creates new form ConnectIPLinkDialog
@@ -67,8 +68,8 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         	ipAddress.setText(ipaddress);
         	String index= (lite)?configlite.get("Last.Index").toString():config.get("Last.Index").toString();
             streamIndex.setText(index);
-            String dpo = (lite)?configlite.get("Last.DPort").toString():config.get("Last.DPort").toString();
-            destPort.setText(dpo);
+            String readCom = (lite)?configlite.get("Last.ReadCommunity").toString():config.get("Last.readCommunity").toString();
+            readCommunity.setText(readCom);
             //EnableLoggingCheckBox.setSelected(true);
             
         }
@@ -101,7 +102,7 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         StreamDownAlarm = new javax.swing.JCheckBox();
         ShutDownAlarm = new javax.swing.JCheckBox();
         jLabel4 = new javax.swing.JLabel();
-        destPort = new javax.swing.JTextField();
+        readCommunity = new javax.swing.JTextField();
         NetXpressBox = new javax.swing.JCheckBox();
         NetXpressLXBox = new javax.swing.JCheckBox();
         NetXpressLXRBox = new javax.swing.JCheckBox();
@@ -190,7 +191,7 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(AlarmThresholdLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(AlarmThresholdLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(alarmThresholdTime, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -232,12 +233,12 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
                 .addGap(67, 67, 67))
         );
 
-        jLabel4.setText("Port");
+        jLabel4.setText("Read Community");
 
-        destPort.setText("50000");
-        destPort.addActionListener(new java.awt.event.ActionListener() {
+        readCommunity.setText("public");
+        readCommunity.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                destPortActionPerformed(evt);
+                readCommunityActionPerformed(evt);
             }
         });
 
@@ -305,26 +306,29 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
                                 .addComponent(StatusOnly)
                                 .addGap(11, 11, 11))
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel2)
-                                    .addComponent(jLabel1))
-                                .addGap(19, 19, 19)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(streamIndex)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(ipAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jLabel4)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(destPort))))
-                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(NetXpressBox)
                                 .addGap(18, 18, 18)
                                 .addComponent(NetXpressLXBox)
                                 .addGap(18, 18, 18)
-                                .addComponent(NetXpressLXRBox)))))
+                                .addComponent(NetXpressLXRBox))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel1)
+                                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 99, Short.MAX_VALUE))
+                                .addGap(3, 3, 3)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(readCommunity)
+                                        .addGap(142, 142, 142))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(ipAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel2)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(streamIndex, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(0, 0, Short.MAX_VALUE)))))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -334,12 +338,12 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(ipAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4)
-                    .addComponent(destPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(streamIndex, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(readCommunity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(NetXpressBox)
@@ -366,7 +370,8 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
        
     iPAddress = ipAddress.getText();
-    dPort = destPort.getText();
+    dPort = "5000";
+    readCom = readCommunity.getText();
     stream = streamIndex.getText();
    // enableLogging = EnableLoggingCheckBox.isSelected();
    //Add Validation Check
@@ -427,11 +432,13 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         if(!lite) {
         	config.put("Last.IP",iPAddress);
     	    config.put("Last.Index",stream);
+    	    config.put("Last.ReadCommunity", readCom);
     	    config.save();
         }
         else {
         	configlite.put("Last.IP",iPAddress);
     	    configlite.put("Last.Index",stream);
+    	    configlite.put("Last.ReadCommunity", readCom);
     	    configlite.save();
         }
         
@@ -487,9 +494,9 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
             ShutDownAlarm.setEnabled(b);
         }
     }
-    private void destPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_destPortActionPerformed
+    private void readCommunityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_readCommunityActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_destPortActionPerformed
+    }//GEN-LAST:event_readCommunityActionPerformed
 
     private void NetXpressBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NetXpressBoxActionPerformed
         NetXpressLXBox.setSelected(false);
@@ -605,7 +612,6 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox StreamDownAlarm;
     private javax.swing.JLabel alarmThresholdLabel2;
     private javax.swing.JTextField alarmThresholdTime;
-    private javax.swing.JTextField destPort;
     private javax.swing.JCheckBox enableDataLogging;
     private javax.swing.JCheckBox enableEmailAlarms;
     private javax.swing.JTextField ipAddress;
@@ -617,6 +623,7 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JButton okButton;
+    private javax.swing.JTextField readCommunity;
     private javax.swing.JTextField streamIndex;
     private javax.swing.JCheckBox useDefaultBox;
     // End of variables declaration//GEN-END:variables

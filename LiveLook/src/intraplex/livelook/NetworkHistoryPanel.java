@@ -213,8 +213,7 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
     
     public void loadConfiguation()     
     {
-        searchParams = new String[]{"", "Packets Lost > 10", 
-        		"Packets Received < 400"
+        searchParams = new String[]{"", "Packets Lost > 10"
         };
         traceColors = new Color[8];
         

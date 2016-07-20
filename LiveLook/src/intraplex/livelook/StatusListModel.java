@@ -8,7 +8,13 @@ package intraplex.livelook;
 
 import intraplex.alarms.AlarmManager;
 import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,7 +65,7 @@ public class StatusListModel extends AbstractTableModel {
         list = l;
         this.mgr = mgr;
     }
-
+    
     @Override
     public int getRowCount() {
         if (list == null) return 0;
@@ -69,10 +75,10 @@ public class StatusListModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 5;
+        return 8;
     }
     
-    private final String[] colNames = new String[] {"Stream Name", "Last Message Time", "Logging Path", "Status", "Full Monitoring"};
+    private final String[] colNames = new String[] {"Stream Name", "Stream Id", "Stream IP", "Link", "Last Message Time", "Logging Path", "Status", "Full Monitoring"};
 
     public String getColumnName(int col) {
         return colNames[col];
@@ -91,18 +97,36 @@ public class StatusListModel extends AbstractTableModel {
     	e = (Stream)it.next();
         if (i1 == 0)
             return e.streamName;
-        else if (i1 == 1)
+        else if(i1 == 1)
+        	return e.index;
+        else if(i1 == 2)
+        	return e.ip;
+        else if(i1 == 3) {
+        	URI uri = null;
+			try {
+				uri = new URI("http://" + e.ip);
+			} catch (URISyntaxException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			};
+        	return uri;
+        }
+        else if (i1 == 4)
             return sdf.format(e.lastEntry);
-        else if (i1 == 2)
+        else if (i1 == 5)
         {
         	 entry = mgr.logMap.get(Long.parseLong(e.ip.replace(".",  "") + e.dstPort));
-            if (entry.enableLogging)
+            if (entry.enableLogging && !e.statusOnly)
                 return entry.fileName;
             else
-                return "Logging is disabled";
+            	if(e.statusOnly)
+            		return "Events Only";
+            	else
+            		return "Logging is disabled";
         }
-        else if(i1 == 4) {
-        	return !e.statusOnly;
+        else if(i1 == 7) {
+        	String s = "" + !e.statusOnly;
+        	return s.substring(0, 1).toUpperCase() + s.substring(1);
         }
         
         int state = Integer.parseInt(e.connectionState);
@@ -115,6 +139,14 @@ public class StatusListModel extends AbstractTableModel {
         return "Error";
     
     }
+    
+    private static void open(URI uri) {
+        if (Desktop.isDesktopSupported()) {
+          try {
+            Desktop.getDesktop().browse(uri);
+          } catch (IOException e) { /* TODO: error handling */ }
+        } else { /* TODO: error handling */ }
+      }
     
     public Color getRowColour(int row) {
         

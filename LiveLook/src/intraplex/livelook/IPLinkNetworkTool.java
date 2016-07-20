@@ -134,6 +134,8 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
             }
             catch (Exception e)
             {
+            	System.out.println("ERROR LOADING CONNECTIONS");
+            	e.printStackTrace();
             }
         	
             showLivelook = true;
@@ -185,10 +187,10 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
             menuItem.addActionListener(this);
             menuItem.setActionCommand("LOGROT");
             menu.add(menuItem);
-            menuItem = new JMenuItem("Signaling Port");
-            menuItem.addActionListener(this);
-            menuItem.setActionCommand("SP");
-            menu.add(menuItem);
+//            menuItem = new JMenuItem("Signaling Port");
+//            menuItem.addActionListener(this);
+//            menuItem.setActionCommand("SP");
+//            menu.add(menuItem);
             menuItem = new JMenuItem("Alarm Settings");
             menuItem.addActionListener(this);
             menuItem.setActionCommand("MAIL");

@@ -52,29 +52,35 @@ public class Stream {
     
     public boolean StreamDownAlarm = false;
     public boolean ShutDownAlarm = false;
+    public String readCommunity;
     
-	public Stream(String ip, String streamID, int port, int streamType, boolean populate, boolean statusOnly) {
+	public Stream(String ip, String streamID, int port, int streamType, boolean populate, boolean statusOnly, String readCommunity) {
 		this.ip = ip;
 		this.index = Integer.parseInt(streamID);
 		this.secondIndex = 1;
 		this.port = "" + port;
 		this.streamType = streamType;
 		this.statusOnly = statusOnly;
+		this.readCommunity = readCommunity;
 		counter = 0;
 		packetsSkipped = 0;
 		statReset = false;
 		liveViewReset1 = false;
 		liveViewReset2 = false;
-		
 		this.connectionState = "";
 		opened = false;
 		snmp = new IPLinkSnmpInterface();
-		opened = snmp.open(ip, "public");
-		if(populate) {
+		opened = snmp.open(ip, readCommunity);
+		try {
+		if(populate && !statusOnly) {
 			populateVars();
 		}
-		else if(checkIfShutDown()) {
+		else if(checkIfShutDown() || statusOnly) {
 			populateBaseInfo();
+		}
+		}catch(Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 	
@@ -111,7 +117,8 @@ public class Stream {
 //	    pktsLostPct = Float.parseFloat(snmp.getSnmp(OIDDictionary.harrisIplinkRTPStreamStatsPacketsLostPctBeforeRecovery, index));
 //	    pktsLostPctCum = Float.parseFloat(snmp.getSnmp(OIDDictionary.harrisIplinkRTPStreamStatsPacketsCumLostPctBeforeRecovery, index));
 //	    currQLen = Integer.parseInt(snmp.getSnmp(OIDDictionary.harrisIplinkRTPStreamStatsRxCurrentQLevel, index));
-//	    	
+//	    
+		lastEntry = System.currentTimeMillis();
 	    streamName = snmp.getSnmp(OIDDictionary.getStreamName(streamType), index);
 	    packetsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + packetsSkipped));
 	    packetsLost = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLost(streamType), index, secondIndex + packetsSkipped));
@@ -230,13 +237,13 @@ public class Stream {
 	}
 	
 	public String toSaveString() {
-		return "" + ip +", " + port + ", " + index + ", " + streamType + ", " + statusOnly;
+		return "" + ip +", " + port + ", " + index + ", " + streamType + ", " + statusOnly + ", " + readCommunity;
 	}
 	
 	public static Stream createFromString(String s) {
         String[] parts = s.split(", ");
 
-        Stream stream = new Stream(parts[0],parts[3], Integer.parseInt(parts[19]), Integer.parseInt(parts[2]), true, Boolean.parseBoolean(parts[4]));
+        Stream stream = new Stream(parts[0],parts[3], Integer.parseInt(parts[19]), Integer.parseInt(parts[2]), true, Boolean.parseBoolean(parts[20]), parts[21]);
         
         return stream;
 	}
