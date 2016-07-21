@@ -21,6 +21,13 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * 
+ * MacFile is responsible for the loading, saving, encrypting and decrypting of the file of MacAdresses.
+ * 
+ * @author Josh Lucas
+ *
+ */
 public class MacFile {
     private String filename;
     public ArrayList<String> MacAddresses;
@@ -29,10 +36,16 @@ public class MacFile {
     private Cipher desCipher;
     private SecretKey myDesKey;
 	
+    /**
+     * Class constructor initializes list, filename, and encryption cipher
+     * 
+     * @param filename	This is the filename of the file containing the list of MacAddresses
+     */
     public MacFile(String filename) {
         MacAddresses = new ArrayList<String>();
         this.filename = filename;
 
+        //This is part of the Bouncy Castle api that provides the encryption method used
         myDesKey = new SecretKeySpec(key, 0, key.length, "AES");
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());  
         try
@@ -50,9 +63,16 @@ public class MacFile {
         }
     }
 
+    /**
+     * Reads the filename passed in through the constructor.
+     * 
+     * @returns byte[]		byte[] of the information in the file still encrypted 
+     * @throws IOException	caused by reading the file
+     */
     public byte[] load() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(filename));
         try {
+        	//Reads the file into one big line
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
@@ -61,10 +81,12 @@ public class MacFile {
                 line = br.readLine();
             }
             String everything = sb.toString();
-
+            
+            //Then the string is split into parts by commas
             String[] parts = everything.split(",");
             byte[] result = new byte[parts.length];
 
+            //the string array is then parsed into a byte array
             for(int x = 0; x < parts.length; x++) {
                 result[x] = Byte.parseByte(parts[x]);
             }
@@ -75,16 +97,25 @@ public class MacFile {
         }
     }
 
+    /**
+     * Saves the encrypted information to a file specified by the filename in the constructor.
+     * <p>
+     * This is not used in this program left over from MacEncrypter.
+     * 
+     * @param savebytes			encrypted byte[] to be saved
+     */
     public void save(byte[] savebytes) {
         try{ 
             PrintWriter writer = new PrintWriter(filename, "UTF-8");
 
             String saveString = "";
-
+            
+            //makes one big string
             for(int x = 0; x < savebytes.length - 1; x++) {
                     saveString += savebytes[x] + ",";
             }
 
+            //saves the string to the file
             writer.println(saveString + savebytes[savebytes.length - 1]);
 
             writer.close(); 
@@ -94,8 +125,16 @@ public class MacFile {
         }
     }
 
+    /**
+     * 
+     * Encrypts the string passed to it and returns it in byte[] form
+     * 
+     * @param input		non-encrypted input string
+     * @return			returns encrypted byte array
+     */
     public byte[] encrypt(String input)
     {
+    	//This is all from the Bouncy Castle api to encrypt info
         byte[] textEncrypted = null;
         try
         {
@@ -109,8 +148,19 @@ public class MacFile {
         return textEncrypted;
     }
 
-    public byte[] decrypt(byte[] textEncrypted) throws IllegalBlockSizeException, BadPaddingException
+    /**
+     * 
+     * Decrypts encrypted byte[] and returns decrypted byte []
+     * 
+     * 
+     * @param encryptedText		encrypted text passed in to be decrypted
+     * @return					decrypted byte[]
+     * @throws IllegalBlockSizeException	both due to the decrypting process
+     * @throws BadPaddingException
+     */
+    public byte[] decrypt(byte[] encryptedText) throws IllegalBlockSizeException, BadPaddingException
     {
+    	//This is all from the Bouncy Castle api to decrypt info
         try
         {
             desCipher.init(Cipher.DECRYPT_MODE, myDesKey);
@@ -119,6 +169,6 @@ public class MacFile {
         {
             e.printStackTrace();
         }
-        return desCipher.doFinal(textEncrypted);
+        return desCipher.doFinal(encryptedText);
     }
 }

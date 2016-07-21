@@ -13,23 +13,25 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
+ * This file is responsible for the table under the tab Mac Addresses.
  *
- * @author jlucas
+ * @author Josh Lucas
  */
-
-
 public class MacList extends javax.swing.JPanel {
 
 	DefaultTableModel model;
 	MacFile file;
 	
+
     /**
-     * Creates new form MacList
+     * Class constructor.
      */
     public MacList() {
         initComponents();
         
         try {
+        	//Looks to see if the user has selected this file before to save them from having
+        	//to load it in every time the program is started
         	String filename = livelookconfig.get("MacFileLocation").toString();
         	loadFile(filename);
         }
@@ -38,10 +40,17 @@ public class MacList extends javax.swing.JPanel {
         }
     }
     
+    /**
+     * Returns the current list of Strings inside the table of Mac Addresses.
+     * 
+     * @return		Mac Address list
+     */
     public String[] getRows() {
     	if(model == null)
     		return new String[0];
     	String[] strings = new String[model.getRowCount()];
+    	
+    	//pulls the list of strings from the table model
     	for(int x = 0; x < model.getRowCount(); x++){
     		strings[x] = (String) model.getValueAt(x, 0);
     	}
@@ -110,11 +119,18 @@ public class MacList extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * This loads the file of Mac Addresses through use of the MacFile class then adds them to the table.
+     * 
+     * @param fileName		filename of the user selected MacAdress text file
+     */
     private void loadFile(String fileName) {
+    	//Initializes new MacFile
     	file = new MacFile(fileName);
 
         byte[] byteUnecrypted = new byte[0];
-
+        
+        //loads the file and then decrypts the file
         try {
             byteUnecrypted = file.decrypt(file.load());
         } catch (IOException e) {
@@ -127,14 +143,16 @@ public class MacList extends javax.swing.JPanel {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
+        //converts from byte[] to string
         String loadString = new String(byteUnecrypted);
 
+        //splits macs
         String[] parts = loadString.split(",");
 
         model = new DefaultTableModel();
         model.addColumn("Mac Addresses");
         
+        //adds the macs from the file to the table model
         for(int x = 0; x < parts.length; x++){
         	Vector temp = new Vector();
         	temp.add(parts[x]);
@@ -143,45 +161,26 @@ public class MacList extends javax.swing.JPanel {
         MacTable.setModel(model);
     }
     
+    /**
+     * This reacts when the load button is pressed on the Mac Addresses page.
+     * A JFileChooser pops up and asks for the file location and then loads the file into the table.
+     * 
+     * @param evt
+     */
     private void LoadFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoadFileActionPerformed
         JFileChooser chooser = new JFileChooser();
-
+        
         int returnVal = chooser.showOpenDialog(this);
+        
+        //Checks to make sure that the file chooser got a successful result
         if(returnVal == JFileChooser.APPROVE_OPTION) {
         	String fileName = chooser.getSelectedFile().getAbsolutePath();
-            file = new MacFile(fileName);
             
+            //saves location of file to be used in program start up
             livelookconfig.setProperty("MacFileLocation", fileName);
             livelookconfig.save();
 
-            byte[] byteUnecrypted = new byte[0];
-
-            try {
-                byteUnecrypted = file.decrypt(file.load());
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalBlockSizeException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (BadPaddingException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-            String loadString = new String(byteUnecrypted);
-
-            String[] parts = loadString.split(",");
-
-            model = new DefaultTableModel();
-            model.addColumn("Mac Addresses");
-            
-            for(int x = 0; x < parts.length; x++){
-            	Vector temp = new Vector();
-            	temp.add(parts[x]);
-                model.addRow(temp);
-            }
-            MacTable.setModel(model);
+            loadFile(fileName);
         }
         else {
             JOptionPane.showMessageDialog(this, "Please reselect the desired file.");

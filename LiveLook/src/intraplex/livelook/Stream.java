@@ -195,7 +195,7 @@ public class Stream {
 		
 		while(tempPacketsReceived != packetsReceived || tempPacketsLost != packetsLost
 	    		|| tempPacketsRecovered != packetsRecovered || tempPacketsLate != packetsLate
-	    		|| tempPacketsEarly != packetsEarly)
+	    		|| tempPacketsEarly != packetsEarly && count < 10)
 		{
 			//System.out.println(tempPacketsReceived + ":" + packetsReceived + ", " +  tempPacketsLost + ":" + packetsLost
 	    	//	+ ", " + tempPacketsRecovered + ":" +  packetsRecovered + ", " +  tempPacketsLate + ":" +  packetsLate

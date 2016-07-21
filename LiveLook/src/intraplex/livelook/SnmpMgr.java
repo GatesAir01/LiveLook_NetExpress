@@ -37,6 +37,8 @@ public class SnmpMgr implements Runnable{
 	public static boolean DefaultStreamDownAlarm = false;
     boolean StreamDownAlarmTriggered = false;
     boolean ShutDownAlarmTriggered = false;
+    boolean mapUpdate = false;
+    long removeKey;
 	
 	public SnmpMgr(boolean lite, MacList macList) {
 		lastLogEntry = null;
@@ -101,6 +103,7 @@ public class SnmpMgr implements Runnable{
 		        		//System.out.println(!reset);
 		        		//System.out.println("Packets Skipped: " + stream.packetsSkipped);
 			        	if(packetsSkipped == 0) {
+			        		try {
 			        		stream.populateVars();
 			        		
 			        		if(reset)
@@ -112,12 +115,17 @@ public class SnmpMgr implements Runnable{
 			        			e.writeToEventLog(e.streamName + ", " + "Stat Reset");
 			        			e.statReset = true;
 			        		}
+			        		}
+			        		catch(NumberFormatException e) {
+			        			e.printStackTrace();
+			        		}
 			        	}
 			        	else
 			        	{
 			        		//System.out.println(stream.packetsSkipped);
 							for(int x = packetsSkipped; x >= 0; x--) 
 							{
+								try {
 								stream.populateVars();
 								//System.out.println(stream.packetsReceived);
 								
@@ -128,6 +136,10 @@ public class SnmpMgr implements Runnable{
 				        			Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
 				        			LogMapEntry e = logMap.get(key);
 				        			e.writeToEventLog(e.streamName + ", " + "Stat Reset");
+				        		}
+								}
+				        		catch(NumberFormatException e) {
+				        			e.printStackTrace();
 				        		}
 		
 							}
@@ -211,7 +223,11 @@ public class SnmpMgr implements Runnable{
 //			else {
 //				stream.counter++;
 //			}
-		}      
+		}
+		if(mapUpdate){
+			map.remove(removeKey);
+			mapUpdate = false;
+		}
     }
 	
 	public Color checkForStreamStatus()
@@ -424,7 +440,8 @@ public class SnmpMgr implements Runnable{
         if(stream == null)return;
         
         logMap.remove(key);
-        map.remove(key);
+        removeKey = key;
+        mapUpdate = true;
     }
 	 
 	 public NetworkLogDataPoint getNextPoint() 
