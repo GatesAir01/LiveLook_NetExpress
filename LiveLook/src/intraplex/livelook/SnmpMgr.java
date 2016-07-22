@@ -104,17 +104,17 @@ public class SnmpMgr implements Runnable{
 		        		//System.out.println("Packets Skipped: " + stream.packetsSkipped);
 			        	if(packetsSkipped == 0) {
 			        		try {
-			        		stream.populateVars();
-			        		
-			        		if(reset)
-			        			createPacket(stream.ip, Integer.parseInt(stream.dstPort));
-			        		else
-			        		{
-			        			Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-			        			LogMapEntry e = logMap.get(key);
-			        			e.writeToEventLog(e.streamName + ", " + "Stat Reset");
-			        			e.statReset = true;
-			        		}
+				        		stream.populateVars();
+				        		
+				        		if(reset)
+				        			createPacket(stream.ip, Integer.parseInt(stream.dstPort));
+				        		else
+				        		{
+				        			Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
+				        			LogMapEntry e = logMap.get(key);
+				        			e.writeToEventLog(e.streamName + ", " + "Stat Reset");
+				        			e.statReset = true;
+				        		}
 			        		}
 			        		catch(NumberFormatException e) {
 			        			e.printStackTrace();
@@ -126,19 +126,20 @@ public class SnmpMgr implements Runnable{
 							for(int x = packetsSkipped; x >= 0; x--) 
 							{
 								try {
-								stream.populateVars();
-								//System.out.println(stream.packetsReceived);
-								
-								if(reset)
-				        			createPacket(stream.ip, Integer.parseInt(stream.dstPort));
-				        		else
-				        		{
-				        			Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-				        			LogMapEntry e = logMap.get(key);
-				        			e.writeToEventLog(e.streamName + ", " + "Stat Reset");
-				        		}
+									stream.populateVars();
+									//System.out.println(stream.packetsReceived);
+									
+									if(reset)
+					        			createPacket(stream.ip, Integer.parseInt(stream.dstPort));
+					        		else
+					        		{
+					        			Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
+					        			LogMapEntry e = logMap.get(key);
+					        			e.writeToEventLog(e.streamName + ", " + "Stat Reset");
+					        		}
 								}
 				        		catch(NumberFormatException e) {
+				        			packetsSkipped++;
 				        			e.printStackTrace();
 				        		}
 		
@@ -345,6 +346,7 @@ public class SnmpMgr implements Runnable{
             String e = entries[i].substring(1,entries[i].length()-1);
             Stream newStream = Stream.createFromString(e);
             LogMapEntry newEntry = LogMapEntry.createFromString(e);
+            newEntry.stream = newStream;
             newStream.populateVars();
             
             long key = Long.parseLong(newStream.ip.replace(".", "") + newStream.dstPort);

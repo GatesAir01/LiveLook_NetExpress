@@ -273,7 +273,7 @@ public class LogMapEntry implements Comparable{
     void writeToLog(IplinkNetworkLogEntry inle) {
         
         dataState = inle.dataState;
-        boolean shutDown = stream.adminState == 2;
+        boolean shutDown = (stream.adminState == 2);
         if ( lossRateAlarmEnabled && lastLogEntry != null && lastLogEntry.pktsRcvd - inle.pktsRcvd == 0 && !shutDown)
         {        
             lossRateGoodCnt = 0;
