@@ -564,8 +564,9 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         updateNeeded++;
     }//GEN-LAST:event_clearDataActionPerformed
 
-    private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed
-        
+    private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed   	
+    	System.out.println(streamKeys.size());
+    	
        if (streamKeys.isEmpty())return;
        String[] streams = streamKeys.keySet().toArray(new String[0]);
        
@@ -895,8 +896,8 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
     
     public void addStreamKey(long key, String name, boolean statusOnly) {
         
-    	if(!statusOnly) 
-    		streamKeys.put(name, key);
+    	
+    	streamKeys.put(name, key);
     	
         boolean retVal = true;
         disconnectButton.setEnabled(true);
@@ -1215,5 +1216,22 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         intervalBox.setSelectedIndex(loadedInterval);
         updateNeeded++;
         
+    }
+    
+    public void refreshStreamKeys() {
+    	TreeMap<Long, Stream> map = msgMgr.map;
+    	TreeMap<String, Long> sk = new TreeMap<String, Long>();
+    	
+    	Iterator it = map.entrySet().iterator();
+    	for(int x = 0; x < map.size(); x++) {
+    		Map.Entry<Long, Stream> entry = (Map.Entry<Long, Stream>) it.next();
+    		sk.put(entry.getValue().streamName, entry.getKey());
+    	}
+    	
+    	streamKeys = sk;
+    	
+    	if(streamKeys.size() > 0) {
+    		disconnectButton.setEnabled(true);
+    	}
     }
 }

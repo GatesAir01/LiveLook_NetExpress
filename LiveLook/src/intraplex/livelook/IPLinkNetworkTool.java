@@ -114,6 +114,7 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
         macList = new MacList();
         mgr = new SnmpMgr(lite, macList);
         showLivelook = false;
+        livelook = new MultiLiveLookPanel(mgr, lite);
         while (mgr.bindState() == 0)
         {
             try {
@@ -130,6 +131,7 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
                 if (s != null)
                 {
                     mgr.loadConnections(s);
+                    livelook.refreshStreamKeys();
                 }
             }
             catch (Exception e)
@@ -139,7 +141,6 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
             }
         	
             showLivelook = true;
-            livelook = new MultiLiveLookPanel(mgr, lite);
             tabbedPane.add("Live View", livelook); 
         }
         tabbedPane.add("History", history);

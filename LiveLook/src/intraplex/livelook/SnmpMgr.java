@@ -225,6 +225,7 @@ public class SnmpMgr implements Runnable{
 //			}
 		}
 		if(mapUpdate){
+			logMap.remove(removeKey);
 			map.remove(removeKey);
 			mapUpdate = false;
 		}
@@ -439,7 +440,6 @@ public class SnmpMgr implements Runnable{
         Stream stream = map.get(key);
         if(stream == null)return;
         
-        logMap.remove(key);
         removeKey = key;
         mapUpdate = true;
     }
