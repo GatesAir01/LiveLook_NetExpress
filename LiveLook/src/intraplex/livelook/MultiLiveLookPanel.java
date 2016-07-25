@@ -239,16 +239,18 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                     JMenu addMenu = new JMenu("Add Trace");
                     for (Map.Entry<String, Long> entry : streamKeys.entrySet())
                     {
-                        JMenu streamMenu = new JMenu(entry.getKey());
-                        String base = p+":-1:"+entry.getValue()+":";
-                        for (int j = 0; j < NetworkLogDataPoint.NUM_TRACES_LIVE; j++)
-                        {
-                            JMenuItem menuItem2 = new JMenuItem(NetworkLogDataPoint.getTypeTitle(j,false));
-                            menuItem2.setActionCommand(base+j);
-                            menuItem2.addActionListener(this);
-                            streamMenu.add(menuItem2);
-                        }
-                        addMenu.add(streamMenu);
+                    	if(!msgMgr.map.get(entry.getValue()).statusOnly) {
+		                    JMenu streamMenu = new JMenu(entry.getKey());
+		                    String base = p+":-1:"+entry.getValue()+":";
+		                    for (int j = 0; j < NetworkLogDataPoint.NUM_TRACES_LIVE; j++)
+		                    {
+		                        JMenuItem menuItem2 = new JMenuItem(NetworkLogDataPoint.getTypeTitle(j,false));
+		                        menuItem2.setActionCommand(base+j);
+		                        menuItem2.addActionListener(this);
+		                        streamMenu.add(menuItem2);
+		                    }
+		                    addMenu.add(streamMenu);
+                    	}
                     }
                     popupItem[p].add(addMenu);
                     
@@ -456,73 +458,71 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
      else {
 	     if(stream.opened)waitDialog.notifyConnection();
 	     
-	     if(!stream.statusOnly) {
-		     addStreamKey(Long.parseLong(stream.ip.replace(".", "")  + stream.dstPort), stream.streamName, stream.statusOnly);
-		     //JDispatchMgr.sendSetupMessage(cipd.iPAddress,Integer.parseInt(cipd.stream),1,dport);
-		     waitDialog.setVisible(true);
-		     //waitDialog.enableLogging = cipd.enableLogging;
-		     //System.out.println(" enable logging in Wait Dialog is "+waitDialog.enableLogging);
-		        if (waitDialog.connected)
-		        {
-		            if (streamKeys.size() <= 2)
-		            {
-		                long streamKey1 = 0;
-		                long newKey = 0;
-		                    
-		                for (int i = 0; i < traces.length; i++)
-		                {
-		                    if (traceTypes[i] != -1)
-		                    {
-		                        streamKey1 = streamId[i];
-		                    }
-		                }
-		                
-		               
-		                Iterator<Long> r = streamKeys.values().iterator();
-		                while (r.hasNext())
-		                {
-		                    Long l = r.next();
-		                    if (l.longValue() != streamKey1 )
-		                    {
-		                        newKey = l.longValue();
-		                    }
-		                }
-		                
-		                if (newKey != 0)
-		                { 
-		                    int[] toAdd = new int[] {1,2};
-		                    int added = 0;
-		                    for (int i = 0; i < 4; i++)
-		                    {
-		                        if (traceTypes[i] != -1 && streamId[i] == 0)break;
-		                        if (traceTypes[i] == -1 )
-		                        {
-		                            addTrace(toAdd[added++], 0, newKey, false);
-		                            if (added == 2)break;
-		                        }
-		                    }
-		                    toAdd = new int[] {0,5};
-		                    added = 0;
-		                    for (int i = 0; i < 4; i++)
-		                    {
-		                        if (traceTypes[i+4] != -1 && streamId[i+4] == 0)break;
-		                        if (traceTypes[i+4] == -1 )
-		                        {
-		                            addTrace(toAdd[added++], 1, newKey, false);
-		                            if (added == 2)break;
-		                        }
-		                    }
-		
-		                    updateNeeded++;
-		                    prepareMenus();
-		                }
-		            }
-		        }
-		        else
-		        {
-		            msgMgr.cleanUp();
-		        }
-	     	}
+	     addStreamKey(Long.parseLong(stream.ip.replace(".", "")  + stream.dstPort), stream.streamName, stream.statusOnly);
+	     //JDispatchMgr.sendSetupMessage(cipd.iPAddress,Integer.parseInt(cipd.stream),1,dport);
+	     waitDialog.setVisible(true);
+	     //waitDialog.enableLogging = cipd.enableLogging;
+	     //System.out.println(" enable logging in Wait Dialog is "+waitDialog.enableLogging);
+	        if (waitDialog.connected)
+	        {
+	            if (streamKeys.size() <= 2 && !stream.statusOnly)
+	            {
+	                long streamKey1 = 0;
+	                long newKey = 0;
+	                    
+	                for (int i = 0; i < traces.length; i++)
+	                {
+	                    if (traceTypes[i] != -1)
+	                    {
+	                        streamKey1 = streamId[i];
+	                    }
+	                }
+	                
+	               
+	                Iterator<Long> r = streamKeys.values().iterator();
+	                while (r.hasNext())
+	                {
+	                    Long l = r.next();
+	                    if (l.longValue() != streamKey1 )
+	                    {
+	                        newKey = l.longValue();
+	                    }
+	                }
+	                
+	                if (newKey != 0)
+	                { 
+	                    int[] toAdd = new int[] {1,2};
+	                    int added = 0;
+	                    for (int i = 0; i < 4; i++)
+	                    {
+	                        if (traceTypes[i] != -1 && streamId[i] == 0)break;
+	                        if (traceTypes[i] == -1 )
+	                        {
+	                            addTrace(toAdd[added++], 0, newKey, false);
+	                            if (added == 2)break;
+	                        }
+	                    }
+	                    toAdd = new int[] {0,5};
+	                    added = 0;
+	                    for (int i = 0; i < 4; i++)
+	                    {
+	                        if (traceTypes[i+4] != -1 && streamId[i+4] == 0)break;
+	                        if (traceTypes[i+4] == -1 )
+	                        {
+	                            addTrace(toAdd[added++], 1, newKey, false);
+	                            if (added == 2)break;
+	                        }
+	                    }
+	
+	                    updateNeeded++;
+	                    prepareMenus();
+	                }
+	            }
+	        }
+	        else
+	        {
+	            msgMgr.cleanUp();
+	        }
      	}
      }
      catch (Exception e)
@@ -600,19 +600,20 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
 
     public void disconnectAll()
     {
-        Iterator i = streamKeys.values().iterator();
-        while (i.hasNext())
-        {
-            try
-            {
-                Long l = (Long)i.next();
-                msgMgr.disconnect(l.longValue());
-            }
-            catch (Exception e)
-            {
-                
-            }
-        }
+//        Iterator i = streamKeys.values().iterator();
+//        while (i.hasNext())
+//        {
+//            try
+//            {
+//                Long l = (Long)i.next();
+//                msgMgr.disconnect(l.longValue());
+//            }
+//            catch (Exception e)
+//            {
+//                
+//            }
+//        }
+        msgMgr.disconnectAll();
     }
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
        for (int p =0; p < 2; p++)
@@ -1230,8 +1231,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
     	Iterator it = map.entrySet().iterator();
     	for(int x = 0; x < map.size(); x++) {
     		Map.Entry<Long, Stream> entry = (Map.Entry<Long, Stream>) it.next();
-    		if(!entry.getValue().statusOnly)
-    			sk.put(entry.getValue().streamName, entry.getKey());
+    		sk.put(entry.getValue().streamName, entry.getKey());
     	}
     	
     	streamKeys = sk;

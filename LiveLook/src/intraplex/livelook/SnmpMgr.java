@@ -711,4 +711,9 @@ public class SnmpMgr implements Runnable{
 		return logMap.values();
 	}
 
+	public void disconnectAll() {
+        map.clear();
+        logMap.clear();
+	}
+	
 }
