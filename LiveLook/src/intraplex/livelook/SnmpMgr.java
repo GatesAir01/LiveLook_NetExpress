@@ -14,9 +14,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+/**
+ * SnmpMgr is meant to manage all things related to snmp in LiveLook.
+ * It handles: the timing of new snmp requests, the start of writing log, the creation of stream objects,
+ * 				and the managing of the stream statuses
+ * 
+ * @author Josh Lucas
+ *
+ */
 public class SnmpMgr implements Runnable{
 
-	public static int port;
+
 	public static SnmpMgr mgr;
 	public static int nextStreamType = 0;
 	public static boolean statusOnly = false;
@@ -37,9 +45,18 @@ public class SnmpMgr implements Runnable{
 	public static boolean DefaultStreamDownAlarm = false;
     boolean StreamDownAlarmTriggered = false;
     boolean ShutDownAlarmTriggered = false;
-    boolean mapUpdate = false;
+    boolean mapRemove = false;
     long removeKey;
+    boolean mapAdd = false;
+    Stream addStream;
+    LogMapEntry addLME;
 	
+	/**
+	 * Constructor of SnmpMgr
+	 * 
+	 * @param lite		This is not necessary for NetXpress but for IPLINK it tells if it is lite version or not
+	 * @param macList	This is the list of MacAdresses allowed to connect to
+	 */
 	public SnmpMgr(boolean lite, MacList macList) {
 		lastLogEntry = null;
         bindfailed = false;
@@ -55,8 +72,19 @@ public class SnmpMgr implements Runnable{
         new Thread(this, "SnmpMgr").start();
 	}
 	
-	public Stream addStream(String ip, String streamID, int port, String readCommunity) {
-		Stream stream = new Stream(ip, streamID, port, nextStreamType, true, statusOnly, readCommunity);
+	/**
+	 * 
+	 * This method is responsible for the creation of new stream objects.
+	 * It also handles the creation of the parallel LogMapEntry object
+	 * 
+	 * 
+	 * @param ip			ipaddress of the stream being connected to
+	 * @param streamID		id that the stream is indexed in the NetXpress 
+	 * @param readCommunity		snmp read community entered when connecting 
+	 * @return					returns a new Stream object
+	 */
+	public Stream addStream(String ip, String streamID, String readCommunity) {
+		Stream stream = new Stream(ip, streamID, nextStreamType, true, statusOnly, readCommunity);
 		stream.StreamDownAlarm = StreamDownAlarm;
 		stream.ShutDownAlarm = ShutDownAlarm;
 		Long temp = Long.parseLong(ip.replace(".", "") + stream.dstPort);
@@ -66,17 +94,20 @@ public class SnmpMgr implements Runnable{
 			lme.index = Integer.parseInt(streamID);
 			lme.streamName = stream.streamName;
 			lme.logEnties = new NetworkLogEntryArray(600,1,temp);
-			map.put(temp, stream);
-			logMap.put(temp, lme);
+			addStream = stream;
+			addLME = lme;
+			mapAdd = true;
 			//stream.populateVars();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return stream;
 	}
 	
-	//Pulls info for streams
+	
+	/**
+	 * This causes the streams to request info from the NetXpress machine
+	 */
 	public void refreshStreams()
     {
 		for(Stream stream: map.values()) {
@@ -84,34 +115,46 @@ public class SnmpMgr implements Runnable{
 		}      
     }
 	
+	/**
+	 * This method is responsible for the periodic requesting of information from the NetXpress machine.
+	 * It will cycle through the streams, and check for alarm statuses and if it shuts down, or packets are skipped.
+	 */
 	public void snmpRequest()
     {
+		//goes through all the streams in the map
 		for(Stream stream: map.values()) {
-//			System.out.println(stream.counter + " " + Math.ceil(((stream.statsInterval * 10) * 1.75)));
-//			if(stream.counter >= Math.ceil((stream.statsInterval * 10) * 1.75)){
-//				stream.counter = 0;
 
+			//counts to see if it is time to poll for data
 	        if(stream.counter >= stream.statsInterval) {
-	        	//System.out.println(stream.streamName);
-				//System.out.println(stream.ip + " " + stream.port);
+	        	//if the stream is status only it will not poll for data 
 	        	if(!stream.statusOnly){
+	        		//checks to make sure if the stream has been shut down before it queries
 		        	boolean shutDown = stream.checkIfShutDown();
-		        	//System.out.println(shutDown);
+		        	
 		        	if(!shutDown){
+		        		//though NetXpress has mib indexes for every 5 seconds of data 
+		        		//NetXpress only updates the mibs every 10 seconds thus when polling 
+		        		//every 5 seconds approximately you have to take this into account
+		        		//updatePacketsSkipped() will show how many times this info must be repolled and displayed
 		        		boolean reset = stream.updatePacketsSkipped();
 		        		int packetsSkipped = stream.packetsSkipped;
-		        		//System.out.println(!reset);
-		        		//System.out.println("Packets Skipped: " + stream.packetsSkipped);
+		        		
+		        		//if no packets have been skipped we can update and post one point
 			        	if(packetsSkipped == 0) {
 			        		try {
+			        			//this is the snmp request for the stream
 				        		stream.populateVars();
 				        		
+				        		//this creates a packet for the LogMapEntry to use in it's functions
+				        		//also though it say if(reset) it really is if(!reset)
+				        		//thus if stats of the stream hasn't been reset this will be true
 				        		if(reset)
 				        			createPacket(stream.ip, Integer.parseInt(stream.dstPort));
 				        		else
 				        		{
 				        			Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
 				        			LogMapEntry e = logMap.get(key);
+				        			//writes an event to the event log 
 				        			e.writeToEventLog(e.streamName + ", " + "Stat Reset");
 				        			e.statReset = true;
 				        		}
@@ -122,23 +165,29 @@ public class SnmpMgr implements Runnable{
 			        	}
 			        	else
 			        	{
-			        		//System.out.println(stream.packetsSkipped);
+			        		//for every packet skipped by NetXpress it will go down the indexes and update
 							for(int x = packetsSkipped; x >= 0; x--) 
 							{
 								try {
+									//this is the snmp request for the stream
 									stream.populateVars();
-									//System.out.println(stream.packetsReceived);
 									
+									//this creates a packet for the LogMapEntry to use in it's functions
+					        		//also though it say if(reset) it really is if(!reset)
+					        		//thus if stats of the stream hasn't been reset this will be true
 									if(reset)
 					        			createPacket(stream.ip, Integer.parseInt(stream.dstPort));
 					        		else
 					        		{
 					        			Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
 					        			LogMapEntry e = logMap.get(key);
+					        			//writes an event to the event log 
 					        			e.writeToEventLog(e.streamName + ", " + "Stat Reset");
+					        			e.statReset = true;
 					        		}
 								}
 				        		catch(NumberFormatException e) {
+				        			//this is to make sure that if packets won't be skipped due to this catch
 				        			packetsSkipped++;
 				        			e.printStackTrace();
 				        		}
@@ -147,19 +196,21 @@ public class SnmpMgr implements Runnable{
 							stream.packetsSkipped = 0;
 			        	}
 		        	}
-		        	else {
+		        	else {  //This else is incase of shut down
 		        		Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
 	        			LogMapEntry e = logMap.get(key);
 	        			e.writeToEventLog(e.streamName + ", " + "Stream not up");
 	        			createPacket(stream.ip, Integer.parseInt(stream.dstPort), true);
 		        	}
 	        	}
-	        	else
+	        	else //This is if status only
 	        	{
+	        		//this checks if the stream has been shut down before query
 	        		boolean shutDown = stream.checkIfShutDown();
 	        		
 	        		if(shutDown) 
 	        		{
+	        			//This writes to the log and then counts till the alarm is triggered
 		        		Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
 	        			LogMapEntry e = logMap.get(key);
 	        			e.writeToEventLog(e.streamName + ", " + "Stream not up");
@@ -171,6 +222,7 @@ public class SnmpMgr implements Runnable{
 	    				}
 	        			if(ShutDownAlarmTriggered) shutDownCount = (stateConnectionAlarmThreshold / 5);
 	        		}
+	        		//this else if is here to count down for the alarm threshold and trigger a alarm clear email
 	        		else if(shutDownCount > 0 && ShutDownAlarm){
 						if(shutDownCount == 1){
 							shutDownCount = 0;
@@ -192,6 +244,7 @@ public class SnmpMgr implements Runnable{
 				
 				if(tabColor == Color.red && StreamDownAlarm)
 				{
+					//This writes to the log and then counts till the alarm is triggered
 					redStatusCount++;
 					if(redStatusCount > (stateConnectionAlarmThreshold / 5) && !StreamDownAlarmTriggered)
 					{
@@ -203,6 +256,7 @@ public class SnmpMgr implements Runnable{
 					}
 					if(StreamDownAlarmTriggered) redStatusCount = (stateConnectionAlarmThreshold / 5);
 				}
+				//this else if is here to count down for the alarm threshold and trigger a alarm clear email
 				else if(redStatusCount > 0 && StreamDownAlarm){
 					if(redStatusCount == 1){
 						redStatusCount = 0;
@@ -215,20 +269,30 @@ public class SnmpMgr implements Runnable{
 						redStatusCount--;
 					}
 				}
+				//this updates the color boxes in the Stream Status tab
 	            IPLinkNetworkTool.updateConnectedStreamstabColor(tabColor);
 	            IPLinkNetworkTool_Lite.updateConnectedStreamstabColor(tabColor);
 	            stream.counter = 0;
 	        }
+	        //counts to see if it is time to query the streams for info
 	        stream.counter++;
 //			}
 //			else {
 //				stream.counter++;
 //			}
 		}
-		if(mapUpdate){
+		//waits for the loop to finish accessing the map and then updates them to avoid
+		//ConcurrentMismatchError
+		if(mapRemove){
 			logMap.remove(removeKey);
 			map.remove(removeKey);
-			mapUpdate = false;
+			mapRemove = false;
+		}
+		if(mapAdd){
+			long key = Long.parseLong(addStream.ip.replace(".", "") + addStream.dstPort);
+			logMap.put(key, addLME);
+			map.put(key, addStream);
+			mapAdd = false;
 		}
     }
 	
@@ -443,7 +507,7 @@ public class SnmpMgr implements Runnable{
         if(stream == null)return;
         
         removeKey = key;
-        mapUpdate = true;
+        mapRemove = true;
     }
 	 
 	 public NetworkLogDataPoint getNextPoint() 

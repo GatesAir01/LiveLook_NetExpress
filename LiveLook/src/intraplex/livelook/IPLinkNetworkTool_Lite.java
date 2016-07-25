@@ -288,28 +288,6 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
                 loadNewConfiguration(chooser.getSelectedFile().getAbsolutePath());
             }
         }
-        else if (ae.getActionCommand().equals("SP"))
-        {
-            String sec = (String)JOptionPane.showInputDialog(null,
-             "Signaling Port", ""+SnmpMgr.port);
-
-
-            if (sec != null)
-            {
-                try
-                {
-                   int port = Integer.parseInt(sec);
-                   SnmpMgr.port = port;
-                   livelookconfiglite.setProperty("SignalingPort", SnmpMgr.port+"");
-                   livelookconfiglite.save();
-
-                }
-                catch (Exception e)
-                {
-
-                }
-            }
-        }
         else if (ae.getActionCommand().equals("MAIL"))
         {
             MailSettingsDialog dia =  new MailSettingsDialog(this, true);
@@ -354,18 +332,6 @@ public class IPLinkNetworkTool_Lite extends JFrame implements ActionListener, Wi
         {
                 LogMapEntry.daysPerLog = 1;
         }
-
-        try
-        {
-            SnmpMgr.port = Integer.parseInt(livelookconfiglite.get("SignalingPort").toString());
-        }
-        catch (Exception e)
-        {
-                SnmpMgr.port = 50000;
-        }
-
-
-
 
         try
         {

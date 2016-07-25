@@ -93,6 +93,37 @@ public class IPLinkSnmpInterface {
         return "";
     }
     
+    public byte[] getSnmp(String itemID, int index, boolean blah)
+    {
+        try{
+             itemID = itemID+"."+index;
+
+             
+            // the getMIBEntry method of the communications interface returns an SNMPVarBindList
+            // object; this is essentially a Vector of SNMP (OID,value) pairs. In this case, the
+            // returned Vector has just one pair inside it.
+            SNMPVarBindList newVars = comInterface.getMIBEntry(itemID);
+
+            // extract the (OID,value) pair from the SNMPVarBindList; the pair is just a two-element
+            // SNMPSequence
+            SNMPSequence pair = (SNMPSequence)(newVars.getSNMPObjectAt(0));
+
+            // extract the object identifier from the pair; it's the first element in the sequence
+            SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
+
+            // extract the corresponding value from the pair; it's the second element in the sequence
+            SNMPObject snmpValue = pair.getSNMPObjectAt(1);
+
+            // print out the String representation of the retrieved value
+            return (byte[])snmpValue.getValue();
+	    }
+	    catch (Exception e)
+	    {
+	
+	    }
+        return new byte[0];
+    }
+    
     //For tables with 2 indexes
     public String getSnmp(String itemID, int index, int secondIndex)
     {
@@ -155,4 +186,22 @@ public class IPLinkSnmpInterface {
         }
     }
 
+    public String convertMacsFromByte(byte[] data) {
+    	String returnString = new String();
+        
+        int convert = data[0];
+        if (convert < 0)
+                convert += 256;
+            returnString += ((convert != 0)?Integer.toHexString(convert):"00");
+                
+        for (int i = 1; i < data.length; i++)
+        {
+            convert = data[i];
+            if (convert < 0)
+                convert += 256;
+            returnString += " " + ((convert != 0)?Integer.toHexString(convert):"00");
+        }
+        
+        return returnString;
+    }
 }

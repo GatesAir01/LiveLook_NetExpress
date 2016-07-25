@@ -15,7 +15,6 @@ public class Stream {
 	NetworkLogEntryArray logEnties;   
 	
 	String ip;
-	String port;
 	String dstPort;
 	String streamName;
 	String connectionState;
@@ -54,11 +53,10 @@ public class Stream {
     public boolean ShutDownAlarm = false;
     public String readCommunity;
     
-	public Stream(String ip, String streamID, int port, int streamType, boolean populate, boolean statusOnly, String readCommunity) {
+	public Stream(String ip, String streamID, int streamType, boolean populate, boolean statusOnly, String readCommunity) {
 		this.ip = ip;
 		this.index = Integer.parseInt(streamID);
 		this.secondIndex = 1;
-		this.port = "" + port;
 		this.streamType = streamType;
 		this.statusOnly = statusOnly;
 		this.readCommunity = readCommunity;
@@ -84,14 +82,23 @@ public class Stream {
 		}
 	}
 	
+	//mac 1-3 for wan, lan and mgmt NetXpress is the only one of NetXpress, LX, LXR that has mgmt port
 	public void getMacs() {
-		SNMPOctetString mac1s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 2).getBytes());
-		SNMPOctetString mac2s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 3).getBytes());
-		SNMPOctetString mac3s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 4).getBytes());
+		byte[] mac1b = snmp.getSnmp(OIDDictionary.getMacs(), 2, false);
+		byte[] mac2b = snmp.getSnmp(OIDDictionary.getMacs(), 3, false);
+		byte[] mac3b = snmp.getSnmp(OIDDictionary.getMacs(), 4, false);
 		
-		mac1 = mac1s.toHexString().trim();
-		mac2 = mac2s.toHexString().trim();
-		mac3 = mac3s.toHexString().trim();
+		mac1 = snmp.convertMacsFromByte(mac1b);
+		mac2 = snmp.convertMacsFromByte(mac2b);
+		mac3 = snmp.convertMacsFromByte(mac3b);
+        
+//		SNMPOctetString mac1s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 2).getBytes());
+//		SNMPOctetString mac2s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 3).getBytes());
+//		SNMPOctetString mac3s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 4).getBytes());
+//		
+//		mac1 = mac1s.toHexString().trim();
+//		mac2 = mac2s.toHexString().trim();
+//		mac3 = mac3s.toHexString().trim();
 		System.out.println(mac1);
 		System.out.println(mac2);
 		System.out.println(mac3);
@@ -118,6 +125,7 @@ public class Stream {
 //	    pktsLostPctCum = Float.parseFloat(snmp.getSnmp(OIDDictionary.harrisIplinkRTPStreamStatsPacketsCumLostPctBeforeRecovery, index));
 //	    currQLen = Integer.parseInt(snmp.getSnmp(OIDDictionary.harrisIplinkRTPStreamStatsRxCurrentQLevel, index));
 //	    
+		System.out.println(index + ", " + secondIndex + ", " + packetsSkipped);
 		lastEntry = System.currentTimeMillis();
 	    streamName = snmp.getSnmp(OIDDictionary.getStreamName(streamType), index);
 	    packetsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + packetsSkipped));
@@ -237,13 +245,13 @@ public class Stream {
 	}
 	
 	public String toSaveString() {
-		return "" + ip +", " + port + ", " + index + ", " + streamType + ", " + statusOnly + ", " + readCommunity;
+		return "" + ip +", " + index + ", " + streamType + ", " + statusOnly + ", " + readCommunity;
 	}
 	
 	public static Stream createFromString(String s) {
         String[] parts = s.split(", ");
 
-        Stream stream = new Stream(parts[0],parts[3], Integer.parseInt(parts[19]), Integer.parseInt(parts[2]), true, Boolean.parseBoolean(parts[20]), parts[21]);
+        Stream stream = new Stream(parts[0],parts[3], Integer.parseInt(parts[2]), true, Boolean.parseBoolean(parts[20]), parts[21]);
         
         return stream;
 	}
