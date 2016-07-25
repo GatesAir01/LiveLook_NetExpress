@@ -22,6 +22,14 @@ import java.util.logging.Logger;
  * @author Josh Lucas
  *
  */
+/**
+ * @author jlucas
+ *
+ */
+/**
+ * @author jlucas
+ *
+ */
 public class SnmpMgr implements Runnable{
 
 
@@ -296,6 +304,11 @@ public class SnmpMgr implements Runnable{
 		}
     }
 	
+	/**
+	 * This returns the current stream status in the form of a color for the stream status panel
+	 * 
+	 * @return   color of stream status
+	 */
 	public Color checkForStreamStatus()
     {
         Color retVal = Color.gray;
@@ -327,6 +340,13 @@ public class SnmpMgr implements Runnable{
         return retVal;
     }
 	
+	/**
+	 * This returns the stream status related color but specifies the stream
+	 * 
+	 * @param ip
+	 * @param dstPort
+	 * @return
+	 */
 	public Color checkForStreamStatus(String ip, String dstPort)
     {
         Color retVal = Color.gray;
@@ -364,6 +384,14 @@ public class SnmpMgr implements Runnable{
         return retVal;
     }
 	
+	
+	/**
+	 * Checks if the stream is existing, this is used to stop multiple instances from existing
+	 * 
+	 * @param ip
+	 * @param id
+	 * @return			true if the stream is already existing
+	 */
 	public boolean checkIfExisting(String ip, int id) 
 	{
         for (Stream stream : map.values())
@@ -380,8 +408,18 @@ public class SnmpMgr implements Runnable{
         return false;
 	}
 	
+	
+	/**
+	 * This checks to see if the mac of the stream is in the list of the macs the user has loaded
+	 * 
+	 * @param stream
+	 * @return				returns true if the mac is allowed false otherwise
+	 */
 	public boolean checkIfMacAllowed(Stream stream) {
+		//This triggers the stream to get it's related mac addresses
 		stream.getMacs();
+		
+		//Goes through each Mac and checks if it matches one of the three macs pulled from the stream
 		for (String Mac : macList.getRows())
         {
 			if(Mac.equalsIgnoreCase(stream.mac1.replace(" ", ":")) || Mac.equalsIgnoreCase(stream.mac2.replace(" ", ":")) || Mac.equalsIgnoreCase(stream.mac3.replace(" ", ":")))
@@ -390,6 +428,13 @@ public class SnmpMgr implements Runnable{
         return false;
 	}
 	
+	
+	/**
+	 * Saves all the connection informattion using their individual save methods
+	 * This is used to load them at program start
+	 * 
+	 * @return
+	 */
 	public String getConnectionsForSave()
     {
         Collection<LogMapEntry> c = logMap.values();
@@ -402,11 +447,17 @@ public class SnmpMgr implements Runnable{
         return s;
     }
 	
+	
+	/**
+	 * This loads the connections which information is in the String passed to it.
+	 * 
+	 * @param s
+	 */
 	public void loadConnections(String s) {
 		String[] entries = s.split("\t");
         for (int i = 0; i < entries.length; i++)
         {
-        	System.out.println(i);
+        	//System.out.println(i);
             String e = entries[i].substring(1,entries[i].length()-1);
             Stream newStream = Stream.createFromString(e);
             LogMapEntry newEntry = LogMapEntry.createFromString(e);
@@ -414,6 +465,7 @@ public class SnmpMgr implements Runnable{
             newStream.populateVars();
             
             long key = Long.parseLong(newStream.ip.replace(".", "") + newStream.dstPort);
+            //makes sure the stream doesn't exist previously
             if(!map.containsKey(key))
             {
             	map.put(key, newStream);
@@ -432,10 +484,25 @@ public class SnmpMgr implements Runnable{
         }
 	}
 	
+	
+	/**
+	 * Returns the Stream that is stored in the map under these parameters
+	 * 
+	 * @param ip
+	 * @param dstPort
+	 * @return
+	 */
 	public Stream getStream(String ip, String dstPort) {
 		return map.get(Long.parseLong(ip + dstPort));
 	}
 	
+	
+	/**
+	 * Returns the stream name of the stream related to the key passed in the params
+	 * 
+	 * @param key
+	 * @return
+	 */
 	public String getStreamName(long key) {
 		String s = "";
         Stream stream = map.get(key);
@@ -449,16 +516,27 @@ public class SnmpMgr implements Runnable{
         return s;
 	}
 	
+	
+	/**
+	 * This method removes Streams with null values
+	 */
 	public void cleanUp() {
         for (Long l : map.keySet()) {
             Stream stream = map.get(l);
             if (stream == null || stream.streamName == null)
             {
                 map.remove(l);
+                logMap.remove(l);
             }
         }
     }
 	
+	
+	/**
+	 * This returns 1 if the bind failed 0 if the map is null and 2 if everything is good
+	 * 
+	 * @return
+	 */
 	public int bindState()
     {
         if (bindfailed) return 1;
@@ -466,7 +544,13 @@ public class SnmpMgr implements Runnable{
         return 2;
     }
 
-	 public int pointsInQueue() 
+	
+	 /**
+	  * This retrieves points that are in the queue of the LogMapEntry
+	  * 
+	 * @return
+	 */
+	public int pointsInQueue() 
 	 {
 	        
         int points  = 0;
@@ -478,7 +562,14 @@ public class SnmpMgr implements Runnable{
         return points;
 	        
 	 }
-	 void changeWindowSize(int windowSize)
+	
+	
+	 /**
+	  * This method is responsible for handling window resizing
+	  * 
+	 * @param windowSize
+	 */
+	void changeWindowSize(int windowSize)
 	 {
         for(Map.Entry<Long,LogMapEntry> entry : logMap.entrySet()) 
         {
@@ -488,7 +579,12 @@ public class SnmpMgr implements Runnable{
 	        
 	 }
 	 
-	 void reset() 
+	
+	 /**
+	 *	This method resets the logenties of the logMapEntries.
+	 *  Used to reset zoom.
+	 */
+	void reset() 
 	 {
         for(Map.Entry<Long,LogMapEntry> entry : logMap.entrySet()) 
         {
@@ -497,7 +593,12 @@ public class SnmpMgr implements Runnable{
         }
     }
 	 
-	 public void disconnect(Long key) 
+	 /**
+	  * 
+	  * 
+	 * @param key
+	 */
+	public void disconnect(Long key) 
 	 {
         if (key == null)return;
         LogMapEntry e = logMap.get(key);

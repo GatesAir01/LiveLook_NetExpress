@@ -125,7 +125,6 @@ public class Stream {
 //	    pktsLostPctCum = Float.parseFloat(snmp.getSnmp(OIDDictionary.harrisIplinkRTPStreamStatsPacketsCumLostPctBeforeRecovery, index));
 //	    currQLen = Integer.parseInt(snmp.getSnmp(OIDDictionary.harrisIplinkRTPStreamStatsRxCurrentQLevel, index));
 //	    
-		System.out.println(index + ", " + secondIndex + ", " + packetsSkipped);
 		lastEntry = System.currentTimeMillis();
 	    streamName = snmp.getSnmp(OIDDictionary.getStreamName(streamType), index);
 	    packetsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + packetsSkipped));
