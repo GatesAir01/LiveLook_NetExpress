@@ -239,7 +239,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                     JMenu addMenu = new JMenu("Add Trace");
                     for (Map.Entry<String, Long> entry : streamKeys.entrySet())
                     {
-                    	if(!msgMgr.map.get(entry.getValue()).statusOnly) {
+                    	if(msgMgr.map.get(entry.getValue()) != null && !msgMgr.map.get(entry.getValue()).statusOnly) {
 		                    JMenu streamMenu = new JMenu(entry.getKey());
 		                    String base = p+":-1:"+entry.getValue()+":";
 		                    for (int j = 0; j < NetworkLogDataPoint.NUM_TRACES_LIVE; j++)
@@ -873,6 +873,10 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                 }
                    
             traceMutex.unlock();
+            if(msgMgr.prepareMenus) {
+            	msgMgr.prepareMenus = false;
+            	prepareMenus();
+            }
         }
     }
 

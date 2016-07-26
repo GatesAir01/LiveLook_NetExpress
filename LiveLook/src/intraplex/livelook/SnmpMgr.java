@@ -56,6 +56,7 @@ public class SnmpMgr implements Runnable{
     boolean mapRemove = false;
     long removeKey;
     boolean mapAdd = false;
+    boolean prepareMenus = false;
     Stream addStream;
     LogMapEntry addLME;
 	
@@ -295,12 +296,15 @@ public class SnmpMgr implements Runnable{
 			logMap.remove(removeKey);
 			map.remove(removeKey);
 			mapRemove = false;
+			prepareMenus = true;
+			
 		}
 		if(mapAdd){
 			long key = Long.parseLong(addStream.ip.replace(".", "") + addStream.dstPort);
 			logMap.put(key, addLME);
 			map.put(key, addStream);
 			mapAdd = false;
+			prepareMenus = true;
 		}
     }
 	

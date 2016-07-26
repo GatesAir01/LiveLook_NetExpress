@@ -88,9 +88,12 @@ public class Stream {
 		byte[] mac2b = snmp.getSnmp(OIDDictionary.getMacs(), 3, false);
 		byte[] mac3b = snmp.getSnmp(OIDDictionary.getMacs(), 4, false);
 		
-		mac1 = snmp.convertMacsFromByte(mac1b);
-		mac2 = snmp.convertMacsFromByte(mac2b);
-		mac3 = snmp.convertMacsFromByte(mac3b);
+		if(mac1b != null)
+			mac1 = snmp.convertMacsFromByte(mac1b);
+		if(mac2b != null)
+			mac2 = snmp.convertMacsFromByte(mac2b);
+		if(mac3b != null)
+			mac3 = snmp.convertMacsFromByte(mac3b);
         
 //		SNMPOctetString mac1s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 2).getBytes());
 //		SNMPOctetString mac2s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 3).getBytes());
@@ -99,9 +102,9 @@ public class Stream {
 //		mac1 = mac1s.toHexString().trim();
 //		mac2 = mac2s.toHexString().trim();
 //		mac3 = mac3s.toHexString().trim();
-		System.out.println(mac1);
-		System.out.println(mac2);
-		System.out.println(mac3);
+//		System.out.println(mac1);
+//		System.out.println(mac2);
+//		System.out.println(mac3);
 	}
 	
 	public void populateVars() {
