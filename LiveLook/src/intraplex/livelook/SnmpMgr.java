@@ -220,16 +220,17 @@ public class SnmpMgr implements Runnable{
 	        		if(shutDown) 
 	        		{
 	        			//This writes to the log and then counts till the alarm is triggered
+	        			//shutDownCount++;
 		        		Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
 	        			LogMapEntry e = logMap.get(key);
 	        			e.writeToEventLog(e.streamName + ", " + "Stream not up");
-	        			if(StreamDownAlarm)shutDownCount++;
-	        			if(shutDownCount > (stateConnectionAlarmThreshold / 5) && !ShutDownAlarmTriggered && StreamDownAlarm)
+	        			if(ShutDownAlarm)shutDownCount++;
+	        			if(shutDownCount > stateConnectionAlarmThreshold && !ShutDownAlarmTriggered && ShutDownAlarm)
 	        			{
 	        				e.generateAlarm("Stream shut down past alarm level");
 	        				ShutDownAlarmTriggered = true;
 	    				}
-	        			if(ShutDownAlarmTriggered) shutDownCount = (stateConnectionAlarmThreshold / 5);
+	        			if(ShutDownAlarmTriggered) shutDownCount = stateConnectionAlarmThreshold;
 	        		}
 	        		//this else if is here to count down for the alarm threshold and trigger a alarm clear email
 	        		else if(shutDownCount > 0 && ShutDownAlarm){
@@ -255,7 +256,7 @@ public class SnmpMgr implements Runnable{
 				{
 					//This writes to the log and then counts till the alarm is triggered
 					redStatusCount++;
-					if(redStatusCount > (stateConnectionAlarmThreshold / 5) && !StreamDownAlarmTriggered)
+					if(redStatusCount > stateConnectionAlarmThreshold && !StreamDownAlarmTriggered)
 					{
 						Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
 	        			LogMapEntry e = logMap.get(key);
@@ -263,7 +264,7 @@ public class SnmpMgr implements Runnable{
 						e.generateAlarm("Stream Connection is at a bad level");
 						StreamDownAlarmTriggered = true;
 					}
-					if(StreamDownAlarmTriggered) redStatusCount = (stateConnectionAlarmThreshold / 5);
+					if(StreamDownAlarmTriggered) redStatusCount = stateConnectionAlarmThreshold;
 				}
 				//this else if is here to count down for the alarm threshold and trigger a alarm clear email
 				else if(redStatusCount > 0 && StreamDownAlarm){
