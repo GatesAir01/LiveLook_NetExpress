@@ -188,19 +188,22 @@ public class IPLinkSnmpInterface {
 
     public String convertMacsFromByte(byte[] data) {
     	String returnString = new String();
-        
         int convert = data[0];
-        if (convert < 0)
-                convert += 256;
-            returnString += ((convert != 0)?Integer.toHexString(convert):"00");
+         if (convert < 0){
+               convert += 256;
+         }
+        returnString += ((convert != 0)?String.format("%02X", convert):"00");
+        //returnString += ((convert != 0)?Integer.toHexString(convert):"00");
                 
         for (int i = 1; i < data.length; i++)
         {
             convert = data[i];
             if (convert < 0)
                 convert += 256;
-            returnString += " " + ((convert != 0)?Integer.toHexString(convert):"00");
+           
+           returnString +=":" + ((convert != 0)?String.format("%02X", convert):"00"); // changed from Hex String to String Format API to get the hex in two digit format   
         }
+        
         
         return returnString;
     }

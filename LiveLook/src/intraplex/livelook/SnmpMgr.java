@@ -297,7 +297,6 @@ public class SnmpMgr implements Runnable{
 			map.remove(removeKey);
 			mapRemove = false;
 			prepareMenus = true;
-			
 		}
 		if(mapAdd){
 			long key = Long.parseLong(addStream.ip.replace(".", "") + addStream.dstPort);
@@ -421,14 +420,20 @@ public class SnmpMgr implements Runnable{
 	 */
 	public boolean checkIfMacAllowed(Stream stream) {
 		//This triggers the stream to get it's related mac addresses
-		stream.getMacs();
+		stream.getInterfaceMacs();
 		
-		//Goes through each Mac and checks if it matches one of the three macs pulled from the stream
-		for (String Mac : macList.getRows())
-        {
-			if(Mac.equalsIgnoreCase(stream.mac1.replace(" ", ":")) || Mac.equalsIgnoreCase(stream.mac2.replace(" ", ":")) || Mac.equalsIgnoreCase(stream.mac3.replace(" ", ":")))
-				return true;
-        }
+                //Goes through each Mac and checks if it matches one of the three macs pulled from the stream
+		for(String Mac: macList.getRows())
+                {
+                    //System.out.println(Mac);
+                    for (String mac : stream.mac) {
+                        // System.out.println(stream.mac[streamMacIndex]);
+                        if ((mac != null) && (Mac.equalsIgnoreCase(mac.replace(" ", ":")))) {
+                            // found a match
+                            return true;
+                        }
+                    }
+                }
         return false;
 	}
 	

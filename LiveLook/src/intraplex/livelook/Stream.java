@@ -14,19 +14,19 @@ import snmp.SNMPOctetString;
 public class Stream {
 	NetworkLogEntryArray logEnties;   
 	
-	String ip;
-	String dstPort;
-	String streamName;
-	String connectionState;
-	String lastConnectionState;
-	IPLinkSnmpInterface snmp;
-	int index;
-	int secondIndex;  
-	int counter;
+    String ip;
+    String dstPort;
+    String streamName;
+    String connectionState;
+    String lastConnectionState;
+    IPLinkSnmpInterface snmp;
+    int index;
+    int secondIndex;  
+    int counter;
 	
     long lastEntry;
 	
-	protected int currentQueueLength;
+    protected int currentQueueLength;
     protected int packetsReceived;								/*Rx stream. Number of bytes received*/
     protected int packetsLost;	 /*Lost packets*/							/*Rx stream. Number of bytes received*/
     protected int packetsRecovered;								/*Number of Rx packets recovered by FEC*/
@@ -35,9 +35,7 @@ public class Stream {
     protected int statsInterval;
     protected int adminState;
     
-    protected String mac1;
-    protected String mac2;
-    protected String mac3;
+    protected String[] mac = null;
     
     private int streamType = 0;
     public int packetsSkipped;
@@ -82,29 +80,37 @@ public class Stream {
 		}
 	}
 	
-	//mac 1-3 for wan, lan and mgmt NetXpress is the only one of NetXpress, LX, LXR that has mgmt port
-	public void getMacs() {
-		byte[] mac1b = snmp.getSnmp(OIDDictionary.getMacs(), 2, false);
+	//mac 1-3 for wan, lan and mgmt interfaces; NetXpress is the only one of NetXpress, LX, LXR that has mgmt port
+	public void getInterfaceMacs() {
+                mac = new String[3];  // total number of interfaces 
+		// get Interface Macs
+                byte[] mac1b = snmp.getSnmp(OIDDictionary.getMacs(), 2, false);
 		byte[] mac2b = snmp.getSnmp(OIDDictionary.getMacs(), 3, false);
 		byte[] mac3b = snmp.getSnmp(OIDDictionary.getMacs(), 4, false);
 		
-		if(mac1b != null)
-			mac1 = snmp.convertMacsFromByte(mac1b);
-		if(mac2b != null)
-			mac2 = snmp.convertMacsFromByte(mac2b);
-		if(mac3b != null)
-			mac3 = snmp.convertMacsFromByte(mac3b);
-        
-//		SNMPOctetString mac1s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 2).getBytes());
+                // convert mac address to string format
+                if(mac1b.length  != 0)
+                {    
+                    mac[0] = snmp.convertMacsFromByte(mac1b);
+                }
+                if(mac2b.length  != 0)
+                {
+                    mac[1] = snmp.convertMacsFromByte(mac2b);
+                }
+                if(mac3b.length  != 0)
+                {    
+                    mac[2] = snmp.convertMacsFromByte(mac3b);
+                }
+    //		SNMPOctetString mac1s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 2).getBytes());
 //		SNMPOctetString mac2s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 3).getBytes());
 //		SNMPOctetString mac3s = new SNMPOctetString(snmp.getSnmp(OIDDictionary.getMacs(), 4).getBytes());
 //		
 //		mac1 = mac1s.toHexString().trim();
 //		mac2 = mac2s.toHexString().trim();
 //		mac3 = mac3s.toHexString().trim();
-//		System.out.println(mac1);
-//		System.out.println(mac2);
-//		System.out.println(mac3);
+		//System.out.println(mac[0]);
+		//System.out.println(mac[1]);
+		//System.out.println(mac[2]);
 	}
 	
 	public void populateVars() {
@@ -128,7 +134,7 @@ public class Stream {
 //	    pktsLostPctCum = Float.parseFloat(snmp.getSnmp(OIDDictionary.harrisIplinkRTPStreamStatsPacketsCumLostPctBeforeRecovery, index));
 //	    currQLen = Integer.parseInt(snmp.getSnmp(OIDDictionary.harrisIplinkRTPStreamStatsRxCurrentQLevel, index));
 //	    
-		lastEntry = System.currentTimeMillis();
+	    lastEntry = System.currentTimeMillis();
 	    streamName = snmp.getSnmp(OIDDictionary.getStreamName(streamType), index);
 	    packetsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + packetsSkipped));
 	    packetsLost = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLost(streamType), index, secondIndex + packetsSkipped));
@@ -165,7 +171,9 @@ public class Stream {
 			}
 		}
 		catch(Exception e) 
-		{return true;}
+		{
+                    return true;
+                }
 		return false;
 	}
 	
