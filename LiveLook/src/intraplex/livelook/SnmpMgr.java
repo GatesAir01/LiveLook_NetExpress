@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 
 /**
- * SnmpMgr is meant to manage all things related to snmp in LiveLook.
+ * SnmpMgr manages all functionalities related to snmp in LiveLook.
  * It handles: the timing of new snmp requests, the start of writing log, the creation of stream objects,
  * 				and the managing of the stream statuses
  * 
@@ -33,9 +33,9 @@ import java.util.logging.Logger;
 public class SnmpMgr implements Runnable{
 
 
-	public static SnmpMgr mgr;
-	public static int nextStreamType = 0;
-	public static boolean statusOnly = false;
+    public static SnmpMgr mgr;
+    public static int nextStreamType = 0;
+    public static boolean statusOnly = false;
     TreeMap<Long,Stream> map;
     TreeMap<Long, LogMapEntry> logMap;
     TreeMap<Long, IplinkNetworkLogEntry> lastEntryMap;
@@ -67,18 +67,18 @@ public class SnmpMgr implements Runnable{
 	 * @param macList	This is the list of MacAdresses allowed to connect to
 	 */
 	public SnmpMgr(boolean lite, MacList macList) {
-		lastLogEntry = null;
-        bindfailed = false;
-        map = new TreeMap<>();
-        logMap = new TreeMap<>();
-        lastEntryMap = new TreeMap<>();
-        queuedPoints = new ArrayList<>();
-        mgr = this;
-        this.macList = macList;
-        this.lite = lite;
-        shutDownCount = 0;
-        redStatusCount = 0;
-        new Thread(this, "SnmpMgr").start();
+            lastLogEntry = null;
+            bindfailed = false;
+            map = new TreeMap<>();
+            logMap = new TreeMap<>();
+            lastEntryMap = new TreeMap<>();
+            queuedPoints = new ArrayList<>();
+            mgr = this;
+            this.macList = macList;
+            this.lite = lite;
+            shutDownCount = 0;
+            redStatusCount = 0;
+            new Thread(this, "SnmpMgr").start();
 	}
 	
 	/**
@@ -90,27 +90,27 @@ public class SnmpMgr implements Runnable{
 	 * @param ip			ipaddress of the stream being connected to
 	 * @param streamID		id that the stream is indexed in the NetXpress 
 	 * @param readCommunity		snmp read community entered when connecting 
-	 * @return					returns a new Stream object
+	 * @return			returns a new Stream object
 	 */
 	public Stream addStream(String ip, String streamID, String readCommunity) {
-		Stream stream = new Stream(ip, streamID, nextStreamType, true, statusOnly, readCommunity);
-		stream.StreamDownAlarm = StreamDownAlarm;
-		stream.ShutDownAlarm = ShutDownAlarm;
-		Long temp = Long.parseLong(ip.replace(".", "") + stream.dstPort);
-		LogMapEntry lme = null;
-		try {
-			lme = new LogMapEntry(InetAddress.getByName(ip), Integer.parseInt(stream.dstPort), stream);
-			lme.index = Integer.parseInt(streamID);
-			lme.streamName = stream.streamName;
-			lme.logEnties = new NetworkLogEntryArray(600,1,temp);
-			addStream = stream;
-			addLME = lme;
-			mapAdd = true;
-			//stream.populateVars();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
-		return stream;
+            Stream stream = new Stream(ip, streamID, nextStreamType, true, statusOnly, readCommunity);
+            stream.StreamDownAlarm = StreamDownAlarm;
+            stream.ShutDownAlarm = ShutDownAlarm;
+            Long temp = Long.parseLong(ip.replace(".", "") + stream.dstPort);
+            LogMapEntry lme = null;
+            try {
+                    lme = new LogMapEntry(InetAddress.getByName(ip), Integer.parseInt(stream.dstPort), stream);
+                    lme.index = Integer.parseInt(streamID);
+                    lme.streamName = stream.streamName;
+                    lme.logEnties = new NetworkLogEntryArray(600,1,temp);
+                    addStream = stream;
+                    addLME = lme;
+                    mapAdd = true;
+                    //stream.populateVars();
+            } catch (UnknownHostException e) {
+                    e.printStackTrace();
+            }
+            return stream;
 	}
 	
 	
@@ -118,17 +118,17 @@ public class SnmpMgr implements Runnable{
 	 * This causes the streams to request info from the NetXpress machine
 	 */
 	public void refreshStreams()
-    {
-		for(Stream stream: map.values()) {
-			stream.populateVars();
-		}      
-    }
+        {
+            for(Stream stream: map.values()) {
+                    stream.populateVars();
+            }      
+        }
 	
 	/**
 	 * This method is responsible for the periodic requesting of information from the NetXpress machine.
 	 * It will cycle through the streams, and check for alarm statuses and if it shuts down, or packets are skipped.
 	 */
-	public void snmpRequest()
+    public void snmpRequest()
     {
 		//goes through all the streams in the map
 		for(Stream stream: map.values()) {
@@ -214,72 +214,72 @@ public class SnmpMgr implements Runnable{
 	        	}
 	        	else //This is if status only
 	        	{
-	        		//this checks if the stream has been shut down before query
-	        		boolean shutDown = stream.checkIfShutDown();
+                            //this checks if the stream has been shut down before query
+                            boolean shutDown = stream.checkIfShutDown();
+
+                            if(shutDown) 
+                            {
+                                    //This writes to the log and then counts till the alarm is triggered
+                                    //shutDownCount++;
+                                    Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
+                                    LogMapEntry e = logMap.get(key);
+                                    e.writeToEventLog(e.streamName + ", " + "Stream not up");
+                                    if(ShutDownAlarm)shutDownCount++;
+                                    if(shutDownCount > stateConnectionAlarmThreshold && !ShutDownAlarmTriggered && ShutDownAlarm)
+                                    {
+                                            e.generateAlarm("Stream shut down past alarm level");
+                                            ShutDownAlarmTriggered = true;
+                                    }
+                                    if(ShutDownAlarmTriggered) shutDownCount = stateConnectionAlarmThreshold;
+                            }
+                            //this else if is here to count down for the alarm threshold and trigger a alarm clear email
+                            else if(shutDownCount > 0 && ShutDownAlarm){
+                                            if(shutDownCount == 1){
+                                                    shutDownCount = 0;
+                                                    ShutDownAlarmTriggered = false;
+                                                    Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
+                                            LogMapEntry e = logMap.get(key);
+                                            e.generateAlarm("Stream Connection back in safe level");
+                                            }
+                                            if(ShutDownAlarmTriggered){
+                                                    shutDownCount--;
+                                            }
+                            }
 	        		
-	        		if(shutDown) 
-	        		{
-	        			//This writes to the log and then counts till the alarm is triggered
-	        			//shutDownCount++;
-		        		Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-	        			LogMapEntry e = logMap.get(key);
-	        			e.writeToEventLog(e.streamName + ", " + "Stream not up");
-	        			if(ShutDownAlarm)shutDownCount++;
-	        			if(shutDownCount > stateConnectionAlarmThreshold && !ShutDownAlarmTriggered && ShutDownAlarm)
-	        			{
-	        				e.generateAlarm("Stream shut down past alarm level");
-	        				ShutDownAlarmTriggered = true;
-	    				}
-	        			if(ShutDownAlarmTriggered) shutDownCount = stateConnectionAlarmThreshold;
-	        		}
-	        		//this else if is here to count down for the alarm threshold and trigger a alarm clear email
-	        		else if(shutDownCount > 0 && ShutDownAlarm){
-						if(shutDownCount == 1){
-							shutDownCount = 0;
-							ShutDownAlarmTriggered = false;
-							Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-		        			LogMapEntry e = logMap.get(key);
-		        			e.generateAlarm("Stream Connection back in safe level");
-						}
-						if(ShutDownAlarmTriggered){
-							shutDownCount--;
-						}
-					}
-	        		
-	        		if(!shutDown) {
-	        			stream.updateConnectionState();
-	        		}
+                            if(!shutDown) {
+                                    stream.updateConnectionState();
+                            }
 	        	}
-				Color tabColor = checkForStreamStatus();
-				
-				if(tabColor == Color.red && StreamDownAlarm)
-				{
-					//This writes to the log and then counts till the alarm is triggered
-					redStatusCount++;
-					if(redStatusCount > stateConnectionAlarmThreshold && !StreamDownAlarmTriggered)
-					{
-						Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-	        			LogMapEntry e = logMap.get(key);
-						e.writeToEventLog(e.streamName + ", " + "Stream packet loss alarm");
-						e.generateAlarm("Stream Connection is at a bad level");
-						StreamDownAlarmTriggered = true;
-					}
-					if(StreamDownAlarmTriggered) redStatusCount = stateConnectionAlarmThreshold;
-				}
-				//this else if is here to count down for the alarm threshold and trigger a alarm clear email
-				else if(redStatusCount > 0 && StreamDownAlarm){
-					if(redStatusCount == 1){
-						redStatusCount = 0;
-						StreamDownAlarmTriggered = false;
-						Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-	        			LogMapEntry e = logMap.get(key);
-	        			e.generateAlarm("Stream Connection back in safe level");
-					}
-					if(StreamDownAlarmTriggered){
-						redStatusCount--;
-					}
-				}
-				//this updates the color boxes in the Stream Status tab
+                        Color tabColor = checkForStreamStatus();
+
+                        if(tabColor == Color.red && StreamDownAlarm)
+                        {
+                                //This writes to the log and then counts till the alarm is triggered
+                                redStatusCount++;
+                                if(redStatusCount > stateConnectionAlarmThreshold && !StreamDownAlarmTriggered)
+                                {
+                                        Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
+                                LogMapEntry e = logMap.get(key);
+                                        e.writeToEventLog(e.streamName + ", " + "Stream packet loss alarm");
+                                        e.generateAlarm("Stream Connection is at a bad level");
+                                        StreamDownAlarmTriggered = true;
+                                }
+                                if(StreamDownAlarmTriggered) redStatusCount = stateConnectionAlarmThreshold;
+                        }
+                        //this else if is here to count down for the alarm threshold and trigger a alarm clear email
+                        else if(redStatusCount > 0 && StreamDownAlarm){
+                                if(redStatusCount == 1){
+                                        redStatusCount = 0;
+                                        StreamDownAlarmTriggered = false;
+                                        Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
+                                LogMapEntry e = logMap.get(key);
+                                e.generateAlarm("Stream Connection back in safe level");
+                                }
+                                if(StreamDownAlarmTriggered){
+                                        redStatusCount--;
+                                }
+                        }
+		    //this updates the color boxes in the Stream Status tab
 	            IPLinkNetworkTool.updateConnectedStreamstabColor(tabColor);
 	            IPLinkNetworkTool_Lite.updateConnectedStreamstabColor(tabColor);
 	            stream.counter = 0;
@@ -295,7 +295,7 @@ public class SnmpMgr implements Runnable{
 		//ConcurrentMismatchError
 		if(mapRemove){
 			logMap.remove(removeKey);
-			map.remove(removeKey);
+			//map.remove(removeKey); // do remove from map when disconnect routine is called
 			mapRemove = false;
 			prepareMenus = true;
 		}
@@ -313,33 +313,35 @@ public class SnmpMgr implements Runnable{
 	 * 
 	 * @return   color of stream status
 	 */
-	public Color checkForStreamStatus()
+    public Color checkForStreamStatus()
     {
         Color retVal = Color.gray;
         Color green = new Color(43,148,49);
+
         for (Stream stream : map.values())
         {
-            int retVal_temp;
-            if(stream.connectionState != null)
-            	retVal_temp = Integer.parseInt(stream.connectionState);
-            else
-            	retVal_temp = 0;
-            if (retVal_temp == 2)
-            {
-                retVal = Color.red;
-            }
-            else if (stream.adminState == 2)
-            {
-            	retVal = Color.yellow;
-            }
-            else if (retVal_temp == 1)
-            {
-                if (retVal!=Color.red && retVal!=Color.yellow)
+            if(stream !=  null){ // check if the object is not null - Fix for NumberFormat Exception
+                int retVal_temp;
+                if(stream.connectionState.isEmpty())
+                    retVal_temp = 0;
+                else
+                    retVal_temp = Integer.parseInt(stream.connectionState);
+                if (retVal_temp == 2)
                 {
-                    retVal = green;
+                    retVal = Color.red;
+                }
+                else if (stream.adminState == 2)
+                {
+                    retVal = Color.yellow;
+                }
+                else if (retVal_temp == 1)
+                {
+                    if (retVal!=Color.red && retVal!=Color.yellow)
+                    {
+                        retVal = green;
+                    }
                 }
             }
-            
         }
         return retVal;
     }
@@ -351,40 +353,43 @@ public class SnmpMgr implements Runnable{
 	 * @param dstPort
 	 * @return
 	 */
-	public Color checkForStreamStatus(String ip, String dstPort)
+    public Color checkForStreamStatus(String ip, String dstPort)
     {
         Color retVal = Color.gray;
         Color green = new Color(43,148,49);
         Long key = Long.parseLong(ip.replace(".", "") + dstPort);
+      
         Stream stream = map.get(key);
         LogMapEntry lme = logMap.get(key);
         
-        int retVal_temp;
-        if(stream.connectionState.isEmpty())
-        	retVal_temp = 0;
-        else
-        	retVal_temp = Integer.parseInt(stream.connectionState);
-        
-        if(stream.adminState == 2) {
-        	retVal = Color.yellow;
-        	retVal_temp = 4;
+        if(stream !=  null){ // check if the object is not null - Fix for Null pointer Exception and NumberFormat Exception
+            int retVal_temp;
+            if(stream.connectionState.isEmpty())
+                retVal_temp = 0;
+            else
+                retVal_temp = Integer.parseInt(stream.connectionState);
+
+            if(stream.adminState == 2) {
+                    retVal = Color.yellow;
+                    retVal_temp = 4;
+            }
+            else 
+            {
+                if (retVal_temp == 2)
+                {
+                    retVal = Color.red;
+                }
+                else if (retVal_temp == 1)
+                {
+                    if (retVal!=Color.red && retVal!=Color.yellow)
+                    {
+                        retVal = green;
+                    }
+                }
+            }
+             if(lme != null) lme.dataState = retVal_temp; // check if the object is not null 
         }
-        else 
-        {
-	        
-	        if (retVal_temp == 2)
-	        {
-	            retVal = Color.red;
-	        }
-	        else if (retVal_temp == 1)
-	        {
-	            if (retVal!=Color.red && retVal!=Color.yellow)
-	            {
-	                retVal = green;
-	            }
-	        }
-        }
-        lme.dataState = retVal_temp;
+       
         return retVal;
     }
 	
@@ -440,7 +445,7 @@ public class SnmpMgr implements Runnable{
 	
 	
 	/**
-	 * Saves all the connection informattion using their individual save methods
+	 * Saves all the connection information using their individual save methods
 	 * This is used to load them at program start
 	 * 
 	 * @return
@@ -586,22 +591,22 @@ public class SnmpMgr implements Runnable{
             LogMapEntry value = entry.getValue();
             value.logEnties.changeWindowSize(windowSize);
         }
-	        
+       
 	 }
 	 
 	
 	 /**
-	 *	This method resets the logenties of the logMapEntries.
+	 *  This method resets the log entries of the logMapEntries.
 	 *  Used to reset zoom.
 	 */
 	void reset() 
-	 {
-        for(Map.Entry<Long,LogMapEntry> entry : logMap.entrySet()) 
-        {
-            LogMapEntry value = entry.getValue();
-            value.logEnties.reset();
+	{
+            for(Map.Entry<Long,LogMapEntry> entry : logMap.entrySet()) 
+            {
+                LogMapEntry value = entry.getValue();
+                value.logEnties.reset();
+            }
         }
-    }
 	 
 	 /**
 	  * 
@@ -609,112 +614,114 @@ public class SnmpMgr implements Runnable{
 	 * @param key
 	 */
 	public void disconnect(Long key) 
-	 {
-        if (key == null)return;
-        LogMapEntry e = logMap.get(key);
-        if (e == null)return;
-       // e.closeFiles();
-        Stream stream = map.get(key);
-        if(stream == null)return;
-        
-        removeKey = key;
-        mapRemove = true;
-    }
+	{
+            if (key == null)
+                return;
+            LogMapEntry e = logMap.get(key);
+            if (e == null)
+                return;
+           // e.closeFiles();
+            Stream stream = map.get(key);
+            if(stream == null)
+                return;
+            removeKey = key;
+            map.remove(removeKey); // remove from map
+            mapRemove = true;
+        }
 	 
-	 public NetworkLogDataPoint getNextPoint() 
-	 {
+	public NetworkLogDataPoint getNextPoint() 
+	{
 	        
-        if (queuedPoints.isEmpty())
-        {
-            for(Map.Entry<Long,LogMapEntry> entry : logMap.entrySet()) 
+            if (queuedPoints.isEmpty())
             {
-                LogMapEntry value = entry.getValue();
-                NetworkLogDataPoint p = value.logEnties.getNextPoint();
-                if (p != null)
+                for(Map.Entry<Long,LogMapEntry> entry : logMap.entrySet()) 
                 {
-                    queuedPoints.add(p);
+                    LogMapEntry value = entry.getValue();
+                    NetworkLogDataPoint p = value.logEnties.getNextPoint();
+                    if (p != null)
+                    {
+                        queuedPoints.add(p);
+                    }
                 }
             }
-        }
         
-        if (queuedPoints.isEmpty())
-        {
-            return null;
-        }
+            if (queuedPoints.isEmpty())
+            {
+                return null;
+            }
         
-        return queuedPoints.remove(0);
+            return queuedPoints.remove(0);
                 
-    }
+        }
 	 
-	 public void createPacket(String ip, int dstPort)
-	 {
-		Long key = Long.parseLong(ip.replace(".", "") + dstPort);
-        LogMapEntry lme2 = logMap.get(key);
-        Stream stream = map.get(key);
+	public void createPacket(String ip, int dstPort)
+	{
+            Long key = Long.parseLong(ip.replace(".", "") + dstPort);
+            LogMapEntry lme2 = logMap.get(key);
+            Stream stream = map.get(key);
         
-        IplinkNetworkLogEntry inle = lme2.logEnties.add(stream);
+            IplinkNetworkLogEntry inle = lme2.logEnties.add(stream);
                
-        if (lme2.streamName == null)
-        {
-            lme2.streamName = stream.streamName;
-            lme2.streamName = lme2.streamName.replace('\\', ' ');
-            lme2.streamName = lme2.streamName.replace('/', ' ');
-            lme2.streamName = lme2.streamName.replace('-', ' ');
-            lme2.streamName = lme2.streamName.replace('*', ' ');
-            lme2.streamName = lme2.streamName.replace('?', ' ');
-            lme2.streamName = lme2.streamName.replace('|', ' ');
-            lme2.streamName = lme2.streamName.replace('<', ' ');
-            lme2.streamName = lme2.streamName.replace('>', ' ');
-            lme2.streamName = lme2.streamName.replace('\"', ' ');
+            if (lme2.streamName == null)
+            {
+                lme2.streamName = stream.streamName;
+                lme2.streamName = lme2.streamName.replace('\\', ' ');
+                lme2.streamName = lme2.streamName.replace('/', ' ');
+                lme2.streamName = lme2.streamName.replace('-', ' ');
+                lme2.streamName = lme2.streamName.replace('*', ' ');
+                lme2.streamName = lme2.streamName.replace('?', ' ');
+                lme2.streamName = lme2.streamName.replace('|', ' ');
+                lme2.streamName = lme2.streamName.replace('<', ' ');
+                lme2.streamName = lme2.streamName.replace('>', ' ');
+                lme2.streamName = lme2.streamName.replace('\"', ' ');
+            }
+            try
+            {
+                if(lastEntryMap.get(key) == null)
+                {
+                    lme2.writeToLog(inle);
+                }
+                else if(inle.isDifference(lastEntryMap.get(key))) {
+                        lme2.writeToLog(inle);
+                }
+                lastEntryMap.put(key, inle);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
-        try
-        {
-        	if(lastEntryMap.get(key) == null)
-        	{
-	            lme2.writeToLog(inle);
-        	}
-        	else if(inle.isDifference(lastEntryMap.get(key))) {
-        		lme2.writeToLog(inle);
-        	}
-        	lastEntryMap.put(key, inle);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
 
 	 public void createPacket(String ip, int dstPort, boolean NaN)
 	 {
-		 if(NaN)
-		 {
-			Long key = Long.parseLong(ip.replace(".", "") + dstPort);
-	        LogMapEntry lme2 = logMap.get(key);
-	        IplinkNetworkLogEntry inle = new IplinkNetworkLogEntry();
-	        lme2.writeNaNToLog(inle);
-		 }
-    }
+            if(NaN)
+            {
+                Long key = Long.parseLong(ip.replace(".", "") + dstPort);
+                LogMapEntry lme2 = logMap.get(key);
+                IplinkNetworkLogEntry inle = new IplinkNetworkLogEntry();
+                lme2.writeNaNToLog(inle);
+            }
+        }
 	 
 	@Override
 	public void run() {
 
-        int streamCounter = 0;
-		while(true) {
-			//System.out.println(streamCounter);
-			try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(MultiLiveLookPanel.class.getName()).log(Level.SEVERE, null, ex);
-            }
-			
-			streamCounter++;
-            if(streamCounter > 10) {
-            	streamCounter = 0;
-            	snmpRequest();
-            }
-			
-		}
-		
+            int streamCounter = 0;
+            while(true) {
+                            //System.out.println(streamCounter);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(MultiLiveLookPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                streamCounter++;
+                if(streamCounter > 10) {
+                    streamCounter = 0;
+                    snmpRequest();
+                }
+
+            }	
 	}
 	
 	public Collection<LogMapEntry> getStreams() {

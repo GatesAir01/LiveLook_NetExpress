@@ -86,56 +86,66 @@ public class StatusListModel extends AbstractTableModel {
     
     @Override
     public Object getValueAt(int i, int i1) {
-    	Stream e;
+    	Stream e =  null; // initialize here - NumberFormatException
     	LogMapEntry entry = null;
     	Collection<Stream> col = mgr.map.values();
     	Iterator it =  col.iterator();
     	
     	for( int x = 0; x < i; x++) {
+            if(it.hasNext())
     		e = (Stream)it.next();
     	}
-    	e = (Stream)it.next();
-        if (i1 == 0)
-            return e.streamName;
-        else if(i1 == 1)
-        	return e.index;
-        else if(i1 == 2)
-        	return e.ip;
-        else if(i1 == 3) {
-        	URI uri = null;
-			try {
-				uri = new URI("http://" + e.ip);
-			} catch (URISyntaxException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			};
-        	return uri;
+         if(it.hasNext()){  // Fix - NumberFormatException/ Null pointer Exception
+            e = (Stream)it.next();
         }
-        else if (i1 == 4)
-            return sdf.format(e.lastEntry);
-        else if (i1 == 5)
+        if(e != null){		// Fix - NumberFormatException/ Null pointer Exception
+            if (i1 == 0)
+                return e.streamName;
+            else if(i1 == 1)
+                    return e.index;
+            else if(i1 == 2)
+                    return e.ip;
+            else if(i1 == 3) {
+                    URI uri = null;
+                            try {
+                                    uri = new URI("http://" + e.ip);
+                            } catch (URISyntaxException e1) {
+                                    // TODO Auto-generated catch block
+                                    e1.printStackTrace();
+                            };
+                    return uri;
+            }
+            else if (i1 == 4)
+                return sdf.format(e.lastEntry);
+            else if (i1 == 5)
+            {
+                     entry = mgr.logMap.get(Long.parseLong(e.ip.replace(".",  "") + e.dstPort));
+                if (entry.enableLogging && !e.statusOnly)
+                    return entry.fileName;
+                else
+                    if(e.statusOnly)
+                            return "Events Only";
+                    else
+                            return "Logging is disabled";
+            }
+            else if(i1 == 7) {
+                    String s = "" + !e.statusOnly;
+                    return s.substring(0, 1).toUpperCase() + s.substring(1);
+            }
+
+            if(!e.connectionState.isEmpty()){  // Fix - NumberFormatException / Null pointer Exception
+                    int state = Integer.parseInt(e.connectionState);
+
+                if (state < dataState.length && e.adminState != 2)
+                        return dataState[state];
+                else if(e.adminState == 2)
+                        return dataState[4];
+            }
+        }
+        else
         {
-        	 entry = mgr.logMap.get(Long.parseLong(e.ip.replace(".",  "") + e.dstPort));
-            if (entry.enableLogging && !e.statusOnly)
-                return entry.fileName;
-            else
-            	if(e.statusOnly)
-            		return "Events Only";
-            	else
-            		return "Logging is disabled";
+             return "Refreshing..."; // when user switch to status panel immediately to see status of connections - will be updated in the next cycle
         }
-        else if(i1 == 7) {
-        	String s = "" + !e.statusOnly;
-        	return s.substring(0, 1).toUpperCase() + s.substring(1);
-        }
-        
-        int state = Integer.parseInt(e.connectionState);
-        
-        if (state < dataState.length && e.adminState != 2)
-        	return dataState[state];
-        else if(e.adminState == 2)
-        	return dataState[4];
-        	
         return "Error";
     
     }

@@ -433,34 +433,43 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
 
     @SuppressWarnings("empty-statement")
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
-     ConnectIPLinkDialog cipd = new ConnectIPLinkDialog(null,true, lite);
-     cipd.setVisible(true);
+    // Open the Dialog box for adding new connection
+    ConnectIPLinkDialog cipd = new ConnectIPLinkDialog(null,true, lite);
+    cipd.setVisible(true);
    //  cipd.enableLogging
+    if(cipd.iPAddress == null) // if user didnot enter valid data -  Fix: NullPointerException
+    {
+        cipd.removeAll();
+        return;
+    }
      try
-     {
+     {  // check if the IP addresss and Stream ID already exist in the connection list
          if (msgMgr.checkIfExisting(cipd.iPAddress, Integer.parseInt(cipd.stream)))
          {
              JOptionPane.showMessageDialog(this, "LiveLook NetXpress is already connected to this stream\nTry connecting to another stream");
              return;
          }
-         
-     waitDialog = new WaitingForConnectionDialog(null,true);
-    // waitDialog.enableLogging = cipd.enableLogging;
-     int dport = Integer.parseInt(cipd.getDPort());
-     LogMapEntry.next_DPort = dport;
-     Stream stream = msgMgr.addStream(cipd.iPAddress, cipd.stream, cipd.readCom);
-     if (!msgMgr.checkIfMacAllowed(stream))
-     {
-         JOptionPane.showMessageDialog(this, "Mac is not registered for use");
-         msgMgr.disconnect(Long.parseLong(stream.ip.replace(".", "") + stream.dstPort));
-         return;
-     }
-     else {
-	     if(stream.opened)waitDialog.notifyConnection();
+        // Open another Dialog - saying Waiting for Connection...
+        waitDialog = new WaitingForConnectionDialog(null,true);
+       // waitDialog.enableLogging = cipd.enableLogging;
+        int dport = Integer.parseInt(cipd.getDPort());
+        LogMapEntry.next_DPort = dport;
+      //  LogMapEntry.next_DPort = Integer.parseInt(cipd.getDPort()); // get a default value for dport - "5000"
+        // Add the stream to the list
+ 
+        Stream stream = msgMgr.addStream(cipd.iPAddress, cipd.stream, cipd.readCom);
+        if(stream != null) {
+        // with the newly created stream, check if th etsream belongs to the Client with the Mac address listed in the mac Address tab
+            if (!msgMgr.checkIfMacAllowed(stream))
+            {
+                JOptionPane.showMessageDialog(this, "Mac is not registered for use");
+                msgMgr.disconnect(Long.parseLong(stream.ip.replace(".", "") + stream.dstPort));
+                return;
+            }
+            else 
+            {
 	     
-	     addStreamKey(Long.parseLong(stream.ip.replace(".", "")  + stream.dstPort), stream.streamName, stream.statusOnly);
-	     //JDispatchMgr.sendSetupMessage(cipd.iPAddress,Integer.parseInt(cipd.stream),1,dport);
-	     waitDialog.setVisible(true);
+	     addStreamKey(Long.parseLong(stream.ip.replace(".", "")  + stream.dstPort), stream.streamName, stream.statusOnly);     waitDialog.setVisible(true);
 	     //waitDialog.enableLogging = cipd.enableLogging;
 	     //System.out.println(" enable logging in Wait Dialog is "+waitDialog.enableLogging);
 	        if (waitDialog.connected)
@@ -518,20 +527,27 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
 	                    prepareMenus();
 	                }
 	            }
+                
+                 msgMgr.refreshStreams(); 
+                 refreshStreamKeys();
+                // System.out.println("Total connections: "+ streamKeys.size());
 	        }
 	        else
 	        {
 	            msgMgr.cleanUp();
 	        }
      	}
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(this, "LiveLook NetXpress- adding new stream failed!");
+            return;
+        }
      }
      catch (Exception e)
      {
          System.out.println("ERROR");
      }
-     
-            
-     
     }//GEN-LAST:event_connectButtonActionPerformed
 
     private void intervalBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_intervalBoxActionPerformed
@@ -569,34 +585,36 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         updateNeeded++;
     }//GEN-LAST:event_clearDataActionPerformed
 
-    private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed   	
+    private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                     
     	//System.out.println(streamKeys.size());
     	
-       if (streamKeys.isEmpty())return;
+       if (streamKeys.isEmpty())
+           return;
+
        String[] streams = streamKeys.keySet().toArray(new String[0]);
        
        String selectedValue = streams[0];
        if (streams.length > 1)
        {
-        selectedValue = (String)JOptionPane.showInputDialog(null,
-         "Select Stream", "Disconnect",
-         JOptionPane.INFORMATION_MESSAGE, null,
-         streams, streams[0]);
+            selectedValue = (String)JOptionPane.showInputDialog(null,
+            "Select Stream", "Disconnect",
+            JOptionPane.INFORMATION_MESSAGE, null,
+            streams, streams[0]);
        }
        
        if (selectedValue!=null)
        {
-        long key = streamKeys.get(selectedValue);
-        msgMgr.disconnect(key);
-        removeTraces(key,true);
-        streamKeys.remove(selectedValue);
-        if (streamKeys.isEmpty())
-        {
-            disconnectButton.setEnabled(false);
-        }
+            long key = streamKeys.get(selectedValue);
+            msgMgr.disconnect(key);
+            removeTraces(key,true);
+            streamKeys.remove(selectedValue);
+            if (streamKeys.isEmpty())
+            {
+                disconnectButton.setEnabled(false);
+            }
        }
        
-    }//GEN-LAST:event_disconnectButtonActionPerformed
+    }                                                
 
     public void disconnectAll()
     {
@@ -613,7 +631,11 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
 //                
 //            }
 //        }
+       
         msgMgr.disconnectAll();
+        msgMgr.cleanUp();  // added to make sure we do cleanup the map as well
+        streamKeys.clear(); // clear the streamkeys map before exiting
+        
     }
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
        for (int p =0; p < 2; p++)
@@ -927,6 +949,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         //return retVal;
         
     }
+    
     
     public boolean getCurrentLoggingStatus() {
         boolean retVal = true;
