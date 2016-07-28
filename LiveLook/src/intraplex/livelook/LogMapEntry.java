@@ -274,57 +274,57 @@ public class LogMapEntry implements Comparable{
         
         dataState = inle.dataState;
         boolean shutDown = (stream.adminState == 2);
-        if ( lossRateAlarmEnabled && lastLogEntry != null && lastLogEntry.pktsRcvd - inle.pktsRcvd == 0 && !shutDown)
-        {        
-            lossRateGoodCnt = 0;
-            lossRateFailCnt = lossRateFailCnt+1;
-            if ((lossRateFailCnt >= alarmThresholdStream) && !lossrateAlarmSent)
-            {
-               AlarmManager.generateAlarm(Level.WARNING,this,"Loss Rate is high");
-               lossrateAlarmSent = true;
-               
-            }
-           // lossRateOverThreshold=10;    
-        }
-        else if (lossRateAlarmEnabled && !shutDown)
-        {
-            //lossRateOverThreshold--;
-            lossRateGoodCnt = lossRateGoodCnt+1;
-            lossRateFailCnt= 0;
-            if (lossRateGoodCnt>=alarmThresholdStream && lossrateAlarmSent)
-            {      
-                AlarmManager.generateAlarm(Level.INFO,this, "Loss Rate is now at an acceptable rate");
-                lossrateAlarmSent = false;
-            }
-        }
+//        if ( lossRateAlarmEnabled && lastLogEntry != null && lastLogEntry.pktsRcvd - inle.pktsRcvd == 0 && !shutDown)
+//        {        
+//            lossRateGoodCnt = 0;
+//            lossRateFailCnt = lossRateFailCnt+1;
+//            if ((lossRateFailCnt >= alarmThresholdStream) && !lossrateAlarmSent)
+//            {
+//               AlarmManager.generateAlarm(Level.WARNING,this,"Loss Rate is high");
+//               lossrateAlarmSent = true;
+//               
+//            }
+//           // lossRateOverThreshold=10;    
+//        }
+//        else if (lossRateAlarmEnabled && !shutDown)
+//        {
+//            //lossRateOverThreshold--;
+//            lossRateGoodCnt = lossRateGoodCnt+1;
+//            lossRateFailCnt= 0;
+//            if (lossRateGoodCnt>=alarmThresholdStream && lossrateAlarmSent)
+//            {      
+//                AlarmManager.generateAlarm(Level.INFO,this, "Loss Rate is now at an acceptable rate");
+//                lossrateAlarmSent = false;
+//            }
+//        }
         
        // System.out.println("the adjusted lost pct for stream name: "+this.streamName+" is " + getCurrentLossPCT(lastLogEntry, inle) );
         //System.out.println(lastLogEntry.pktsRcvd);
         //System.out.println(inle.pktsRcvd);
         //System.out.println(lastLogEntry.pktsRcvd - inle.pktsRcvd == 0);
-        if ( lossRateCorrectedAlarmEnabled && lossrateCorrectionGoodCnt > 1)
-        {
-            lossrateCorrectionGoodCnt = 0;
-            lossrateCorrectionsFailCnt = lossrateCorrectionsFailCnt + 5;
-            if (lossrateCorrectionsFailCnt>=alarmThresholdStream && !lossrateCorrectionAlarmSent)
-            {
-                AlarmManager.generateAlarm(Level.SEVERE,this, "Packet Loss is high");
-                //System.out.println("Loss rate correted alarm is "+lossRateCorrectedAlarm+ " The loss rate after correction is " +inle.getPktsLostPct() + " The loss rate before correction is " + inle.getPktsLostLocalPct() );
-                lossrateCorrectionAlarmSent = true;
-            }
-            //lossRateCorOverThreshold=10;
-        }
-        else if (lossRateCorrectedAlarmEnabled)
-        {
-            lossrateCorrectionGoodCnt = lossrateCorrectionGoodCnt+5;
-            lossrateCorrectionsFailCnt = 0;
-            if (lossrateCorrectionGoodCnt >= alarmThresholdStream && lossrateCorrectionAlarmSent)
-            {
-                
-                AlarmManager.generateAlarm(Level.INFO,this, "Packet Loss is now at an acceptable rate");
-                lossrateCorrectionAlarmSent = false;
-            }
-        }
+//        if ( lossRateCorrectedAlarmEnabled && lossrateCorrectionGoodCnt > 1)
+//        {
+//            lossrateCorrectionGoodCnt = 0;
+//            lossrateCorrectionsFailCnt = lossrateCorrectionsFailCnt + 5;
+//            if (lossrateCorrectionsFailCnt>=alarmThresholdStream && !lossrateCorrectionAlarmSent)
+//            {
+//                AlarmManager.generateAlarm(Level.SEVERE,this, "Packet Loss is high");
+//                //System.out.println("Loss rate correted alarm is "+lossRateCorrectedAlarm+ " The loss rate after correction is " +inle.getPktsLostPct() + " The loss rate before correction is " + inle.getPktsLostLocalPct() );
+//                lossrateCorrectionAlarmSent = true;
+//            }
+//            //lossRateCorOverThreshold=10;
+//        }
+//        else if (lossRateCorrectedAlarmEnabled)
+//        {
+//            lossrateCorrectionGoodCnt = lossrateCorrectionGoodCnt+5;
+//            lossrateCorrectionsFailCnt = 0;
+//            if (lossrateCorrectionGoodCnt >= alarmThresholdStream && lossrateCorrectionAlarmSent)
+//            {
+//                
+//                AlarmManager.generateAlarm(Level.INFO,this, "Packet Loss is now at an acceptable rate");
+//                lossrateCorrectionAlarmSent = false;
+//            }
+//        }
         
        
         //ssudhaka: make change here to return if logging is disabled

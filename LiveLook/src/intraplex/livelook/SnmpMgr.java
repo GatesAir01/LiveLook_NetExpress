@@ -227,7 +227,7 @@ public class SnmpMgr implements Runnable{
                                     if(ShutDownAlarm)shutDownCount++;
                                     if(shutDownCount > stateConnectionAlarmThreshold && !ShutDownAlarmTriggered && ShutDownAlarm)
                                     {
-                                            e.generateAlarm("Stream shut down past alarm level");
+                                            e.generateAlarm("Stream's admin state is down");
                                             ShutDownAlarmTriggered = true;
                                     }
                                     if(ShutDownAlarmTriggered) shutDownCount = stateConnectionAlarmThreshold;
@@ -239,7 +239,7 @@ public class SnmpMgr implements Runnable{
                                                     ShutDownAlarmTriggered = false;
                                                     Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
                                             LogMapEntry e = logMap.get(key);
-                                            e.generateAlarm("Stream Connection back in safe level");
+                                            e.generateAlarm("Stream's admin state is up");
                                             }
                                             if(ShutDownAlarmTriggered){
                                                     shutDownCount--;
@@ -261,7 +261,7 @@ public class SnmpMgr implements Runnable{
                                         Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
                                 LogMapEntry e = logMap.get(key);
                                         e.writeToEventLog(e.streamName + ", " + "Stream packet loss alarm");
-                                        e.generateAlarm("Stream Connection is at a bad level");
+                                        e.generateAlarm("Stream is down");
                                         StreamDownAlarmTriggered = true;
                                 }
                                 if(StreamDownAlarmTriggered) redStatusCount = stateConnectionAlarmThreshold;
@@ -273,7 +273,7 @@ public class SnmpMgr implements Runnable{
                                         StreamDownAlarmTriggered = false;
                                         Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
                                 LogMapEntry e = logMap.get(key);
-                                e.generateAlarm("Stream Connection back in safe level");
+                                e.generateAlarm("Stream is up");
                                 }
                                 if(StreamDownAlarmTriggered){
                                         redStatusCount--;
