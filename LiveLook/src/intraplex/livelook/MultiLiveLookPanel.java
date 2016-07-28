@@ -547,6 +547,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
      catch (Exception e)
      {
          System.out.println("ERROR");
+         JOptionPane.showMessageDialog(this, "LiveLook NetXpress- adding new stream failed!");
      }
     }//GEN-LAST:event_connectButtonActionPerformed
 

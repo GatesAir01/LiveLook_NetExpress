@@ -49,8 +49,8 @@ public class SnmpMgr implements Runnable{
     public static boolean StreamDownAlarm = false;
     public static boolean ShutDownAlarm = false;
     static int stateConnectionAlarmThreshold = 30;
-	public static boolean DefaultShutDownAlarm = false;
-	public static boolean DefaultStreamDownAlarm = false;
+	public static boolean DefaultShutDownAlarm = true;
+	public static boolean DefaultStreamDownAlarm = true;
     boolean StreamDownAlarmTriggered = false;
     boolean ShutDownAlarmTriggered = false;
     boolean mapRemove = false;

@@ -44,6 +44,7 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         FullMonitoring.setSelected(true);
         alarmThresholdTime.setText(SnmpMgr.stateConnectionAlarmThreshold + "");
         StreamDownAlarm.setSelected(SnmpMgr.DefaultStreamDownAlarm);
+        ShutDownAlarm.setSelected(SnmpMgr.DefaultShutDownAlarm);
         enableDataLogging.setSelected(LogMapEntry.default_enableStreamLogging);
         
         LogMapEntry.next_lossRateAlarmEnabled = LogMapEntry.default_lossRateAlarmEnabled;
@@ -420,9 +421,6 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this.getParent(),"Invalid alarm threshold");
             return;
         }
-        if(StreamDownAlarm.isSelected() && FullMonitoring.isSelected()) {
-        	LogMapEntry.next_lossRateAlarmEnabled = true;
-        }
         LogMapEntry.next_useDefault = useDefaultBox.isSelected();
         LogMapEntry.next_enableStreamLogging = enableDataLogging.isSelected();
         SnmpMgr.nextStreamType = getSelectedStreamType();
@@ -484,15 +482,7 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         AlarmThresholdLabel1.setEnabled(b);
         alarmThresholdLabel2.setEnabled(b);
         StreamDownAlarm.setEnabled(b);
-
-        if(b) {
-	        if(StatusOnly.isSelected()) {
-	            ShutDownAlarm.setEnabled(b);
-	        }
-        }
-        else {
-            ShutDownAlarm.setEnabled(b);
-        }
+        ShutDownAlarm.setEnabled(b);
     }
     private void readCommunityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_readCommunityActionPerformed
         // TODO add your handling code here:
@@ -515,30 +505,15 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
 
     private void StatusOnlyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StatusOnlyActionPerformed
         FullMonitoring.setSelected(false);
-        if(!useDefaultBox.isSelected()) {
-	    	ShutDownAlarm.setEnabled(true);
-	    	StreamDownAlarm.setSelected(SnmpMgr.StreamDownAlarm);
-	        ShutDownAlarm.setSelected(SnmpMgr.ShutDownAlarm);
-        }
-        else {
-	    	StreamDownAlarm.setSelected(SnmpMgr.DefaultStreamDownAlarm);
-	        ShutDownAlarm.setSelected(SnmpMgr.DefaultShutDownAlarm);
-        }
         
     }//GEN-LAST:event_StatusOnlyActionPerformed
 
     private void FullMonitoringActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FullMonitoringActionPerformed
     	StatusOnly.setSelected(false);
-        if(!useDefaultBox.isSelected()) {
-	    	ShutDownAlarm.setEnabled(false);
-        }
-        StreamDownAlarm.setSelected(false);
-        ShutDownAlarm.setSelected(false);
     }//GEN-LAST:event_FullMonitoringActionPerformed
 
     private void ShutDownAlarmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ShutDownAlarmActionPerformed
-        if(StatusOnly.isSelected())
-        	SnmpMgr.ShutDownAlarm = ShutDownAlarm.isSelected();
+        SnmpMgr.ShutDownAlarm = ShutDownAlarm.isSelected();
     }//GEN-LAST:event_ShutDownAlarmActionPerformed
 
     private void StreamDownAlarmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StreamDownAlarmActionPerformed
