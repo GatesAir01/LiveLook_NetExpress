@@ -78,7 +78,7 @@ public class StatusListModel extends AbstractTableModel {
         return 8;
     }
     
-    private final String[] colNames = new String[] {"Stream Name", "Stream Id", "Stream IP", "Link", "Last Message Time", "Logging Path", "Status", "Full Monitoring"};
+    private final String[] colNames = new String[] {"Stream Name", "Stream Id", "Stream IP", "Link", "Last Message Time", "Logging Path", "Status", "Stream Monitoring"};
 
     public String getColumnName(int col) {
         return colNames[col];
@@ -129,8 +129,12 @@ public class StatusListModel extends AbstractTableModel {
                             return "Logging is disabled";
             }
             else if(i1 == 7) {
-                    String s = "" + !e.statusOnly;
-                    return s.substring(0, 1).toUpperCase() + s.substring(1);
+                    if(e.statusOnly) {
+                    	return "Status Only";
+                    }
+                    else {
+                    	return "Full Monitoring";
+                    }
             }
 
             if(!e.connectionState.isEmpty()){  // Fix - NumberFormatException / Null pointer Exception
