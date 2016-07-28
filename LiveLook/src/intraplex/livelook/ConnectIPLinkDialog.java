@@ -42,8 +42,8 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         enableEmailAlarms.setSelected(LogMapEntry.default_enableEmail);
         NetXpressBox.setSelected(true);
         FullMonitoring.setSelected(true);
-        alarmThresholdTime.setText(LogMapEntry.default_alarmthresholdTime + "");
-        StreamDownAlarm.setSelected(LogMapEntry.default_lossRateAlarmEnabled);
+        alarmThresholdTime.setText(SnmpMgr.stateConnectionAlarmThreshold + "");
+        StreamDownAlarm.setSelected(SnmpMgr.DefaultStreamDownAlarm);
         enableDataLogging.setSelected(LogMapEntry.default_enableStreamLogging);
         
         LogMapEntry.next_lossRateAlarmEnabled = LogMapEntry.default_lossRateAlarmEnabled;

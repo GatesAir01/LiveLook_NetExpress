@@ -67,6 +67,7 @@ public class Stream {
 		opened = false;
 		snmp = new IPLinkSnmpInterface();
 		opened = snmp.open(ip, readCommunity);
+		lastEntry = System.currentTimeMillis();
 		try {
 		if(populate && !statusOnly) {
 			populateVars();
@@ -179,6 +180,7 @@ public class Stream {
 	
 	public void updateConnectionState() 
 	{
+		lastEntry = System.currentTimeMillis();
 		connectionState = snmp.getSnmp(OIDDictionary.getConnectionState(streamType), index);
 	}
 	
