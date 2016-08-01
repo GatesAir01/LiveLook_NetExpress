@@ -462,13 +462,13 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         // with the newly created stream, check if th etsream belongs to the Client with the Mac address listed in the mac Address tab
             if (!msgMgr.checkIfMacAllowed(stream))
             {
-                JOptionPane.showMessageDialog(this, "Mac is not registered for use");
+                JOptionPane.showMessageDialog(this, "Mac Address is not registered for use in Livelook NetXpress");
                 msgMgr.disconnect(Long.parseLong(stream.ip.replace(".", "") + stream.dstPort));
                 return;
             }
             else 
             {
-	     
+   
 	     addStreamKey(Long.parseLong(stream.ip.replace(".", "")  + stream.dstPort), stream.streamName, stream.statusOnly);     waitDialog.setVisible(true);
 	     //waitDialog.enableLogging = cipd.enableLogging;
 	     //System.out.println(" enable logging in Wait Dialog is "+waitDialog.enableLogging);
@@ -536,18 +536,18 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
 	        {
 	            msgMgr.cleanUp();
 	        }
-     	}
+            }
         }
         else
         {
-            JOptionPane.showMessageDialog(this, "LiveLook NetXpress- adding new stream failed!");
+            JOptionPane.showMessageDialog(this, "LiveLook NetXpress cannot connect to the specified stream!\nPlease check the stream details");
             return;
         }
      }
      catch (Exception e)
      {
          System.out.println("ERROR");
-         JOptionPane.showMessageDialog(this, "LiveLook NetXpress- adding new stream failed!");
+         JOptionPane.showMessageDialog(this, "LiveLook NetXpress cannot connect to the specified stream!\nPlease check the stream details");
      }
     }//GEN-LAST:event_connectButtonActionPerformed
 
@@ -889,8 +889,10 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                         }
                     }
                     
-                    if(msgMgr.map.get(p.streamId).liveViewReset2)msgMgr.map.get(p.streamId).liveViewReset2 = false;
-                    else if(msgMgr.map.get(p.streamId).liveViewReset1)msgMgr.map.get(p.streamId).liveViewReset1 = false;
+                    if(msgMgr.map.get(p.streamId).liveViewReset2)
+                        msgMgr.map.get(p.streamId).liveViewReset2 = false;
+                    else if(msgMgr.map.get(p.streamId).liveViewReset1)
+                        msgMgr.map.get(p.streamId).liveViewReset1 = false;
                     p = msgMgr.getNextPoint();
                     count++;
                 }

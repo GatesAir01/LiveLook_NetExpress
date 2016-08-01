@@ -81,7 +81,11 @@ public class MacFile {
                 line = br.readLine();
             }
             String everything = sb.toString();
-            
+            if(everything.isEmpty())
+            {
+                br.close();
+                return null;
+            }
             //Then the string is split into parts by commas
             String[] parts = everything.split(",");
             byte[] result = new byte[parts.length];

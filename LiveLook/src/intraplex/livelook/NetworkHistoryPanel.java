@@ -663,13 +663,29 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
 
         int returnVal = chooser.showOpenDialog(this);
         
-        if(returnVal == JFileChooser.APPROVE_OPTION) {
-                  loadFiles(chooser.getSelectedFiles(),0,0);
-        }
+        if(returnVal == JFileChooser.APPROVE_OPTION) 
+        {
+            if(!loadFiles(chooser.getSelectedFiles(),0,0)){
+                JOptionPane.showMessageDialog(null,"File cannot be loaded!", "Error",
+                                JOptionPane.ERROR_MESSAGE);
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null,"File Loaded succeefully", "Message",
+                                JOptionPane.INFORMATION_MESSAGE);
+            }
     }//GEN-LAST:event_loadFileButtonActionPerformed
-
-    public void loadFiles(File[] f, long s, long e)
+   }
+    /**
+     *
+     * @param f
+     * @param s
+     * @param e
+     * @return
+     */
+    public boolean loadFiles(File[] f, long s, long e)
     {
+        boolean bRet = false;
         try 
         {
             log.setFiles(f);
@@ -698,6 +714,7 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
                 endTime.setDate(c.getTime());
                 search = false;
                 updatePlot();
+                bRet = true;
             }
             else
             {
@@ -709,6 +726,7 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
            JOptionPane.showMessageDialog(null,"Files do not contain data or are not from the same stream!", "Error",
                                 JOptionPane.ERROR_MESSAGE);
         }
+        return bRet;
     }
     private void reloadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reloadButtonActionPerformed
 

@@ -124,7 +124,7 @@ public class MacList extends javax.swing.JPanel {
      * 
      * @param fileName		filename of the user selected MacAdress text file
      */
-    private void loadFile(String fileName) {
+    private boolean loadFile(String fileName) {
     	//Initializes new MacFile
     	file = new MacFile(fileName);
 
@@ -132,7 +132,13 @@ public class MacList extends javax.swing.JPanel {
         
         //loads the file and then decrypts the file
         try {
-            byteUnecrypted = file.decrypt(file.load());
+            byte[] loadbyte = file.load();
+            if(loadbyte != null)
+            {
+                byteUnecrypted = file.decrypt(loadbyte);
+            }
+            else
+                return false;
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -159,6 +165,7 @@ public class MacList extends javax.swing.JPanel {
             model.addRow(temp);
         }
         MacTable.setModel(model);
+        return true;
     }
     
     /**
@@ -180,10 +187,12 @@ public class MacList extends javax.swing.JPanel {
             livelookconfig.setProperty("MacFileLocation", fileName);
             livelookconfig.save();
 
-            loadFile(fileName);
+            if(!loadFile(fileName))
+                 JOptionPane.showMessageDialog(this, "File Load failed!");
+                
         }
         else {
-            JOptionPane.showMessageDialog(this, "Please reselect the desired file.");
+            JOptionPane.showMessageDialog(this, "Please select the desired file");
         }
 
     }//GEN-LAST:event_LoadFileActionPerformed

@@ -65,14 +65,13 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
     {
         try
         {
-        	String ipaddress = (lite)?configlite.get("Last.IP").toString():config.get("Last.IP").toString();
-        	ipAddress.setText(ipaddress);
-        	String index= (lite)?configlite.get("Last.Index").toString():config.get("Last.Index").toString();
+            String ipaddress = (lite)?configlite.get("Last.IP").toString():config.get("Last.IP").toString();
+            ipAddress.setText(ipaddress);
+            String index= (lite)?configlite.get("Last.Index").toString():config.get("Last.Index").toString();
             streamIndex.setText(index);
             String readCom = (lite)?configlite.get("Last.ReadCommunity").toString():config.get("Last.readCommunity").toString();
             readCommunity.setText(readCom);
-            //EnableLoggingCheckBox.setSelected(true);
-            
+            //EnableLoggingCheckBox.setSelected(true);            
         }
         catch (Exception e)
         {
@@ -365,9 +364,7 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-
-    
+   
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
        
     iPAddress = ipAddress.getText();
@@ -409,7 +406,7 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
                 value = value - (value % 5);
             }
             LogMapEntry.next_alarmthresholdTime = value;
-            
+            SnmpMgr.stateConnectionAlarmThreshold = LogMapEntry.next_alarmthresholdTime;
         }
         catch ( NumberFormatException e)
         {
@@ -427,14 +424,28 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         LogMapEntry.nextStreamType = getSelectedStreamType();
         SnmpMgr.statusOnly = getSelectedMonitoringType();
         
+        // get the Alarm Settings based on the user selection - Fix for Alarm generation
+        if(useDefaultBox.isSelected())
+        {
+            SnmpMgr.DefaultShutDownAlarm =  true;
+            SnmpMgr.DefaultStreamDownAlarm =  true;
+            SnmpMgr.ShutDownAlarm = SnmpMgr.DefaultShutDownAlarm;
+            SnmpMgr.StreamDownAlarm =  SnmpMgr.DefaultStreamDownAlarm;
+        }
+        else
+        {
+            SnmpMgr.ShutDownAlarm = ShutDownAlarm.isSelected();
+            SnmpMgr.StreamDownAlarm = StreamDownAlarm.isSelected();
+        }
+        
         if(!lite) {
-        	config.put("Last.IP",iPAddress);
+            config.put("Last.IP",iPAddress);
     	    config.put("Last.Index",stream);
     	    config.put("Last.ReadCommunity", readCom);
     	    config.save();
         }
         else {
-        	configlite.put("Last.IP",iPAddress);
+            configlite.put("Last.IP",iPAddress);
     	    configlite.put("Last.Index",stream);
     	    configlite.put("Last.ReadCommunity", readCom);
     	    configlite.save();
@@ -474,15 +485,15 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_ipAddressActionPerformed
 
-        private void useDefaultSet (boolean b)
-        {
-        enableEmailAlarms.setEnabled(b);
-        enableDataLogging.setEnabled(b);
-        alarmThresholdTime.setEnabled(b);
-        AlarmThresholdLabel1.setEnabled(b);
-        alarmThresholdLabel2.setEnabled(b);
-        StreamDownAlarm.setEnabled(b);
-        ShutDownAlarm.setEnabled(b);
+    private void useDefaultSet (boolean b)
+    {
+    enableEmailAlarms.setEnabled(b);
+    enableDataLogging.setEnabled(b);
+    alarmThresholdTime.setEnabled(b);
+    AlarmThresholdLabel1.setEnabled(b);
+    alarmThresholdLabel2.setEnabled(b);
+    StreamDownAlarm.setEnabled(b);
+    ShutDownAlarm.setEnabled(b);
     }
     private void readCommunityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_readCommunityActionPerformed
         // TODO add your handling code here:

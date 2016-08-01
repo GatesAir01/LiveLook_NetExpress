@@ -128,7 +128,7 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
         	try
             {
                 String s = livelookconfig.get("Connections").toString();
-                if (s != null)
+                if (!s.isEmpty())
                 {
                     mgr.loadConnections(s);
                     livelook.refreshStreamKeys();
@@ -136,7 +136,7 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
             }
             catch (Exception e)
             {
-            	System.out.println("ERROR LOADING CONNECTIONS");
+            	System.out.println("ERROR LOADING PREVIOUS CONNECTIONS");
             	e.printStackTrace();
             }
         	

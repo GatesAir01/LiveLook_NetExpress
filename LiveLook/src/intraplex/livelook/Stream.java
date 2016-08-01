@@ -69,16 +69,16 @@ public class Stream {
 		opened = snmp.open(ip, readCommunity);
 		lastEntry = System.currentTimeMillis();
 		try {
-		if(populate && !statusOnly) {
-			populateVars();
-		}
-		else if(checkIfShutDown() || statusOnly) {
-			populateBaseInfo();
-		}
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+            if(populate && !statusOnly && !checkIfShutDown()) { // populate all when not shut down - Fix: Stream connection failed when stream is already shut down
+                populateVars();
+            }
+            else if(checkIfShutDown() || statusOnly) {
+                populateBaseInfo();
+            }
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+            }
 	}
 	
 	//mac 1-3 for wan, lan and mgmt interfaces; NetXpress is the only one of NetXpress, LX, LXR that has mgmt port
@@ -114,7 +114,7 @@ public class Stream {
 		//System.out.println(mac[2]);
 	}
 	
-	public void populateVars() {
+	public boolean populateVars() {
 		
 //		srcIpAddress = snmp.getSnmp(OIDDictionary.harrisIplinkRTPStrmRxSourceIP, index);
 //	    dstIpAddress = snmp.getSnmp(OIDDictionary.harrisIplinkRTPStrmTxDestinationIP, index);
@@ -137,6 +137,8 @@ public class Stream {
 //	    
 	    lastEntry = System.currentTimeMillis();
 	    streamName = snmp.getSnmp(OIDDictionary.getStreamName(streamType), index);
+            if(streamName.isEmpty()) // do not continue and return if the snmp is not returning valid stream name for the stream type and index specified
+                return false;
 	    packetsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + packetsSkipped));
 	    packetsLost = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLost(streamType), index, secondIndex + packetsSkipped));
 	    packetsRecovered = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsRecovered(streamType), index, secondIndex + packetsSkipped));
@@ -149,7 +151,7 @@ public class Stream {
 	    statsInterval = Integer.parseInt(snmp.getSnmp(OIDDictionary.getStatsInterval(streamType), index));
 	    //printVars();
 	    if(packetsSkipped > 0)packetsSkipped--;
-	    
+	    return true;
 	}
 	
 	public void populateBaseInfo() {
@@ -180,8 +182,8 @@ public class Stream {
 	
 	public void updateConnectionState() 
 	{
-		lastEntry = System.currentTimeMillis();
-		connectionState = snmp.getSnmp(OIDDictionary.getConnectionState(streamType), index);
+            lastEntry = System.currentTimeMillis();
+            connectionState = snmp.getSnmp(OIDDictionary.getConnectionState(streamType), index);
 	}
 	
 	public boolean updatePacketsSkipped() 

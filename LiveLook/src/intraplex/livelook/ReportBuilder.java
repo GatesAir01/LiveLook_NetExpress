@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -105,7 +106,11 @@ public class ReportBuilder {
         
     public static String generateReport(long starttime, long endtime, long interval, int pointsPerInterval, LogFileHandler log)
     {
-        String base = loadTemplate("C:/Users/jlucas/LiveLook NetXpress/templates/report.html");
+        // get the path for directory "templates"
+         String currentpath = new File("templates").getAbsolutePath();
+      //  String base = loadTemplate("C:/Users/jlucas/LiveLook NetXpress/templates/report.html");
+
+         String base = loadTemplate(currentpath + "/report.html"); // Fix for Report generation
         chartname = "chart"+sdf.format(System.currentTimeMillis());
         //Ok we have the base get chart images
        //System.out.println("The start Time is " +starttime+" and the end time is "+  endtime);
@@ -153,7 +158,11 @@ public class ReportBuilder {
     
     public static String generateReport(long starttime, long endtime, long interval, int pointsPerInterval, LogFileHandler log, int gaps)
     {
-        String base = loadTemplate("C:/Users/jlucas/LiveLook NetXpress/templates/report.html", gaps);
+          // get the path for directory "templates"
+         String currentpath = new File("templates").getAbsolutePath();
+         // String base = loadTemplate("C:/Users/jlucas/LiveLook NetXpress/templates/report.html", gaps);
+         String base = loadTemplate(currentpath + "/report.html", gaps); // Fix for Report generation
+
         chartname = "chart"+sdf.format(System.currentTimeMillis());
         //Ok we have the base get chart images
        //System.out.println("The start Time is " +starttime+" and the end time is "+  endtime);
@@ -479,5 +488,9 @@ public class ReportBuilder {
         {
         }
         return 0;
+    }
+
+    private String getProperty(String defaultDirectory) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
