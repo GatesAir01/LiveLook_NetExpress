@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-
+import java.util.Date;
+import java.text.SimpleDateFormat;
 /**
  * SnmpMgr manages all functionalities related to snmp in LiveLook.
  * It handles: the timing of new snmp requests, the start of writing log, the creation of stream objects,
@@ -59,7 +59,6 @@ public class SnmpMgr implements Runnable{
     boolean prepareMenus = false;
     Stream addStream;
     LogMapEntry addLME;
-	
 	/**
 	 * Constructor of SnmpMgr
 	 * 
@@ -78,6 +77,7 @@ public class SnmpMgr implements Runnable{
             this.lite = lite;
             shutDownCount = 0;
             redStatusCount = 0;
+            String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
             new Thread(this, "SnmpMgr").start();
 	}
 	
@@ -133,23 +133,23 @@ public class SnmpMgr implements Runnable{
     public void snmpRequest()
     {
         //goes through all the streams in the map
-	for(Stream stream: map.values()) {
-            //counts to see if it is time to poll for data -  default is 5 seconds
-	    if(stream.counter >= stream.statsInterval) {
-	        //if the stream is status only it will not poll for data 
-	        if(!stream.statusOnly){ // FULL MONITORING MODE
-                    //checks to make sure if the stream has been shut down before it queries
-                    boolean shutDown = stream.checkIfShutDown();
+        for(Stream stream: map.values()) {
+        
+	//counts to see if it is time to poll for data
+        if(stream.counter >= stream.statsInterval) {
+        //if the stream is status only it will not poll for data 
+            if(!stream.statusOnly){
+                //checks to make sure if the stream has been shut down before it queries
+                boolean shutDown = stream.checkIfShutDown();
 		        	
-		    if(!shutDown){
-                        System.out.println("snmpRequest:" + stream.streamName+ "Stream is Up\n");
-                        //though NetXpress has MIB indexes for every 5 seconds of data 
+                    if(!shutDown){
+                        //though NetXpress has mib indexes for every 5 seconds of data 
                         //NetXpress only updates the mibs every 10 seconds thus when polling 
                         //every 5 seconds approximately you have to take this into account
                         //updatePacketsSkipped() will show how many times this info must be repolled and displayed
                         boolean reset = stream.updatePacketsSkipped();
                         int packetsSkipped = stream.packetsSkipped;
-		        		
+
                         //if no packets have been skipped we can update and post one point
                         if(packetsSkipped == 0) {
                             try {
@@ -160,20 +160,20 @@ public class SnmpMgr implements Runnable{
                                 //also though it say if(reset) it really is if(!reset)
                                 //thus if stats of the stream hasn't been reset this will be true
                                 if(reset)
-                                    createPacket(stream.ip, Integer.parseInt(stream.dstPort));
+                                        createPacket(stream.ip, Integer.parseInt(stream.dstPort));
                                 else
                                 {
-                                    Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-                                    LogMapEntry e = logMap.get(key);
-                                    //writes an event to the event log 
-                                    e.writeToEventLog(e.streamName + ", " + "Stat Reset");
-                                    e.statReset = true;
+                                        Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
+                                        LogMapEntry e = logMap.get(key);
+                                        //writes an event to the event log 
+                                        e.writeToEventLog(e.streamName + ", " + "Stat Reset");
+                                        e.statReset = true;
                                 }
                             }
                             catch(NumberFormatException e) {
-                                    e.printStackTrace();
+                                e.printStackTrace();
                             }
-			}
+                        }
                         else
                         {
                             //for every packet skipped by NetXpress it will go down the indexes and update
@@ -185,147 +185,144 @@ public class SnmpMgr implements Runnable{
 
                                     //this creates a packet for the LogMapEntry to use in it's functions
                                     //also though it say if(reset) it really is if(!reset)
-                                    //thus if stats of the stream hasn't been reset this will be true
-                                        if(reset)
-                                            createPacket(stream.ip, Integer.parseInt(stream.dstPort));
-                                        else
-                                        {
+                                     //thus if stats of the stream hasn't been reset this will be true
+                                    if(reset)
+                                        createPacket(stream.ip, Integer.parseInt(stream.dstPort));
+                                    else
+                                    {
                                             Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
                                             LogMapEntry e = logMap.get(key);
                                             //writes an event to the event log 
                                             e.writeToEventLog(e.streamName + ", " + "Stat Reset");
                                             e.statReset = true;
-                                        }
                                     }
+                                }
                                 catch(NumberFormatException e) {
-                                    //this is to make sure that if packets won't be skipped due to this catch
-                                    packetsSkipped++;
-                                    e.printStackTrace();
+                                        //this is to make sure that if packets won't be skipped due to this catch
+                                        packetsSkipped++;
+                                        e.printStackTrace();
                                 }
                             }
                             stream.packetsSkipped = 0;
                         }
-                       //this else if is here to count down for the alarm threshold and trigger a alarm clear email
-                       if(shutDownCount > 0 && ShutDownAlarm){
-                           if(shutDownCount == 1){
-                                   shutDownCount = 0;
-                                   ShutDownAlarmTriggered = false;
-                                   Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-                           LogMapEntry e = logMap.get(key);
-                          
-                           e.generateAlarm("Stream's admin state is up");
-                           }
-                           if(ShutDownAlarmTriggered){
-                                   shutDownCount--;
-                            }
-                       }
-                       stream.updateConnectionState();   // Update the last packet entry and the Connection state for FUll monitor streams
-		    }
+                    }
                     else {  //This else is incase of shut down
-                        Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-                        LogMapEntry e = logMap.get(key);
-                        e.writeToEventLog(e.streamName + ", " + "Stream not up");
-                        if(ShutDownAlarm){
-                            shutDownCount++;
-                        }
-                        if(shutDownCount > stateConnectionAlarmThreshold && !ShutDownAlarmTriggered && ShutDownAlarm)
-                        {
-                            e.generateAlarm("Stream's admin state is down");
-                            ShutDownAlarmTriggered = true;
-                        }
-                        if(ShutDownAlarmTriggered) 
-                            shutDownCount = stateConnectionAlarmThreshold;
-
-                        createPacket(stream.ip, Integer.parseInt(stream.dstPort), true);
-                    }
-	        }
-	        else // STATUS ONLY MODE
-	        {
-                    //this checks if the stream has been shut down before query
-                    boolean shutDown = stream.checkIfShutDown();
-                    if(shutDown) 
-                    {
-                        //This writes to the log and then counts till the alarm is triggered
-                         //shutDownCount++;
-                         Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-                         LogMapEntry e = logMap.get(key);
-                         e.writeToEventLog(e.streamName + ", " + "Stream not up");
-                         if(ShutDownAlarm)shutDownCount++;
-                         if(shutDownCount > stateConnectionAlarmThreshold && !ShutDownAlarmTriggered && ShutDownAlarm)
-                         {
-                                 e.generateAlarm("Stream's admin state is down");
-                                 ShutDownAlarmTriggered = true;
-                         }
-                         if(ShutDownAlarmTriggered) shutDownCount = stateConnectionAlarmThreshold;
-                    }
-                    //this else if is here to count down for the alarm threshold and trigger a alarm clear email
-                    else if(shutDownCount > 0 && ShutDownAlarm){
-                        if(shutDownCount == 1){
-                            shutDownCount = 0;
-                            ShutDownAlarmTriggered = false;
                             Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
                             LogMapEntry e = logMap.get(key);
-                            e.generateAlarm("Stream's admin state is up");
-                        }
-                        if(ShutDownAlarmTriggered){
-                            shutDownCount--;
-                        }
-                        stream.updateConnectionState();  // Update the last packet entry and the Connection state for Status only streams
+                            e.writeToEventLog(e.streamName + ", " + "Stream not up");
+                            createPacket(stream.ip, Integer.parseInt(stream.dstPort), true);
                     }
-	            // moved inside the previous if else if loop for shutdown	
-                    //  if(!shutDown) {
-                    //      stream.updateConnectionState();   
-                    //  }
-	        }
-                Color tabColor = checkForStreamStatus();
-
-                if(tabColor == Color.red && StreamDownAlarm)
+                }
+                else //This is if status only
+                {
+                   
+                }   
+                Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
+                LogMapEntry e = logMap.get(key);
+                if(stream.checkIfShutDown())  //this checks if the stream has been shut down before query
                 {
                     //This writes to the log and then counts till the alarm is triggered
-                    redStatusCount++;
-                    if(redStatusCount > stateConnectionAlarmThreshold && !StreamDownAlarmTriggered)
-                    {
-                        Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-                        LogMapEntry e = logMap.get(key);
-                        e.writeToEventLog(e.streamName + ", " + "Stream is down");
-                        e.generateAlarm("Stream is down");
-                        StreamDownAlarmTriggered = true;
+                    if(stream.ShutDownAlarm && !stream.ShutDownAlarmTriggered)
+                    { 
+                        stream.ShutDownAlarmCounter += (System.currentTimeMillis() -  e.lastEntry);;
+                        System.out.println("Shut down alarm counter for" +stream.streamName + " increase="+ stream.ShutDownAlarmCounter);   
+                   
+                        if(stream.ShutDownAlarmCounter >= stateConnectionAlarmThreshold && !stream.ShutDownAlarmTriggered && stream.ShutDownAlarm)
+                        {
+                            e.writeToEventLog(e.streamName + ", " + "Stream is shut down");
+                            e.generateAlarm("Stream is shut down");
+                            stream.ShutDownAlarmTriggered = true;
+                        }
                     }
-                    if(StreamDownAlarmTriggered) redStatusCount = stateConnectionAlarmThreshold;
+                    if(stream.ShutDownAlarmTriggered)
+                        stream.ShutDownAlarmCounter = 0;
                 }
                 //this else if is here to count down for the alarm threshold and trigger a alarm clear email
-                else if(redStatusCount > 0 && StreamDownAlarm){
-                    if(redStatusCount == 1){
-                            redStatusCount = 0;
-                            StreamDownAlarmTriggered = false;
-                            Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-                    LogMapEntry e = logMap.get(key);
-                    e.generateAlarm("Stream is up");
+                else
+                {
+                    if(stream.ShutDownAlarmTriggered){
+                        stream.ShutDownAlarmCounter += (((System.currentTimeMillis() -  e.lastEntry)));
+                   
+                        if(stream.ShutDownAlarmCounter >= stateConnectionAlarmThreshold  && stream.ShutDownAlarm){
+                            stream.ShutDownAlarmTriggered = false;
+                            e.writeToEventLog(e.streamName + ", " + "Stream is up");
+                            e.generateAlarm("Stream is up");
+                            stream.ShutDownAlarmCounter = 0;
+                        }
                     }
-                    if(StreamDownAlarmTriggered){
-                            redStatusCount--;
+                    else
+                    {
+                        stream.ShutDownAlarmCounter = 0;
+                    }
+                    stream.updateConnectionState();
+                }
+                
+                // get the operational state of stream
+                stream.updateConnectionState();
+                int conState = getStreamConnectionStatus(stream.ip, stream.dstPort);
+
+                if (conState == 2){ // stream down -  RED!
+                    if(stream.StreamDownAlarm && !stream.StreamDownAlarmTriggered  ) 
+                    {
+                        if(!stream.ShutDownAlarmTriggered){ // if a stream is already shut down (outof service), then dont trigger the stream down alarm once more
+                            //This writes to the log and then counts till the alarm is triggered
+                            stream.StreamDownAlarmCounter += (System.currentTimeMillis() -  e.lastEntry);
+                            if( (stream.StreamDownAlarmCounter >= (stateConnectionAlarmThreshold*1000))&& !stream.StreamDownAlarmTriggered)
+                            {
+                                e.writeToEventLog(e.streamName + ", " + "Stream is down");
+                                e.generateAlarm("Stream is down");
+                                stream.StreamDownAlarmTriggered = true;
+                                stream.StreamDownAlarmCounter = 0;
+                            }
+                        }
+                    }
+                    if(stream.StreamDownAlarmTriggered) 
+                    {
+                        stream.StreamDownAlarmCounter = 0;
+                       // stream.StreamDownAlarmCounter = stateConnectionAlarmThreshold;
                     }
                 }
+                //this else if is here to count down for the alarm threshold and trigger a alarm clear email
+                else if( conState == 1){ // stream up -  GREEN!
+                     
+                    if(stream.StreamDownAlarmTriggered){ // Stream up alarm is required only if the stream down is already triggered
+                        stream.StreamDownAlarmCounter += (((System.currentTimeMillis() -  e.lastEntry)));
+                        if((stream.StreamDownAlarmCounter >= (stateConnectionAlarmThreshold*1000)) && stream.StreamDownAlarm ){
+                            stream.StreamDownAlarmTriggered = false; 
+                            e.writeToEventLog(e.streamName + ", " + "Stream is up");
+                            e.generateAlarm("Stream is up");
+                            System.out.println("Stream up alarm counter reset:" + " timegap="+ stream.StreamDownAlarmCounter);   
+                            stream.StreamDownAlarmCounter = 0;
+                        }
+                    }
+                    else
+                    {
+                        stream.StreamDownAlarmCounter = 0;
+                    }
+                }
+                Color tabColor = checkForStreamStatus();
                 //this updates the color boxes in the Stream Status tab
                 IPLinkNetworkTool.updateConnectedStreamstabColor(tabColor);
-                IPLinkNetworkTool_Lite.updateConnectedStreamstabColor(tabColor);
+                //IPLinkNetworkTool_Lite.updateConnectedStreamstabColor(tabColor); // not neede for netXpress
                 stream.counter = 0;
-	    }
+            }
             //counts to see if it is time to query the streams for info
             stream.counter++;
-            //  }
-            //  else {
-            //      stream.counter++;
-            //  }
-	}
+               
+//			}
+//			else {
+//				stream.counter++;
+//			}
+        }
         //waits for the loop to finish accessing the map and then updates them to avoid
         //ConcurrentMismatchError
         if(mapRemove){
             logMap.remove(removeKey);
-            //map.remove(removeKey); // do remove from map when disconnect routine is called
+            //map.remove(removeKey); // move this line to disconnect routine
             mapRemove = false;
             prepareMenus = true;
-            IPLinkNetworkTool.updateConnectedStreamstabColor(checkForStreamStatus()); //this updates the color boxes in the Stream Status tab after remove Connections - Fix for Tab color issue
+            //this updates the color boxes in the Stream Status tab
+            IPLinkNetworkTool.updateConnectedStreamstabColor(checkForStreamStatus());
         }
         if(mapAdd){
             long key = Long.parseLong(addStream.ip.replace(".", "") + addStream.dstPort);
@@ -333,9 +330,11 @@ public class SnmpMgr implements Runnable{
             map.put(key, addStream);
             mapAdd = false;
             prepareMenus = true;
-             IPLinkNetworkTool.updateConnectedStreamstabColor(checkForStreamStatus()); //this updates the color boxes in the Stream Status tab after Add Connections - Fix for Tab color issue
+            //this updates the color boxes in the Stream Status tab
+            IPLinkNetworkTool.updateConnectedStreamstabColor(checkForStreamStatus());
         }
-
+       
+       
     }
 	
 	/**
@@ -384,14 +383,13 @@ public class SnmpMgr implements Runnable{
         }
         return retVal;
     }
-	
-	/**
-	 * This returns the stream status related color but specifies the stream
-	 * 
-	 * @param ip
-	 * @param dstPort
-	 * @return
-	 */
+    /**
+     * This function returns the stream status related color for the specified stream
+     * 
+     * @param ip - IP address of the stream
+     * @param dstPort - Destination port of the stream
+     * @return
+     */
     public Color checkForStreamStatus(String ip, String dstPort)
     {
         Color retVal = Color.gray;
@@ -427,11 +425,33 @@ public class SnmpMgr implements Runnable{
                 }
             }
              if(lme != null) lme.dataState = retVal_temp; // check if the object is not null 
-        }
-       
+        }       
         return retVal;
     }
-	
+        /**
+     * This returns the stream status in the integer format but specifies the stream
+     * 
+     * @param ip - IP address of the stream
+     * @param dstPort - Destination port of the stream
+     * @return retVal - Connection state: 1 =  stream UP, 2 - Stream down, 0 - No status
+     */
+    public int getStreamConnectionStatus(String ip, String dstPort)
+    {
+        int retVal = 0;
+       
+        Long key = Long.parseLong(ip.replace(".", "") + dstPort);
+      
+        Stream stream = map.get(key);
+        LogMapEntry lme = logMap.get(key);
+        
+        if(stream !=  null){ // check if the object is not null - Fix for Null pointer Exception and NumberFormat Exception
+            if(stream.connectionState.isEmpty())
+                retVal = 0;
+            else
+                retVal = Integer.parseInt(stream.connectionState);
+        }       
+        return retVal;
+    }
 	
 	/**
 	 * Checks if the stream is existing, this is used to stop multiple instances from existing
@@ -513,12 +533,17 @@ public class SnmpMgr implements Runnable{
                 return;
             for (int i = 0; i < entries.length; i++)
             {
-                    //System.out.println(i);
+                //System.out.println(i);
                 String e = entries[i].substring(1,entries[i].length()-1);
                 Stream newStream = Stream.createFromString(e);
                 LogMapEntry newEntry = LogMapEntry.createFromString(e);
                 newEntry.stream = newStream;
-                newStream.populateVars();
+                newEntry.streamName = newStream.streamName; // Fix: if in case the stream name is updated in th enetXpress client and the log file has the old name, update the log entry with the streamname
+                if(newStream.checkIfShutDown() || statusOnly) { // Fix: For error while loading an Out of Service stream to live look.
+                    newStream.populateBaseInfo(); // check if the stream is shutdown while adding it to the Livelook, if Yes  - load basic info only 
+                }
+                else
+                    newStream.populateVars();
 
                 long key = Long.parseLong(newStream.ip.replace(".", "") + newStream.dstPort);
                 //makes sure the stream doesn't exist previously

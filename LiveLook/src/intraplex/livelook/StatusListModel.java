@@ -88,6 +88,7 @@ public class StatusListModel extends AbstractTableModel {
     public Object getValueAt(int i, int i1) {
     	Stream e =  null; // initialize here - NumberFormatException
     	LogMapEntry entry = null;
+        int state = 0;
     	Collection<Stream> col = mgr.map.values();
     	Iterator it =  col.iterator();
     	
@@ -138,13 +139,19 @@ public class StatusListModel extends AbstractTableModel {
             }
 
             if(!e.connectionState.isEmpty()){  // Fix - NumberFormatException / Null pointer Exception
-                    int state = Integer.parseInt(e.connectionState);
-
-                if (state < dataState.length && e.adminState != 2)
-                        return dataState[state];
-                else if(e.adminState == 2)
-                        return dataState[4];
+                state = Integer.parseInt(e.connectionState);
             }
+            else
+            {
+                if(e.checkIfShutDown())
+                 state = 2; // set shut down
+            }
+
+            if (state < dataState.length && e.adminState != 2)
+                    return dataState[state];
+            else if(e.adminState == 2)
+                    return dataState[4];
+           
         }
         else
         {

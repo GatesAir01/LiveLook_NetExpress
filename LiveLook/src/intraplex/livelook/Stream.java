@@ -47,8 +47,13 @@ public class Stream {
     boolean opened;
     boolean statusOnly;
     
-    public boolean StreamDownAlarm = false;
-    public boolean ShutDownAlarm = false;
+    public boolean StreamDownAlarm = true;
+    public boolean ShutDownAlarm = true;
+    public boolean StreamDownAlarmTriggered = false;
+    public boolean ShutDownAlarmTriggered = false;        
+    public long StreamDownAlarmCounter = 0;
+    public long ShutDownAlarmCounter = 0;
+    
     public String readCommunity;
     
 	public Stream(String ip, String streamID, int streamType, boolean populate, boolean statusOnly, String readCommunity) {
@@ -164,14 +169,14 @@ public class Stream {
 		String adminString = snmp.getSnmp(OIDDictionary.getAdminState(streamType), index);
 		try
 		{
-			adminState = Integer.parseInt(adminString);
-			if(adminState == 1) {
-				return false;
-			}
-			else if(adminState == 2)
-			{
-				return true;
-			}
+                    adminState = Integer.parseInt(adminString);
+                    if(adminState == 1) {
+                            return false;
+                    }
+                    else if(adminState == 2)
+                    {
+                            return true;
+                    }
 		}
 		catch(Exception e) 
 		{
@@ -190,7 +195,7 @@ public class Stream {
 	{
 		int count = 0;
 		
-		int tempPacketsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex));
+            int tempPacketsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex));
 	    int tempPacketsLost = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLost(streamType), index, secondIndex));
 	    int tempPacketsRecovered = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsRecovered(streamType), index, secondIndex));
 	    int tempPacketsLate = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLate(streamType), index, secondIndex));

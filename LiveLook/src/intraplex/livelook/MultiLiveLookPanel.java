@@ -112,28 +112,26 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
             traces[i].setMaximumItemCount(600);
             //traces[i].setStroke(new BasicStroke(2));
         }
-        
         charts = new JFreeChart[2];
         charts[0] = createChart(0);
         charts[1] = createChart(4);
-       panels = new ChartPanel[2];
-       for (int p =0; p < 2; p++)
-       {
-        panels[p] = new ChartPanel(charts[p], true, true, true, true, true);
-        panels[p].getPopupMenu().remove(0);
-        ((JMenu)(panels[p].getPopupMenu().getSubElements()[1])).remove(2);
-        panels[p].getPopupMenu().remove(6);
-        panels[p].getPopupMenu().remove(6);
-        panels[p].getPopupMenu().remove(6);
-        panels[p].getPopupMenu().remove(6);
-        
-        panels[p].addChartMouseListener(this);
-       }
-       
+        panels = new ChartPanel[2];
+        for (int p =0; p < 2; p++)
+        {
+             panels[p] = new ChartPanel(charts[p], true, true, true, true, true);
+             panels[p].getPopupMenu().remove(0);
+             ((JMenu)(panels[p].getPopupMenu().getSubElements()[1])).remove(2);
+             panels[p].getPopupMenu().remove(6);
+             panels[p].getPopupMenu().remove(6);
+             panels[p].getPopupMenu().remove(6);
+             panels[p].getPopupMenu().remove(6);
+
+             panels[p].addChartMouseListener(this);
+        }
+
        chart1Container.setLayout(new BorderLayout());
        chart2Container.setLayout(new BorderLayout());
-       
-       
+           
         //Added chartpanel to main panel
         chart1Container.add(panels[0]);
         chart2Container.add(panels[1]);
@@ -155,8 +153,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
             mItem.setActionCommand(base+2);
             mItem.addActionListener(this);
             optionMenu.add(mItem);
-            panels[p].getPopupMenu().add(optionMenu);
-            
+            panels[p].getPopupMenu().add(optionMenu);   
         }
                 
         streamKeys = new TreeMap<>();
@@ -588,14 +585,14 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
 
     private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                     
     	//System.out.println(streamKeys.size());
-    	
+       refreshStreamKeys();
        if (streamKeys.isEmpty())
            return;
-
+       
        String[] streams = streamKeys.keySet().toArray(new String[0]);
        
        String selectedValue = streams[0];
-       if (streams.length > 1)
+       if (streams.length > 0)
        {
             selectedValue = (String)JOptionPane.showInputDialog(null,
             "Select Stream", "Disconnect",
@@ -1256,15 +1253,16 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
     
     public void refreshStreamKeys() {
     	TreeMap<Long, Stream> map = msgMgr.map;
-    	TreeMap<String, Long> sk = new TreeMap<String, Long>();
+    	
+        TreeMap<String, Long> sk = new TreeMap<String, Long>();
     	
     	Iterator it = map.entrySet().iterator();
     	for(int x = 0; x < map.size(); x++) {
     		Map.Entry<Long, Stream> entry = (Map.Entry<Long, Stream>) it.next();
     		sk.put(entry.getValue().streamName, entry.getKey());
-    	}
+            }
     	
-    	streamKeys = sk;
+        streamKeys= sk;
     	
     	if(streamKeys.size() > 0) {
     		disconnectButton.setEnabled(true);

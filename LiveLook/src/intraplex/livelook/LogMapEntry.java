@@ -264,16 +264,17 @@ public class LogMapEntry implements Comparable{
     void writeNaNToLog(IplinkNetworkLogEntry inle) {
     	try {
 			fos.write(inle.getNaNRow() + "\n");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+            } 
+        catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+	    }
     }
     
     void writeToLog(IplinkNetworkLogEntry inle) {
         
         dataState = inle.dataState;
-        boolean shutDown = (stream.adminState == 2);
+        boolean shutDown = (stream.adminState == 2); 
 //        if ( lossRateAlarmEnabled && lastLogEntry != null && lastLogEntry.pktsRcvd - inle.pktsRcvd == 0 && !shutDown)
 //        {        
 //            lossRateGoodCnt = 0;
@@ -355,9 +356,7 @@ public class LogMapEntry implements Comparable{
         if (!enableLogging)
         {
             //System.out.println ("\n Returning without writing to a file.");
-            
-            
-            return;
+             return;
         }
         
         
@@ -456,7 +455,7 @@ public class LogMapEntry implements Comparable{
                 }
             } catch (IOException ex) {
                 
-                 ex.printStackTrace();
+                ex.printStackTrace();
                 fos =  null;
                 fos2 =  null;
             }
@@ -508,7 +507,8 @@ public class LogMapEntry implements Comparable{
     
      public void writeToEventLog(String s)
     {
-        if (fos2 != null)try {
+        if (fos2 != null)
+            try {
             fos2.write(format.format(new Date(System.currentTimeMillis()))+","+s+"\n");
             fos2.flush();
         } catch (IOException ex) {
@@ -585,7 +585,7 @@ public class LogMapEntry implements Comparable{
     public static LogMapEntry createFromString(String s)
     {
         try {
-            String[] parts = s.split(",");
+            String[] parts = s.split(", ");
             String dport = "50000";
             if (parts.length > 19)
             {

@@ -671,7 +671,7 @@ public class NetworkHistoryPanel extends javax.swing.JPanel implements ActionLis
             }
             else
             {
-                JOptionPane.showMessageDialog(null,"File Loaded succeefully", "Message",
+                JOptionPane.showMessageDialog(null,"File Loaded successfully", "Message",
                                 JOptionPane.INFORMATION_MESSAGE);
             }
     }//GEN-LAST:event_loadFileButtonActionPerformed

@@ -395,11 +395,11 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         try
         {
             int value = Integer.parseInt(alarmThresholdTime.getText());
-            if (value < 5)
+            if (value < 5) // snmp request runs every 5 seconds -  dont accept threahold < 5
             {
                JOptionPane.showMessageDialog(this.getParent(),"Minimum alarm threshold time is 5 seconds");
                value = 5;
-               LogMapEntry.next_alarmthresholdTime = value;
+              // LogMapEntry.next_alarmthresholdTime = value;
             }
             else if ((value % 5)>0)
             {

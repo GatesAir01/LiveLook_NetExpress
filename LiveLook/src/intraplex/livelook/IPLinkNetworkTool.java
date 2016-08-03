@@ -132,6 +132,7 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
                 {
                     mgr.loadConnections(s);
                     livelook.refreshStreamKeys();
+                    
                 }
             }
             catch (Exception e)
@@ -227,7 +228,7 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
     public static void updateConnectedStreamstabColor(Color e)
     {
     	if(tabbedPane != null)
-    		tabbedPane.setBackgroundAt(3,e);
+            tabbedPane.setBackgroundAt(3,e);
     }
 
 
