@@ -43,6 +43,7 @@ public class MailSettingsDialog extends javax.swing.JDialog {
     int oldIndex = 0;
     public MailSettingsDialog(IPLinkNetworkTool parent, boolean modal) {
         super(parent, modal);
+        
         streams = parent.mgr.getStreams();
         streamList = new String[streams.size()+1];
         lossRate = new double[streams.size()+1];
@@ -76,6 +77,7 @@ public class MailSettingsDialog extends javax.swing.JDialog {
 	    	if(stream != null) {
 	    		ShutDown[i] = stream.ShutDownAlarm;
 	    		StreamDown[i] = stream.StreamDownAlarm;
+                        alarmthreshold[i] = stream.alarmthresholdtime;
 	    	}
         	
            streamList[i] = e.streamName;
@@ -89,6 +91,7 @@ public class MailSettingsDialog extends javax.swing.JDialog {
            alarmthreshold[i] = e.alarmThresholdStream;
            i++;
         }
+        setTitle("Alarm Settings"); //FIX: added title for the diaglog box
         initComponents();
         man = AlarmManager.getAlarmManager();
         this.mailer = man.getMailer();
@@ -148,6 +151,7 @@ public class MailSettingsDialog extends javax.swing.JDialog {
 	    	if(stream != null) {
 	    		ShutDown[i] = stream.ShutDownAlarm;
 	    		StreamDown[i] = stream.StreamDownAlarm;
+                        alarmthreshold[i] = stream.alarmthresholdtime;
 	    	}
 	    	
            streamList[i] = e.streamName;
@@ -721,8 +725,18 @@ public class MailSettingsDialog extends javax.swing.JDialog {
 	    	int index = i;
 	    	
 	    	if(stream != null) {
-		    	stream.ShutDownAlarm = ShutDown[index];
-		    	stream.StreamDownAlarm = StreamDown[index];
+                    if(enableDefault[index] == false) // Fix: if default has to be used for every stream in the list
+                    {
+                        stream.ShutDownAlarm = ShutDown[index];         
+                      	stream.StreamDownAlarm = StreamDown[index];
+                        stream.alarmthresholdtime = alarmthreshold[index];
+                    }
+                    else
+                    {
+                        stream.ShutDownAlarm = ShutDown[0]; // Fix: if default has to be used - copy the default configuration
+                      	stream.StreamDownAlarm = StreamDown[0];
+                        stream.alarmthresholdtime = alarmthreshold[0];
+                    }
 	    	}
 	    	
            e.useDefault = enableDefault[index];
