@@ -428,7 +428,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    @SuppressWarnings("empty-statement")
+    @SuppressWarnings({"empty-statement", "UnnecessaryReturnStatement"})
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
     // Open the Dialog box for adding new connection
     ConnectIPLinkDialog cipd = new ConnectIPLinkDialog(null,true, lite);
@@ -471,7 +471,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
 	     //System.out.println(" enable logging in Wait Dialog is "+waitDialog.enableLogging);
 	        if (waitDialog.connected)
 	        {
-	            if (streamKeys.size() <= 2 && !stream.statusOnly)
+	            if (streamKeys.size() <= 2 && !stream.statusOnly)    /* <= 2*/
 	            {
 	                long streamKey1 = 0;
 	                long newKey = 0;
@@ -638,7 +638,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
        for (int p =0; p < 2; p++)
        {
-        panels[p].restoreAutoBounds();
+            panels[p].restoreAutoBounds();
        }
                 
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -1184,9 +1184,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         
     }
     
-   
-    
-    
+
     public void reloadConfiguation()     
     {
         

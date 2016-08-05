@@ -274,7 +274,19 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
         {
 
            livelookconfig.setProperty("Connections", mgr.getConnectionsForSave());
-           livelookconfig.save();
+           if (livelookconfig.save())
+           {
+                JOptionPane.showMessageDialog(this,
+                "Connections are saved successfully", "Remember Connections",
+                JOptionPane.INFORMATION_MESSAGE);
+           }
+           else
+           {
+                JOptionPane.showMessageDialog(this,
+                "Failed to save connections", "Remember Connections",
+                JOptionPane.ERROR_MESSAGE);
+           }
+           
         }
         else if (ae.getActionCommand().equals("DEFC"))
         {

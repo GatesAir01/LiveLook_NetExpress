@@ -15,9 +15,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Iterator;
+//import java.net.URISyntaxException;
+//import java.util.Collection;
+//import java.util.Iterator;
 
 import javax.swing.JButton;
 import javax.swing.JTable;
@@ -38,11 +38,11 @@ public  class StatusTableCellRender extends DefaultTableCellRenderer
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
         this.table = table;
-        table.addMouseListener(this);
+       // table.addMouseListener(this); // really need mouse listener for status table ?? try remove and see
         
         if (column == 3)
         {
-        	JButton button = new JButton();
+            JButton button = new JButton();
             button.setText(value.toString());
             return button;
         }

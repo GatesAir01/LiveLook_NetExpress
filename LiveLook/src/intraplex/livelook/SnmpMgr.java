@@ -96,6 +96,7 @@ public class SnmpMgr implements Runnable{
             Stream stream = new Stream(ip, streamID, nextStreamType, true, statusOnly, readCommunity);
             stream.StreamDownAlarm = StreamDownAlarm;
             stream.ShutDownAlarm = ShutDownAlarm;
+            
             if(stream.streamName.isEmpty())
                 return null;
             Long temp = Long.parseLong(ip.replace(".", "") + stream.dstPort);
@@ -122,7 +123,10 @@ public class SnmpMgr implements Runnable{
 	public void refreshStreams()
         {
             for(Stream stream: map.values()) {
-                    stream.populateVars();
+                 if(stream.checkIfShutDown() || stream.statusOnly)    // if stream is shut down,call to populatevars will throw an error!
+                    stream.populateBaseInfo();
+                 else
+                     stream.populateVars();
             }      
         }
 	
@@ -225,9 +229,8 @@ public class SnmpMgr implements Runnable{
                     if(stream.ShutDownAlarm && !stream.ShutDownAlarmTriggered)
                     { 
                         stream.ShutDownAlarmCounter += (System.currentTimeMillis() -  e.lastEntry);;
-                        System.out.println("Shut down alarm counter for" +stream.streamName + " increase="+ stream.ShutDownAlarmCounter);   
-                   
-                        if(stream.ShutDownAlarmCounter >= stateConnectionAlarmThreshold && !stream.ShutDownAlarmTriggered && stream.ShutDownAlarm)
+                                          
+                        if(stream.ShutDownAlarmCounter >= (stream.alarmthresholdtime*1000) && !stream.ShutDownAlarmTriggered && stream.ShutDownAlarm)
                         {
                             e.writeToEventLog(e.streamName + ", " + "Stream is shut down");
                             e.generateAlarm("Stream is shut down");
@@ -243,7 +246,7 @@ public class SnmpMgr implements Runnable{
                     if(stream.ShutDownAlarmTriggered){
                         stream.ShutDownAlarmCounter += (((System.currentTimeMillis() -  e.lastEntry)));
                    
-                        if(stream.ShutDownAlarmCounter >= stateConnectionAlarmThreshold  && stream.ShutDownAlarm){
+                        if(stream.ShutDownAlarmCounter >= (stream.alarmthresholdtime*1000)  && stream.ShutDownAlarm){
                             stream.ShutDownAlarmTriggered = false;
                             e.writeToEventLog(e.streamName + ", " + "Stream is up");
                             e.generateAlarm("Stream is up");
@@ -261,13 +264,13 @@ public class SnmpMgr implements Runnable{
                 stream.updateConnectionState();
                 int conState = getStreamConnectionStatus(stream.ip, stream.dstPort);
 
-                if (conState == 2){ // stream down -  RED!
+                if (conState == 2 && !stream.checkIfShutDown()){ // stream down -  RED! only
                     if(stream.StreamDownAlarm && !stream.StreamDownAlarmTriggered  ) 
                     {
                         if(!stream.ShutDownAlarmTriggered){ // if a stream is already shut down (outof service), then dont trigger the stream down alarm once more
                             //This writes to the log and then counts till the alarm is triggered
                             stream.StreamDownAlarmCounter += (System.currentTimeMillis() -  e.lastEntry);
-                            if( (stream.StreamDownAlarmCounter >= (stateConnectionAlarmThreshold*1000))&& !stream.StreamDownAlarmTriggered)
+                            if( (stream.StreamDownAlarmCounter >= (stream.alarmthresholdtime*1000))&& !stream.StreamDownAlarmTriggered)
                             {
                                 e.writeToEventLog(e.streamName + ", " + "Stream is down");
                                 e.generateAlarm("Stream is down");
@@ -287,7 +290,7 @@ public class SnmpMgr implements Runnable{
                      
                     if(stream.StreamDownAlarmTriggered){ // Stream up alarm is required only if the stream down is already triggered
                         stream.StreamDownAlarmCounter += (((System.currentTimeMillis() -  e.lastEntry)));
-                        if((stream.StreamDownAlarmCounter >= (stateConnectionAlarmThreshold*1000)) && stream.StreamDownAlarm ){
+                        if((stream.StreamDownAlarmCounter >= (stream.alarmthresholdtime*1000)) && stream.StreamDownAlarm ){
                             stream.StreamDownAlarmTriggered = false; 
                             e.writeToEventLog(e.streamName + ", " + "Stream is up");
                             e.generateAlarm("Stream is up");

@@ -263,8 +263,55 @@ public class LogMapEntry implements Comparable{
     
     void writeNaNToLog(IplinkNetworkLogEntry inle) {
     	try {
-			fos.write(inle.getNaNRow() + "\n");
+            if(fos == null)
+            {
+                 String base = "logs/"+address.toString().replace("/", "")+"/"+ streamName+"-"+index+"-"+getDate(inle.timestamp);
+                 try {
+                        File f = new File(base+".csv").getAbsoluteFile();
+                        int count = 0;
+                        boolean oldFile =false;
+                        while (f.exists())
+                        {
+                           System.out.println("");
+                            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+                            String headerline = br.readLine();
+                            br.close();
+                            if (headerline.equals(getBase()))
+                            {
+                                oldFile = true;
+                                break;
+                            }
+                            f = new File(base+"-"+count+".csv").getAbsoluteFile();
+                            count++;
+                 
+                        }
+                        fileName = f.getAbsolutePath();
+                        fos = new FileWriter(f,true);
+
+                        if (!oldFile)
+                        {
+                            fos.write(getBase()+"\n");
+                        }
+                 }
+                  catch (IOException ex) {
+                    //Make sure the directory exists
+                    File logDir = new File("logs").getAbsoluteFile();
+                    if (!logDir.exists()) {
+                        if (logDir.mkdir())System.out.println("The directory was created");
+                    }
+                    logDir = new File("logs/"+"/"+address.toString().replace("/", "")).getAbsoluteFile();
+                    if (!logDir.exists()) {
+                        if (logDir.mkdir())System.out.println("The directory was created");
+                    }
+                    fos =  null;  
+                }
+            }
+            else
+            {
+                if(inle!= null)
+                    fos.write(inle.getNaNRow() + "\n");
             } 
+        }
         catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

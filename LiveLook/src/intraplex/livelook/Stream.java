@@ -47,13 +47,14 @@ public class Stream {
     boolean opened;
     boolean statusOnly;
     
+    //Fix:  added to fix alarm timing issues
     public boolean StreamDownAlarm = true;
     public boolean ShutDownAlarm = true;
     public boolean StreamDownAlarmTriggered = false;
     public boolean ShutDownAlarmTriggered = false;        
     public long StreamDownAlarmCounter = 0;
     public long ShutDownAlarmCounter = 0;
-    
+    public int alarmthresholdtime = 30;    // default
     public String readCommunity;
     
 	public Stream(String ip, String streamID, int streamType, boolean populate, boolean statusOnly, String readCommunity) {
@@ -193,7 +194,7 @@ public class Stream {
 	
 	public boolean updatePacketsSkipped() 
 	{
-		int count = 0;
+            int count = 0;
 		
             int tempPacketsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex));
 	    int tempPacketsLost = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLost(streamType), index, secondIndex));
@@ -227,8 +228,8 @@ public class Stream {
 			//System.out.println(tempPacketsReceived + ":" + packetsReceived + ", " +  tempPacketsLost + ":" + packetsLost
 	    	//	+ ", " + tempPacketsRecovered + ":" +  packetsRecovered + ", " +  tempPacketsLate + ":" +  packetsLate
 	    	//	+ ", " +  tempPacketsEarly + ":" +  packetsEarly);
-			count++;
-			tempPacketsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + count));
+                    count++;
+                    tempPacketsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + count));
 		    tempPacketsLost = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLost(streamType), index, secondIndex + count));
 		    tempPacketsRecovered = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsRecovered(streamType), index, secondIndex + count));
 		    tempPacketsLate = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLate(streamType), index, secondIndex + count));
