@@ -7,7 +7,6 @@
 package intraplex.livelook;
 
 import static intraplex.livelook.IPLinkNetworkTool.livelookconfig;
-import static intraplex.livelook.IPLinkNetworkTool_Lite.livelookconfiglite;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -88,10 +87,8 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
     private int tracefontsize;
     private String tracenumberformat;
     private int numberpad;
-    boolean lite;
     
-    public MultiLiveLookPanel(SnmpMgr mgr, boolean lite) {
-    	this.lite = lite;
+    public MultiLiveLookPanel(SnmpMgr mgr) {
         loadConfiguation();
         initComponents();
         intervalBox.setSelectedIndex(loadedInterval);
@@ -431,7 +428,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
     @SuppressWarnings({"empty-statement", "UnnecessaryReturnStatement"})
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
     // Open the Dialog box for adding new connection
-    ConnectIPLinkDialog cipd = new ConnectIPLinkDialog(null,true, lite);
+    ConnectIPLinkDialog cipd = new ConnectIPLinkDialog(null,true);
     cipd.setVisible(true);
    //  cipd.enableLogging
     if(cipd.iPAddress == null) // if user didnot enter valid data -  Fix: NullPointerException
@@ -550,14 +547,8 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
 
     private void intervalBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_intervalBoxActionPerformed
 
-    	if(!lite){
-        	livelookconfig.put("LiveView.Interval",(interval[intervalBox.getSelectedIndex()]/1000)+"");
-            livelookconfig.save();
-        }
-        else {
-        	livelookconfiglite.put("LiveView.Interval",(interval[intervalBox.getSelectedIndex()]/1000)+"");
-            livelookconfiglite.save();
-        }
+    	livelookconfig.put("LiveView.Interval",(interval[intervalBox.getSelectedIndex()]/1000)+"");
+        livelookconfig.save();
                 
         updateNeeded++;
     }//GEN-LAST:event_intervalBoxActionPerformed
@@ -1086,32 +1077,20 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                 
                 int offset = charts[0] == event.getChart()? 0 : 4;
                 
-                if(!lite) {
-                	for (int i = 0; i < dataset.getSeriesCount(); i++) {
-                        if (dataset.getSeriesKey(i).equals(seriesKey)) {
-                            Color c = (Color)renderer.getSeriesPaint(i);
-                            c = JColorChooser.showDialog(this, "Change Color", c);
-                            livelookconfig.put("LiveView.Trace."+(offset+i+1)+".Color",Integer.toHexString(c.getRGB()));
-                            livelookconfig.save();
-                            renderer.setSeriesPaint(i, c);
-                            break;
-                            
+            	for (int i = 0; i < dataset.getSeriesCount(); i++) {
+                    if (dataset.getSeriesKey(i).equals(seriesKey)) {
+                        Color c = (Color)renderer.getSeriesPaint(i);
+                        c = JColorChooser.showDialog(this, "Change Color", c);
+                        if(c != null) {
+	                        livelookconfig.put("LiveView.Trace."+(offset+i+1)+".Color",Integer.toHexString(c.getRGB()));
+	                        livelookconfig.save();
                         }
+                        renderer.setSeriesPaint(i, c);
+                        break;
+                        
                     }
                 }
-                else {
-                	for (int i = 0; i < dataset.getSeriesCount(); i++) {
-                        if (dataset.getSeriesKey(i).equals(seriesKey)) {
-                            Color c = (Color)renderer.getSeriesPaint(i);
-                            c = JColorChooser.showDialog(this, "Change Color", c);
-                            livelookconfiglite.put("LiveView.Trace."+(offset+i+1)+".Color",Integer.toHexString(c.getRGB()));
-                            livelookconfiglite.save();
-                            renderer.setSeriesPaint(i, c);
-                            break;
-                            
-                        }
-                    }
-                }
+                
             }
         }
     }
@@ -1136,18 +1115,12 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         traceColors[6] = Color.white;
         traceColors[7] = new Color(255,104,179);
         
-        if(!lite){
-        	tracefont = (String) livelookconfig.get("Trace.FontName");
-  	        tracefontsize = livelookconfig.getInt("Trace.FontSize",12);
-  	        tracenumberformat = (String) livelookconfig.get("Trace.NumberFormat");
-  	        numberpad = livelookconfig.getInt("Trace.NumberPad",5);
-        }
-        else {
-        	tracefont = (String) livelookconfiglite.get("Trace.FontName");
-	        tracefontsize = livelookconfiglite.getInt("Trace.FontSize",12);
-	        tracenumberformat = (String) livelookconfiglite.get("Trace.NumberFormat");
-	        numberpad = livelookconfiglite.getInt("Trace.NumberPad",5);
-        }
+        
+    	tracefont = (String) livelookconfig.get("Trace.FontName");
+        tracefontsize = livelookconfig.getInt("Trace.FontSize",12);
+        tracenumberformat = (String) livelookconfig.get("Trace.NumberFormat");
+        numberpad = livelookconfig.getInt("Trace.NumberPad",5);
+
         
         if (tracefont == null)
             tracefont = "Courier New";
@@ -1158,7 +1131,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         {
           try
           {
-        	  String s = (lite)?(String)livelookconfiglite.get("LiveView.Trace."+(i+1)+".Color"):(String)livelookconfig.get("LiveView.Trace."+(i+1)+".Color");
+        	  String s = (String)livelookconfig.get("LiveView.Trace."+(i+1)+".Color");
               int x = (int)Long.parseLong(s, 16);
               traceColors[i] = new Color(x);
           }
@@ -1168,7 +1141,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         }
         try
           {
-        	int s = Integer.parseInt((lite)?(String)livelookconfiglite.get("LiveView.Interval"):(String)livelookconfig.get("LiveView.Interval"))*1000;
+        	int s = Integer.parseInt((String)livelookconfig.get("LiveView.Interval"))*1000;
               for (int i = 0; i < interval.length; i++)
               {
                   if (s == interval[i])
@@ -1205,7 +1178,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         {
           try
           {
-        	  String s = (lite)?(String)livelookconfiglite.get("LiveView.Trace."+(i+1)+".Color"):(String)livelookconfig.get("LiveView.Trace."+(i+1)+".Color");
+        	  String s = (String)livelookconfig.get("LiveView.Trace."+(i+1)+".Color");
               int x = (int)Long.parseLong(s, 16);
               traceColors[i] = new Color(x);
           }
@@ -1231,7 +1204,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         loadedInterval = 0;
         try
           {
-        	int s = Integer.parseInt((lite)?(String)livelookconfiglite.get("LiveView.Interval"):(String)livelookconfig.get("LiveView.Interval"))*1000;
+        	int s = Integer.parseInt((String)livelookconfig.get("LiveView.Interval"))*1000;
               for (int i = 0; i < interval.length; i++)
               {
                   if (s == interval[i])

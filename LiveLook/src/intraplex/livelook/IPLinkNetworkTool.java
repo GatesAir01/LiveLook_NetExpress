@@ -53,7 +53,6 @@ import javax.swing.text.html.HTMLDocument;
 
 public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowListener{
 
-	boolean lite = false;
     NetworkHistoryPanel history;
     MultiLiveLookPanel livelook;
     JEditorPane report;
@@ -112,9 +111,9 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
         history = new NetworkHistoryPanel(filename,report);
         tabbedPane = new JTabbedPane();
         macList = new MacList();
-        mgr = new SnmpMgr(lite, macList);
+        mgr = new SnmpMgr(macList);
         showLivelook = false;
-        livelook = new MultiLiveLookPanel(mgr, lite);
+        livelook = new MultiLiveLookPanel(mgr);
         while (mgr.bindState() == 0)
         {
             try {
@@ -258,7 +257,7 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
 
         if (ae.getActionCommand().equals("ABOUT"))
         {
-            AboutDialog dialog = new AboutDialog(this, true, lite);
+            AboutDialog dialog = new AboutDialog(this, true);
             dialog.setVisible(true);
         }
         else if (ae.getActionCommand().equals("SAVE"))

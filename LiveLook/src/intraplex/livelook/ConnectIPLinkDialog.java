@@ -1,7 +1,6 @@
 package intraplex.livelook;
 
 import static intraplex.livelook.IPLinkNetworkTool.config;
-import static intraplex.livelook.IPLinkNetworkTool_Lite.configlite;
 
 import java.net.InetAddress;
 import javax.swing.JOptionPane;
@@ -18,27 +17,21 @@ import javax.swing.JOptionPane;
  */
 public class ConnectIPLinkDialog extends javax.swing.JDialog {
     private String dPort;
-    boolean lite;
     public String readCom;
 
     /**
      * Creates new form ConnectIPLinkDialog
      */
-    public ConnectIPLinkDialog(java.awt.Frame parent, boolean modal, boolean lite) {
+    public ConnectIPLinkDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.lite = lite;
         setTitle("Connect to Stream");
         initComponents();
         
         loadConfiguation();
-        if(!lite) {
-	        enableEmailAlarms.setSelected(LogMapEntry.default_enableEmail);
-	        enableDataLogging.setSelected(LogMapEntry.default_enableStreamLogging);
-        }
-        else {
-        	enableEmailAlarms.setSelected(false);
-	        enableDataLogging.setSelected(false);
-        }
+        
+        enableEmailAlarms.setSelected(LogMapEntry.default_enableEmail);
+        enableDataLogging.setSelected(LogMapEntry.default_enableStreamLogging);
+
         enableEmailAlarms.setSelected(LogMapEntry.default_enableEmail);
         NetXpressBox.setSelected(true);
         FullMonitoring.setSelected(true);
@@ -54,22 +47,21 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
         LogMapEntry.next_lossRateCorrectedAlarm = LogMapEntry.default_lossRateCorrectedAlarm;
         LogMapEntry.next_alarmthresholdTime = LogMapEntry.default_alarmthresholdTime;
         LogMapEntry.next_enableStreamLogging = LogMapEntry.default_enableStreamLogging;
-        LogMapEntry.next_useDefault = (lite)?false:true;
+        LogMapEntry.next_useDefault = true;
         
-        useDefaultBox.setSelected((lite)?false:true);
-        useDefaultSet((lite)?false:(!(useDefaultBox.isSelected())));
-        if(lite)useDefaultBox.setEnabled(false);
+        useDefaultBox.setSelected(true);
+        useDefaultSet((!(useDefaultBox.isSelected())));
     }
 
     public void loadConfiguation()     
     {
         try
         {
-            String ipaddress = (lite)?configlite.get("Last.IP").toString():config.get("Last.IP").toString();
+            String ipaddress = config.get("Last.IP").toString();
             ipAddress.setText(ipaddress);
-            String index= (lite)?configlite.get("Last.Index").toString():config.get("Last.Index").toString();
+            String index= config.get("Last.Index").toString();
             streamIndex.setText(index);
-            String readCom = (lite)?configlite.get("Last.ReadCommunity").toString():config.get("Last.readCommunity").toString();
+            String readCom = config.get("Last.readCommunity").toString();
             readCommunity.setText(readCom);
             //EnableLoggingCheckBox.setSelected(true);            
         }
@@ -438,18 +430,12 @@ public class ConnectIPLinkDialog extends javax.swing.JDialog {
             SnmpMgr.StreamDownAlarm = StreamDownAlarm.isSelected();
         }
         
-        if(!lite) {
-            config.put("Last.IP",iPAddress);
-    	    config.put("Last.Index",stream);
-    	    config.put("Last.ReadCommunity", readCom);
-    	    config.save();
-        }
-        else {
-            configlite.put("Last.IP",iPAddress);
-    	    configlite.put("Last.Index",stream);
-    	    configlite.put("Last.ReadCommunity", readCom);
-    	    configlite.save();
-        }
+
+        config.put("Last.IP",iPAddress);
+	    config.put("Last.Index",stream);
+	    config.put("Last.ReadCommunity", readCom);
+	    config.save();
+
         
     //JOptionPane.showMessageDialog(this, enableLogging);
     setVisible(false);

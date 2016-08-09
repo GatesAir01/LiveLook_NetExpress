@@ -7,7 +7,6 @@
 package intraplex.alarms;
 
 import intraplex.livelook.IPLinkNetworkTool;
-import intraplex.livelook.IPLinkNetworkTool_Lite;
 import intraplex.livelook.LogMapEntry;
 import intraplex.livelook.SnmpMgr;
 import intraplex.livelook.Stream;
@@ -92,79 +91,6 @@ public class MailSettingsDialog extends javax.swing.JDialog {
            i++;
         }
         setTitle("Alarm Settings"); //FIX: added title for the diaglog box
-        initComponents();
-        man = AlarmManager.getAlarmManager();
-        this.mailer = man.getMailer();
-        destEmailAddress.setText(mailer.getAlarmToUsername());
-        emailPassword.setText(mailer.getAlarmFromPassword());
-        sourceEmail.setText(mailer.getAlarmFromUsername());
-        serverAddress.setText(mailer.getServerAddress());
-        serverPort.setText(mailer.getPort());
-        enableEmailAlarms.setSelected(LogMapEntry.default_enableEmail);
-        alarmThresholdTime.setText(LogMapEntry.default_alarmthresholdTime + "");
-        if(SnmpMgr.statusOnly) {
-        	StreamDownAlarm.setSelected(SnmpMgr.DefaultStreamDownAlarm);
-        }
-        else {
-        	StreamDownAlarm.setSelected(LogMapEntry.default_lossRateAlarmEnabled);
-        }
-        ShutDownAlarm.setSelected(SnmpMgr.DefaultShutDownAlarm);
-        enableDataLogging.setSelected(LogMapEntry.default_enableStreamLogging);
-        useDefaultBox.setSelected(true);
-        emailAlarmsSet(man.isSendEmailAlarms());
-        globalEnableEmail.setSelected(man.isSendEmailAlarms());
-        useDefaultBox.setVisible(false);
-        //emailAlarmsFailOnly.setSelected(man.getEmailLevel() == Level.SEVERE);
-        setVisible(true);
-    }
-    
-    public MailSettingsDialog(IPLinkNetworkTool_Lite parent, boolean modal) {
-        super(parent, modal);
-        streams = parent.mgr.getStreams();
-        streamList = new String[streams.size()+1];
-        lossRate = new double[streams.size()+1];
-        lossRateAfterCorrection = new double[streams.size()+1];
-        alarmthreshold = new int [streams.size()+1];
-        enablelossRate = new boolean[streams.size()+1];
-        enablelossRateAfterCorrection = new boolean[streams.size()+1];
-        enableDefault = new boolean[streams.size()+1];
-        enableEmail = new boolean[streams.size()+1];
-        enableStreamLogging = new boolean[streams.size()+1];
-        streamList[0] = "Default Profile";
-        lossRate[0] = LogMapEntry.default_lossRateAlarm*100;
-        lossRateAfterCorrection[0] = LogMapEntry.default_lossRateCorrectedAlarm*100;
-        alarmthreshold[0] = LogMapEntry.default_alarmthresholdTime;
-        enablelossRate[0] = LogMapEntry.default_lossRateAlarmEnabled;
-        ShutDown[0] = SnmpMgr.DefaultShutDownAlarm;
-        StreamDown[0] = SnmpMgr.DefaultStreamDownAlarm;
-        enablelossRateAfterCorrection[0] = LogMapEntry.default_lossRateCorrectedAlarmEnabled;
-        enableDefault[0] = true;
-        enableEmail[0] = true;
-        enableStreamLogging[0] = true;
-        
-        int i = 1;
-        for (LogMapEntry e : streams)
-        {
-        	IPLinkNetworkTool ip = (IPLinkNetworkTool) super.getParent();
-        	Stream stream = ip.mgr.getStream("" + e.address.toString().replace("/", "").replace(".", ""), "" + e.destPort);
-	    	
-	    	if(stream != null) {
-	    		ShutDown[i] = stream.ShutDownAlarm;
-	    		StreamDown[i] = stream.StreamDownAlarm;
-                        alarmthreshold[i] = stream.alarmthresholdtime;
-	    	}
-	    	
-           streamList[i] = e.streamName;
-           lossRate[i] = e.lossRateAlarm*100;
-           lossRateAfterCorrection[i] = e.lossRateCorrectedAlarm*100;
-           enablelossRate[i] = e.lossRateAlarmEnabled;
-           enablelossRateAfterCorrection[i] = e.lossRateCorrectedAlarmEnabled;
-           enableDefault[i] = e.useDefault;
-           enableEmail[i] = e.enableEmail;
-           enableStreamLogging[i] = e.enableLogging;
-           alarmthreshold[i] = e.alarmThresholdStream;
-           i++;
-        }
         initComponents();
         man = AlarmManager.getAlarmManager();
         this.mailer = man.getMailer();

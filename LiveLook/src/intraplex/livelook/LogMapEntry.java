@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 
 
 import static intraplex.livelook.IPLinkNetworkTool.livelookconfig;
-import static intraplex.livelook.IPLinkNetworkTool_Lite.livelookconfiglite;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -700,23 +699,4 @@ public class LogMapEntry implements Comparable{
         LogMapEntry.next_useDefault = true;
     }
     
-    public static void loadConfigLite()
-    {
-        default_lossRateAlarm=livelookconfiglite.getDouble("Alert.LossRatePercent",.05);
-        default_lossRateCorrectedAlarm=livelookconfiglite.getDouble("Alert.CorrectedLossRatePercent",.01);
-        default_lossRateAlarmEnabled=livelookconfiglite.getBoolean("Alert.EnableLossRate",false);
-        default_lossRateCorrectedAlarmEnabled=livelookconfiglite.getBoolean("Alert.EnableCorrectedLossRate",false);
-        default_enableEmail=livelookconfiglite.getBoolean("Alert.EnableEmail",true);
-        default_enableStreamLogging=livelookconfiglite.getBoolean("Alert.EnableStreamLogging", true);
-        default_alarmthresholdTime=livelookconfiglite.getInt("Alert.alarmthresholdtime", 30);
-        
-        LogMapEntry.next_lossRateAlarmEnabled = LogMapEntry.default_lossRateAlarmEnabled;
-        LogMapEntry.next_lossRateCorrectedAlarmEnabled = LogMapEntry.default_lossRateCorrectedAlarmEnabled;
-        LogMapEntry.next_enableEmail = LogMapEntry.default_enableEmail;
-        LogMapEntry.next_lossRateAlarm = LogMapEntry.default_lossRateAlarm;
-        LogMapEntry.next_lossRateCorrectedAlarm = LogMapEntry.default_lossRateCorrectedAlarm;
-        LogMapEntry.next_alarmthresholdTime = LogMapEntry.default_alarmthresholdTime;
-        LogMapEntry.next_enableStreamLogging = LogMapEntry.default_enableStreamLogging;
-        LogMapEntry.next_useDefault = true;
-    }
 }

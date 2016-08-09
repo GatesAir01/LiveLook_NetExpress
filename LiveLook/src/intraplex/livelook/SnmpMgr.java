@@ -41,7 +41,6 @@ public class SnmpMgr implements Runnable{
     TreeMap<Long, IplinkNetworkLogEntry> lastEntryMap;
     ArrayList<NetworkLogDataPoint> queuedPoints;
     boolean bindfailed;
-    boolean lite;
     IplinkNetworkLogEntry lastLogEntry;
     MacList macList;
     int shutDownCount;
@@ -65,7 +64,7 @@ public class SnmpMgr implements Runnable{
 	 * @param lite		This is not necessary for NetXpress but for IPLINK it tells if it is lite version or not
 	 * @param macList	This is the list of MacAdresses allowed to connect to
 	 */
-	public SnmpMgr(boolean lite, MacList macList) {
+	public SnmpMgr(MacList macList) {
             lastLogEntry = null;
             bindfailed = false;
             map = new TreeMap<>();
@@ -74,7 +73,6 @@ public class SnmpMgr implements Runnable{
             queuedPoints = new ArrayList<>();
             mgr = this;
             this.macList = macList;
-            this.lite = lite;
             shutDownCount = 0;
             redStatusCount = 0;
             String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());

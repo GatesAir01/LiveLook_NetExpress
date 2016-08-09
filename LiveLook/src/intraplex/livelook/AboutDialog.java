@@ -11,15 +11,13 @@ package intraplex.livelook;
  * @author jschreiv
  */
 public class AboutDialog extends javax.swing.JDialog {
-	static boolean lite;
 
     /**
      * Creates new form AboutDialog
      */
     public static final String version = "B1.0";
-    public AboutDialog(java.awt.Frame parent, boolean modal, boolean lite) {
+    public AboutDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.lite = lite;
         initComponents();
         versionLabel.setText(version);
     }
@@ -132,7 +130,7 @@ public class AboutDialog extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                AboutDialog dialog = new AboutDialog(new javax.swing.JFrame(), true, lite);
+                AboutDialog dialog = new AboutDialog(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
