@@ -189,6 +189,8 @@ public class MacList extends javax.swing.JPanel {
 
             if(!loadFile(fileName))
                  JOptionPane.showMessageDialog(this, "File Load failed!");
+            else
+            	JOptionPane.showMessageDialog(this, "File Load Succesful.");
                 
         }
         else {

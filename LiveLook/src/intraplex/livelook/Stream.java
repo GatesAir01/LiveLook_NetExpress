@@ -194,9 +194,9 @@ public class Stream {
 	
 	public boolean updatePacketsSkipped() 
 	{
-            int count = 0;
+        int count = 0;
 		
-            int tempPacketsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex));
+        int tempPacketsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex));
 	    int tempPacketsLost = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLost(streamType), index, secondIndex));
 	    int tempPacketsRecovered = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsRecovered(streamType), index, secondIndex));
 	    int tempPacketsLate = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLate(streamType), index, secondIndex));
@@ -228,8 +228,8 @@ public class Stream {
 			//System.out.println(tempPacketsReceived + ":" + packetsReceived + ", " +  tempPacketsLost + ":" + packetsLost
 	    	//	+ ", " + tempPacketsRecovered + ":" +  packetsRecovered + ", " +  tempPacketsLate + ":" +  packetsLate
 	    	//	+ ", " +  tempPacketsEarly + ":" +  packetsEarly);
-                    count++;
-                    tempPacketsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + count));
+            count++;
+            tempPacketsReceived = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + count));
 		    tempPacketsLost = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLost(streamType), index, secondIndex + count));
 		    tempPacketsRecovered = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsRecovered(streamType), index, secondIndex + count));
 		    tempPacketsLate = Integer.parseInt(snmp.getSnmp(OIDDictionary.getPacketsLate(streamType), index, secondIndex + count));

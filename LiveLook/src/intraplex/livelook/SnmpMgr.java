@@ -151,8 +151,17 @@ public class SnmpMgr implements Runnable{
                         //NetXpress only updates the mibs every 10 seconds thus when polling 
                         //every 5 seconds approximately you have to take this into account
                         //updatePacketsSkipped() will show how many times this info must be repolled and displayed
-                        boolean reset = stream.updatePacketsSkipped();
-                        int packetsSkipped = stream.packetsSkipped;
+                        boolean reset; 
+                        int packetsSkipped;
+                        try {
+                        	reset = stream.updatePacketsSkipped();
+                            packetsSkipped = stream.packetsSkipped;
+                        }
+                        catch(NumberFormatException e) {
+                        	reset = true;
+                        	packetsSkipped = 0;
+                        	System.out.println("prevented exception");
+                        }
 
                         //if no packets have been skipped we can update and post one point
                         if(packetsSkipped == 0) {
