@@ -136,8 +136,6 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
             }
             catch (Exception e)
             {
-            	System.out.println("ERROR LOADING PREVIOUS CONNECTIONS");
-            	e.printStackTrace();
             }
         	
             showLivelook = true;

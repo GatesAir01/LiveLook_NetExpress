@@ -553,13 +553,58 @@ public class LogMapEntry implements Comparable{
     
      public void writeToEventLog(String s)
     {
-        if (fos2 != null)
+    	 if(fos2 == null)
+         {
+    		 String base = "logs/"+address.toString().replace("/", "")+"/Event_Log_"+ streamName+"-"+index+"-"+getDate(System.currentTimeMillis());
+              try {
+                     File f = new File(base+".csv").getAbsoluteFile();
+                     int count = 0;
+                     boolean oldFile =false;
+                     while (f.exists())
+                     {
+                        System.out.println("");
+                         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+                         String headerline = br.readLine();
+                         br.close();
+                         if (headerline.equals(getBase()))
+                         {
+                             oldFile = true;
+                             break;
+                         }
+                         f = new File(base+"-"+count+".csv").getAbsoluteFile();
+                         count++;
+              
+                     }
+                     fileName = f.getAbsolutePath();
+                     fos2 = new FileWriter(f,true);
+
+                     if (!oldFile)
+                     {
+                    	 fos2.write(format.format(new Date(System.currentTimeMillis()))+","+s+"\n");
+         	             fos2.flush();
+                     }
+              }
+               catch (IOException ex) {
+                 //Make sure the directory exists
+                 File logDir = new File("logs").getAbsoluteFile();
+                 if (!logDir.exists()) {
+                     if (logDir.mkdir())System.out.println("The directory was created");
+                 }
+                 logDir = new File("logs/"+"/"+address.toString().replace("/", "")).getAbsoluteFile();
+                 if (!logDir.exists()) {
+                     if (logDir.mkdir())System.out.println("The directory was created");
+                 }
+                 fos2 =  null;  
+             }
+         }
+    	 else {
             try {
-            fos2.write(format.format(new Date(System.currentTimeMillis()))+","+s+"\n");
-            fos2.flush();
-        } catch (IOException ex) {
-            Logger.getLogger(LogMapEntry.class.getName()).log(Level.SEVERE, null, ex);
-        }
+	            fos2.write(format.format(new Date(System.currentTimeMillis()))+","+s+"\n");
+	            fos2.flush();
+	        } catch (IOException ex) {
+	            Logger.getLogger(LogMapEntry.class.getName()).log(Level.SEVERE, null, ex);
+	        }
+    	 }
     }
     
     public void generateAlarm(String alarmString) {

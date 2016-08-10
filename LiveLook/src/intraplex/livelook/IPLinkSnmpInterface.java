@@ -16,6 +16,7 @@ import snmp.SNMPOctetString;
 import snmp.SNMPSequence;
 import snmp.SNMPVarBindList;
 import snmp.SNMPv1CommunicationInterface;
+import java.math.*;
 
 /**
  *
@@ -91,6 +92,68 @@ public class IPLinkSnmpInterface {
 	
 	    }
         return "";
+    }
+    
+    public Integer getSnmpInteger(String itemID, int index)
+    {
+        try{
+        	itemID = itemID + "." + index;
+
+             
+            // the getMIBEntry method of the communications interface returns an SNMPVarBindList
+            // object; this is essentially a Vector of SNMP (OID,value) pairs. In this case, the
+            // returned Vector has just one pair inside it.
+            SNMPVarBindList newVars = comInterface.getMIBEntry(itemID);
+
+            // extract the (OID,value) pair from the SNMPVarBindList; the pair is just a two-element
+            // SNMPSequence
+            SNMPSequence pair = (SNMPSequence)(newVars.getSNMPObjectAt(0));
+
+            // extract the object identifier from the pair; it's the first element in the sequence
+            SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
+
+            // extract the corresponding value from the pair; it's the second element in the sequence
+            SNMPObject snmpValue = pair.getSNMPObjectAt(1);
+
+            // print out the String representation of the retrieved value
+            return ((BigInteger)snmpValue.getValue()).intValue();
+	    }
+	    catch (Exception e)
+	    {
+	    	e.printStackTrace();
+	    }
+        return -1;
+    }
+    
+    public Integer getSnmpInteger(String itemID, int index, int secondIndex)
+    {
+        try{
+        	itemID = itemID + "." + index + "." + secondIndex;
+
+             
+            // the getMIBEntry method of the communications interface returns an SNMPVarBindList
+            // object; this is essentially a Vector of SNMP (OID,value) pairs. In this case, the
+            // returned Vector has just one pair inside it.
+            SNMPVarBindList newVars = comInterface.getMIBEntry(itemID);
+
+            // extract the (OID,value) pair from the SNMPVarBindList; the pair is just a two-element
+            // SNMPSequence
+            SNMPSequence pair = (SNMPSequence)(newVars.getSNMPObjectAt(0));
+
+            // extract the object identifier from the pair; it's the first element in the sequence
+            SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
+
+            // extract the corresponding value from the pair; it's the second element in the sequence
+            SNMPObject snmpValue = pair.getSNMPObjectAt(1);
+
+            // print out the String representation of the retrieved value
+            return ((BigInteger)snmpValue.getValue()).intValue();
+	    }
+	    catch (Exception e)
+	    {
+	    	e.printStackTrace();
+	    }
+        return -1;
     }
     
     public byte[] getSnmp(String itemID, int index, boolean blah)

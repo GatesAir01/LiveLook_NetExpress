@@ -188,7 +188,7 @@ public class SnmpMgr implements Runnable{
                         else
                         {
                             //for every packet skipped by NetXpress it will go down the indexes and update
-                            for(int x = packetsSkipped; x >= 0; x--) 
+                            for(int packet = packetsSkipped; packet >= 0; packet--) 
                             {
                                 try {
                                     //this is the snmp request for the stream
@@ -641,9 +641,9 @@ public class SnmpMgr implements Runnable{
 	public int pointsInQueue() 
 	{
             int points  = 0;
-            for(Map.Entry<Long,LogMapEntry> entry : logMap.entrySet()) 
+            for(Map.Entry<Long,LogMapEntry> logMapEntry : logMap.entrySet()) 
             {
-                LogMapEntry value = entry.getValue();
+                LogMapEntry value = logMapEntry.getValue();
                 points += value.logEnties.pointsInQueue();
             }
             return points;
@@ -657,9 +657,9 @@ public class SnmpMgr implements Runnable{
 	 */
 	void changeWindowSize(int windowSize)
 	{
-            for(Map.Entry<Long,LogMapEntry> entry : logMap.entrySet()) 
+            for(Map.Entry<Long,LogMapEntry> logMapEntry : logMap.entrySet()) 
             {
-                LogMapEntry value = entry.getValue();
+                LogMapEntry value = logMapEntry.getValue();
                 value.logEnties.changeWindowSize(windowSize);
             }
 	 }
@@ -671,15 +671,15 @@ public class SnmpMgr implements Runnable{
 	 */
 	void reset() 
 	{
-            for(Map.Entry<Long,LogMapEntry> entry : logMap.entrySet()) 
+            for(Map.Entry<Long,LogMapEntry> logMapEntry : logMap.entrySet()) 
             {
-                LogMapEntry value = entry.getValue();
+                LogMapEntry value = logMapEntry.getValue();
                 value.logEnties.reset();
             }
         }
 	 
 	 /**
-	  * 
+	  * This method is used to disconnect a stream by removing it from the maps stored in SnmpMgr
 	  * 
 	 * @param key
 	 */
@@ -699,14 +699,19 @@ public class SnmpMgr implements Runnable{
             mapRemove = true;
         }
 	 
+	/**
+	 * 	This method retrieves the next point that is stored in each LogMapEntry
+	 * 
+	 * @return
+	 */
 	public NetworkLogDataPoint getNextPoint() 
 	{
 	        
             if (queuedPoints.isEmpty())
             {
-                for(Map.Entry<Long,LogMapEntry> entry : logMap.entrySet()) 
+                for(Map.Entry<Long,LogMapEntry> logMapEntry : logMap.entrySet()) 
                 {
-                    LogMapEntry value = entry.getValue();
+                    LogMapEntry value = logMapEntry.getValue();
                     NetworkLogDataPoint p = value.logEnties.getNextPoint();
                     if (p != null)
                     {
@@ -724,6 +729,12 @@ public class SnmpMgr implements Runnable{
                 
         }
 	 
+	/**
+	 * This method is used to simulate creating a packet 
+	 * 
+	 * @param ip
+	 * @param dstPort
+	 */
 	public void createPacket(String ip, int dstPort)
 	{
             Long key = Long.parseLong(ip.replace(".", "") + dstPort);
