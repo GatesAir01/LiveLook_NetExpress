@@ -56,6 +56,7 @@ public class Stream {
     public long ShutDownAlarmCounter = 0;
     public int alarmthresholdtime = 30;    // default
     public String readCommunity;
+    public boolean requestFailed = false;
     
 	public Stream(String ip, String streamID, int streamType, boolean populate, boolean statusOnly, String readCommunity) {
 		this.ip = ip;
@@ -146,15 +147,49 @@ public class Stream {
             if(streamName.isEmpty()) // do not continue and return if the snmp is not returning valid stream name for the stream type and index specified
                 return false;
 	    packetsReceived = snmp.getSnmpInteger(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + packetsSkipped);
+	    if(packetsReceived == -1) {
+	    	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 152");
+	    	return true;
+	    }
 	    packetsLost = snmp.getSnmpInteger(OIDDictionary.getPacketsLost(streamType), index, secondIndex + packetsSkipped);
+	    if(packetsLost == -1) {
+	    	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 158");
+	    	return true;
+	    }
 	    packetsRecovered = snmp.getSnmpInteger(OIDDictionary.getPacketsRecovered(streamType), index, secondIndex + packetsSkipped);
+	    if(packetsRecovered == -1) {
+	    	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 164");
+	    	return true;
+	    }
 	    connectionState = snmp.getSnmp(OIDDictionary.getConnectionState(streamType), index);
 	    adminState = snmp.getSnmpInteger(OIDDictionary.getAdminState(streamType), index);
+	    if(adminState == -1) {
+	    	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 171");
+	    	return true;
+	    }
 	    dstPort = snmp.getSnmp(OIDDictionary.getDestinationPort(streamType), index);
 	    currentQueueLength = snmp.getSnmpInteger(OIDDictionary.getCurrentQueueLength(streamType), index, secondIndex + packetsSkipped);
+	    if(currentQueueLength == -1) {
+	    	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 178");
+	    	return true;
+	    }
 	    packetsLate = snmp.getSnmpInteger(OIDDictionary.getPacketsLate(streamType), index, secondIndex + packetsSkipped);
+	    if(packetsLate == -1) {
+	    	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 184");
+	    	return true;
+	    }
 	    packetsEarly = snmp.getSnmpInteger(OIDDictionary.getPacketsEarly(streamType), index, secondIndex + packetsSkipped);
-	    statsInterval = snmp.getSnmpInteger(OIDDictionary.getStatsInterval(streamType), index);
+	    if(packetsEarly == -1) {
+	    	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 190");
+	    	return true;
+	    }
 	    //printVars();
 	    if(packetsSkipped > 0)packetsSkipped--;
 	    return true;
@@ -198,31 +233,36 @@ public class Stream {
 		
         int tempPacketsReceived = snmp.getSnmpInteger(OIDDictionary.getPacketsReceived(streamType), index, secondIndex);
         if(tempPacketsReceived == -1) {
-        	System.out.println("bad int");
+        	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 237");
         	return true;
         }
 
 	    int tempPacketsLost = snmp.getSnmpInteger(OIDDictionary.getPacketsLost(streamType), index, secondIndex);
 	    if(tempPacketsLost == -1) {
-        	System.out.println("bad int");
+        	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 244");
         	return true;
         }
 	    
 	    int tempPacketsRecovered = snmp.getSnmpInteger(OIDDictionary.getPacketsRecovered(streamType), index, secondIndex);
 	    if(tempPacketsRecovered == -1) {
-        	System.out.println("bad int");
+        	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 251");
         	return true;
         }
 	    
 	    int tempPacketsLate = snmp.getSnmpInteger(OIDDictionary.getPacketsLate(streamType), index, secondIndex);
 	    if(tempPacketsLate == -1) {
-        	System.out.println("bad int");
+        	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 258");
         	return true;
         }
 
 	    int tempPacketsEarly = snmp.getSnmpInteger(OIDDictionary.getPacketsEarly(streamType), index, secondIndex);
 	    if(tempPacketsEarly == -1) {
-        	System.out.println("bad int");
+        	requestFailed = true;
+	    	System.out.println("Request Failed/Bad Int 265");
         	return true;
         }
 	    
@@ -254,10 +294,35 @@ public class Stream {
 	    	//	+ ", " +  tempPacketsEarly + ":" +  packetsEarly);
             count++;
             tempPacketsReceived = snmp.getSnmpInteger(OIDDictionary.getPacketsReceived(streamType), index, secondIndex + count);
-		    tempPacketsLost = snmp.getSnmpInteger(OIDDictionary.getPacketsLost(streamType), index, secondIndex + count);
-		    tempPacketsRecovered = snmp.getSnmpInteger(OIDDictionary.getPacketsRecovered(streamType), index, secondIndex + count);
-		    tempPacketsLate = snmp.getSnmpInteger(OIDDictionary.getPacketsLate(streamType), index, secondIndex + count);
-		    tempPacketsEarly = snmp.getSnmpInteger(OIDDictionary.getPacketsEarly(streamType), index, secondIndex + count);
+            if(tempPacketsReceived == -1) {
+            	requestFailed = true;
+    	    	System.out.println("Request Failed/Bad Int 299");
+            	return true;
+            }
+            tempPacketsLost = snmp.getSnmpInteger(OIDDictionary.getPacketsLost(streamType), index, secondIndex + count);
+            if(tempPacketsReceived == -1) {
+            	requestFailed = true;
+    	    	System.out.println("Request Failed/Bad Int 305");
+            	return true;
+            }
+            tempPacketsRecovered = snmp.getSnmpInteger(OIDDictionary.getPacketsRecovered(streamType), index, secondIndex + count);
+            if(tempPacketsReceived == -1) {
+            	requestFailed = true;
+    	    	System.out.println("Request Failed/Bad Int 311");
+            	return true;
+            }
+            tempPacketsLate = snmp.getSnmpInteger(OIDDictionary.getPacketsLate(streamType), index, secondIndex + count);
+            if(tempPacketsReceived == -1) {
+            	requestFailed = true;
+    	    	System.out.println("Request Failed/Bad Int 317");
+            	return true;
+            }            
+            tempPacketsEarly = snmp.getSnmpInteger(OIDDictionary.getPacketsEarly(streamType), index, secondIndex + count);
+            if(tempPacketsReceived == -1) {
+            	requestFailed = true;
+    	    	System.out.println("Request Failed/Bad Int 323");
+            	return true;
+            }
 		}
 	    packetsSkipped = count;
 	    return true;

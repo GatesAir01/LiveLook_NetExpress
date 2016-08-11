@@ -153,6 +153,10 @@ public class SnmpMgr implements Runnable{
                         int packetsSkipped;
                         try {
                         	reset = stream.updatePacketsSkipped();
+                        	while(stream.requestFailed) {
+                        		stream.requestFailed = false;
+                        		reset = stream.updatePacketsSkipped();
+                        	}
                             packetsSkipped = stream.packetsSkipped;
                         }
                         catch(NumberFormatException e) {
@@ -166,7 +170,10 @@ public class SnmpMgr implements Runnable{
                             try {
                                 //this is the snmp request for the stream
                                 stream.populateVars();
-
+                                while(stream.requestFailed) {
+                            		stream.requestFailed = false;
+                            		stream.populateVars();
+                            	}
                                 //this creates a packet for the LogMapEntry to use in it's functions
                                 //also though it say if(reset) it really is if(!reset)
                                 //thus if stats of the stream hasn't been reset this will be true
@@ -193,7 +200,10 @@ public class SnmpMgr implements Runnable{
                                 try {
                                     //this is the snmp request for the stream
                                     stream.populateVars();
-
+                                    while(stream.requestFailed) {
+                                		stream.requestFailed = false;
+                                		stream.populateVars();
+                                	}
                                     //this creates a packet for the LogMapEntry to use in it's functions
                                     //also though it say if(reset) it really is if(!reset)
                                      //thus if stats of the stream hasn't been reset this will be true
@@ -521,14 +531,14 @@ public class SnmpMgr implements Runnable{
 	 */
 	public String getConnectionsForSave()
         {
-            Collection<LogMapEntry> c = logMap.values();
-            String s = "";
-            for (LogMapEntry e : c)
+            Collection<LogMapEntry> collection = logMap.values();
+            String tempString = "";
+            for (LogMapEntry logMapEntry : collection)
             {
-                    Stream stream = map.get(Long.parseLong(e.address.toString().replace(".", "").replace("/", "") + e.destPort));
-                s += "{"+e.toSaveString()+ ", " + stream.statusOnly + ", " + stream.readCommunity + "}\t";
+                    Stream stream = map.get(Long.parseLong(logMapEntry.address.toString().replace(".", "").replace("/", "") + logMapEntry.destPort));
+                tempString += "{"+logMapEntry.toSaveString()+ ", " + stream.statusOnly + ", " + stream.readCommunity + "}\t";
             }
-            return s;
+            return tempString;
         }
 	
 	
@@ -541,10 +551,10 @@ public class SnmpMgr implements Runnable{
             String[] entries = s.split("\t");
             if(entries.length == 0) // if no previously saved connections - return doing nothing
                 return;
-            for (int i = 0; i < entries.length; i++)
+            for (int index = 0; index < entries.length; index++)
             {
                 //System.out.println(i);
-                String e = entries[i].substring(1,entries[i].length()-1);
+                String e = entries[index].substring(1,entries[index].length()-1);
                 Stream newStream = Stream.createFromString(e);
                 LogMapEntry newEntry = LogMapEntry.createFromString(e);
                 newEntry.stream = newStream;
@@ -609,12 +619,12 @@ public class SnmpMgr implements Runnable{
 	 * This method removes Streams with null values
 	 */
 	public void cleanUp() {
-        for (Long l : map.keySet()) {
-            Stream stream = map.get(l);
+        for (Long key : map.keySet()) {
+            Stream stream = map.get(key);
             if (stream == null || stream.streamName == null)
             {
-                map.remove(l);
-                logMap.remove(l);
+                map.remove(key);
+                logMap.remove(key);
             }
         }
     }
@@ -730,7 +740,9 @@ public class SnmpMgr implements Runnable{
         }
 	 
 	/**
-	 * This method is used to simulate creating a packet 
+	 * This method is used to simulate creating a packet that happened in regular livelook.
+	 * This is necessary to provide the LogMapEntry with the information that is needed
+	 * for the NetworkLogDataPoint to be pulled from it later.
 	 * 
 	 * @param ip
 	 * @param dstPort
@@ -773,6 +785,14 @@ public class SnmpMgr implements Runnable{
             }
         }
 
+	/**
+	 * This method is used to simulate creating a packet that happened in regular livelook.
+	 * This version of createPacket is purely for the purpose of providing NaN values to 
+	 * the LogMapEntry.
+	 * 
+	 * @param ip
+	 * @param dstPort
+	 */
 	 public void createPacket(String ip, int dstPort, boolean NaN)
 	 {
             if(NaN)
@@ -784,6 +804,10 @@ public class SnmpMgr implements Runnable{
             }
         }
 	 
+	 
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 
@@ -805,10 +829,19 @@ public class SnmpMgr implements Runnable{
             }	
 	}
 	
+	/**
+	 * This method is a simple get method to retrieve the streams stored in the logMap
+	 * 
+	 * @return
+	 */
 	public Collection<LogMapEntry> getStreams() {
 		return logMap.values();
 	}
 
+	
+	/**
+	 * This method is simply used to disconnect all the streams that are currently stored in both the map and logMap
+	 */
 	public void disconnectAll() {
         map.clear();
         logMap.clear();
