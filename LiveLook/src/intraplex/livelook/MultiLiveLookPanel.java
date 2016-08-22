@@ -71,6 +71,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
     
     //Keys for String Lookups 
     TreeMap<String, Long> streamKeys;
+    TreeMap<Long,Stream> localmap;
     long startingPoint;
     boolean dataReceived;
     
@@ -172,7 +173,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         disconnectButton.setEnabled(false);
         waitDialog = null;
         QueueMonitor qm = new QueueMonitor(msgMgr, piq);
-        
+     
         if(msgMgr.map.size() > 0) {
         	for(Long stream: msgMgr.map.keySet()) {
         		Stream streams = msgMgr.map.get(stream);
@@ -180,6 +181,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
         	}
         	disconnectButton.setEnabled(true);
         }
+        refreshStreamKeys();
     }
     
     public long nearestMinute()
@@ -518,12 +520,15 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
 	                    }
 	
 	                    updateNeeded++;
-	                    prepareMenus();
+                            prepareMenus();
+	                  
 	                }
 	            }
-                
+                if(msgMgr.prepareMenus){
                  msgMgr.refreshStreams(); 
                  refreshStreamKeys();
+                }
+                prepareMenus();
                 // System.out.println("Total connections: "+ streamKeys.size());
 	        }
 	        else
@@ -583,7 +588,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
        String[] streams = streamKeys.keySet().toArray(new String[0]);
        
        String selectedValue = streams[0];
-       if (streams.length > 0)
+       if (streams.length > 1)
        {
             selectedValue = (String)JOptionPane.showInputDialog(null,
             "Select Stream", "Disconnect",
@@ -595,8 +600,8 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
        {
             long key = streamKeys.get(selectedValue);
             msgMgr.disconnect(key);
-            removeTraces(key,true);
             streamKeys.remove(selectedValue);
+            removeTraces(key,true);
             if (streamKeys.isEmpty())
             {
                 disconnectButton.setEnabled(false);
@@ -844,7 +849,8 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                                     traces[i].setKey(name+" "+NetworkLogDataPoint.getTypeTitle(traceTypes[i],false));
                                     prepareMenus();
                                 }
-                                stream = msgMgr.map.get(streamId[i]);
+                                //stream = msgMgr.map.get(streamId[i]);
+                                stream = localmap.get(streamId[i]);
                                 isReset = stream.liveViewReset;
                                 isShutDown = stream.adminState == 2;
                             	isZero = p.isZeroOrNaN();
@@ -852,7 +858,8 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                             }
                             else
                             {
-                            	stream = msgMgr.map.get(streamId[i]);
+                            	//stream = msgMgr.map.get(streamId[i]);
+                                stream = localmap.get(streamId[i]);
                                 isReset = stream.liveViewReset;
                                 isShutDown = stream.adminState == 2;
                             	isZero = p.isZeroOrNaN();
@@ -877,19 +884,24 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
                         }
                     }
                     
-                    if(msgMgr.map.get(p.streamId).liveViewReset2)
-                        msgMgr.map.get(p.streamId).liveViewReset2 = false;
-                    else if(msgMgr.map.get(p.streamId).liveViewReset1)
-                        msgMgr.map.get(p.streamId).liveViewReset1 = false;
+                   // if(msgMgr.map.get(p.streamId).liveViewReset2)
+//                        msgMgr.map.get(p.streamId).liveViewReset2 = false;
+//                    else if(msgMgr.map.get(p.streamId).liveViewReset1)
+//                        msgMgr.map.get(p.streamId).liveViewReset1 = false;
                     p = msgMgr.getNextPoint();
                     count++;
                 }
                    
             traceMutex.unlock();
+            
             if(msgMgr.prepareMenus) {
             	msgMgr.prepareMenus = false;
+                msgMgr.refreshStreams();
+                refreshStreamKeys();
+                updateNeeded++;
             	prepareMenus();
             }
+            prepareMenus();
         }
     }
 
@@ -1234,7 +1246,7 @@ public class MultiLiveLookPanel extends javax.swing.JPanel implements ActionList
             }
     	
         streamKeys= sk;
-    	
+    	localmap = map;
     	if(streamKeys.size() > 0) {
     		disconnectButton.setEnabled(true);
     	}

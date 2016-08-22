@@ -75,6 +75,14 @@ public class NetworkLogDataPointBlock extends NetworkLogDataPoint
 //        if (type == MIN_LOSS_RATE)return minLossRate*100;
 //        if (type == MAX_LOSS_RATE_AFTER_CORRECTION)return maxLossRateAfterCorrection*100;
 //        if (type == DATA_GAP) return 0;
+        
+        if (interval < 30000)
+            return super.getValue(type, intVal, pps);
+        if (interval > intVal*2) 
+            return Double.NaN;
+        if(invalidPacket)
+        	return Double.NaN;
+        
         return super.getValue(type, intVal, pps);
     }
     

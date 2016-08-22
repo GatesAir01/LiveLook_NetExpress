@@ -52,7 +52,4 @@ public class LogEntry {
         return s;
     }
     
-    
-    
-    
 }

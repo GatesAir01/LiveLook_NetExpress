@@ -60,7 +60,7 @@ public class LogFileHandler {
         allowRecover = true;
         loadConfiguation();
         this.setFile(file);
-        reload();
+        //reload();
         pps = true;
     }
     
@@ -154,11 +154,11 @@ public class LogFileHandler {
                                 if (!localRemember)
                                 {
                                     localRemember = true;
-                                    AskRecoverDialog d = new AskRecoverDialog(null, true);
-                                    d.setLocationRelativeTo(null);
-                                    d.setVisible(true);
-                                    rememberSelection = d.remember;
-                                    allowRecover = d.recover;
+                                   // AskRecoverDialog d = new AskRecoverDialog(null, true);
+                                  //  d.setLocationRelativeTo(null);
+                                  //  d.setVisible(true);
+                                  ///  rememberSelection = d.remember;
+                                  //  allowRecover = d.recover;
                                     
                                     if (rememberSelection)
                                     {

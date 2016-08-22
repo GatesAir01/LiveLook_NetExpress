@@ -83,31 +83,32 @@ public class IPLinkNetworkTool extends JFrame implements ActionListener, WindowL
         report.setBackground(Color.white);
         String filename = "log.csv";
         File f = new File("logs").getAbsoluteFile();
-        if (f.exists() && f.isDirectory())
-        {
-            File [] streams = f.listFiles();
-            if (streams != null && streams.length > 0)
-            {
-                Arrays.sort(streams, new Comparator<File>(){
-                    public int compare(File f1, File f2)
-                        {return (int)(f2.lastModified()-f1.lastModified());}});
-
-                for (int i = 0; i < streams.length; i++)
-                {
-                    File [] data = streams[i].listFiles();
-                    if (data != null && data.length > 0)
-                    {
-                    Arrays.sort(data, new Comparator<File>(){
-                        public int compare(File f1, File f2)
-                            {return (int)(f2.lastModified()-f1.lastModified());}});
-
-                    filename = data[0].getPath();
-                    break;
-                    }
-                }
-            }
-
-        }
+        //Dont load log in histrory panel in the beginning - let th euser load the file
+//        if (f.exists() && f.isDirectory())
+//        {
+//            File [] streams = f.listFiles();
+//            if (streams != null && streams.length > 0)
+//            {
+//                Arrays.sort(streams, new Comparator<File>(){
+//                    public int compare(File f1, File f2)
+//                        {return (int)(f2.lastModified()-f1.lastModified());}});
+//
+//                for (int i = 0; i < streams.length; i++)
+//                {
+//                    File [] data = streams[i].listFiles();
+//                    if (data != null && data.length > 0)
+//                    {
+//                    Arrays.sort(data, new Comparator<File>(){
+//                        public int compare(File f1, File f2)
+//                            {return (int)(f2.lastModified()-f1.lastModified());}});
+//
+//                    filename = data[0].getPath();
+//                    break;
+//                    }
+//                }
+//            }
+//
+//        }
         history = new NetworkHistoryPanel(filename,report);
         tabbedPane = new JTabbedPane();
         macList = new MacList();

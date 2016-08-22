@@ -188,9 +188,9 @@ public class MacList extends javax.swing.JPanel {
             livelookconfig.save();
 
             if(!loadFile(fileName))
-                 JOptionPane.showMessageDialog(this, "File Load failed!");
+                 JOptionPane.showMessageDialog(this, "File load failed!");
             else
-            	JOptionPane.showMessageDialog(this, "File Load Succesful.");
+            	JOptionPane.showMessageDialog(this, "File loaded successfully.");
                 
         }
         else {

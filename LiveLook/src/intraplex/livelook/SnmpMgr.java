@@ -153,11 +153,7 @@ public class SnmpMgr implements Runnable{
                         int packetsSkipped;
                         try {
                         	reset = stream.updatePacketsSkipped();
-                        	while(stream.requestFailed) {
-                        		stream.requestFailed = false;
-                        		reset = stream.updatePacketsSkipped();
-                        	}
-                            packetsSkipped = stream.packetsSkipped;
+                                packetsSkipped = stream.packetsSkipped;
                         }
                         catch(NumberFormatException e) {
                         	reset = true;
@@ -168,17 +164,13 @@ public class SnmpMgr implements Runnable{
                         //if no packets have been skipped we can update and post one point
                         if(packetsSkipped == 0) {
                             try {
-                                //this is the snmp request for the stream
-                                stream.populateVars();
-                                while(stream.requestFailed) {
-                            		stream.requestFailed = false;
-                            		stream.populateVars();
-                            	}
                                 //this creates a packet for the LogMapEntry to use in it's functions
                                 //also though it say if(reset) it really is if(!reset)
                                 //thus if stats of the stream hasn't been reset this will be true
-                                if(reset)
+                                if(reset){  // check if there is no statreset
                                         createPacket(stream.ip, Integer.parseInt(stream.dstPort));
+                                        stream.requestFailed = false;
+                                }
                                 else
                                 {
                                         Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
@@ -198,24 +190,28 @@ public class SnmpMgr implements Runnable{
                             for(int packet = packetsSkipped; packet >= 0; packet--) 
                             {
                                 try {
+                                    Stream tempStream = stream; // take a previous instance
                                     //this is the snmp request for the stream
-                                    stream.populateVars();
-                                    while(stream.requestFailed) {
-                                		stream.requestFailed = false;
-                                		stream.populateVars();
-                                	}
+                                    stream.populateVars();      // fectch the new data from NetXpress
+                                    if(stream.requestFailed)
+                                    {
+                                        stream = tempStream;    // if there is a receive timeout, replace the previous instance
+                                        stream.requestFailed = false;
+                                    }
                                     //this creates a packet for the LogMapEntry to use in it's functions
                                     //also though it say if(reset) it really is if(!reset)
                                      //thus if stats of the stream hasn't been reset this will be true
                                     if(reset)
+                                    {
                                         createPacket(stream.ip, Integer.parseInt(stream.dstPort));
+                                    }
                                     else
                                     {
-                                            Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
-                                            LogMapEntry e = logMap.get(key);
-                                            //writes an event to the event log 
-                                            e.writeToEventLog(e.streamName + ", " + "Stat Reset");
-                                            e.statReset = true;
+                                        Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
+                                        LogMapEntry e = logMap.get(key);
+                                        //writes an event to the event log 
+                                        e.writeToEventLog(e.streamName + ", " + "Stat Reset");
+                                        e.statReset = true;
                                     }
                                 }
                                 catch(NumberFormatException e) {
@@ -230,8 +226,8 @@ public class SnmpMgr implements Runnable{
                     else {  //This else is incase of shut down
                             Long key = Long.parseLong(stream.ip.replace(".", "") + stream.dstPort);
                             LogMapEntry e = logMap.get(key);
-                            e.writeToEventLog(e.streamName + ", " + "Stream not up");
-                            createPacket(stream.ip, Integer.parseInt(stream.dstPort), true);
+                            e.writeToEventLog(e.streamName + ", " + "Stream is not up from Shutdown");
+                            createPacket(stream.ip, Integer.parseInt(stream.dstPort), true); // write NaN in the logs
                     }
                 }
                 else //This is if status only
@@ -249,7 +245,7 @@ public class SnmpMgr implements Runnable{
                                           
                         if(stream.ShutDownAlarmCounter >= (stream.alarmthresholdtime*1000) && !stream.ShutDownAlarmTriggered && stream.ShutDownAlarm)
                         {
-                            e.writeToEventLog(e.streamName + ", " + "Stream is shut down");
+                            //e.writeToEventLog(e.streamName + ", " + "Stream is shut down"); -  already done part of generateAlarm
                             e.generateAlarm("Stream is shut down");
                             stream.ShutDownAlarmTriggered = true;
                         }
@@ -264,10 +260,10 @@ public class SnmpMgr implements Runnable{
                         stream.ShutDownAlarmCounter += (((System.currentTimeMillis() -  e.lastEntry)));
                    
                         if(stream.ShutDownAlarmCounter >= (stream.alarmthresholdtime*1000)  && stream.ShutDownAlarm){
-                            stream.ShutDownAlarmTriggered = false;
-                            e.writeToEventLog(e.streamName + ", " + "Stream is up");
+                            //e.writeToEventLog(e.streamName + ", " + "Stream is up");  -  already done part of generateAlarm
                             e.generateAlarm("Stream is up");
                             stream.ShutDownAlarmCounter = 0;
+                            stream.ShutDownAlarmTriggered = false;
                         }
                     }
                     else
@@ -289,7 +285,7 @@ public class SnmpMgr implements Runnable{
                             stream.StreamDownAlarmCounter += (System.currentTimeMillis() -  e.lastEntry);
                             if( (stream.StreamDownAlarmCounter >= (stream.alarmthresholdtime*1000))&& !stream.StreamDownAlarmTriggered)
                             {
-                                e.writeToEventLog(e.streamName + ", " + "Stream is down");
+                               // e.writeToEventLog(e.streamName + ", " + "Stream is down");  -  already done part of generateAlarm
                                 e.generateAlarm("Stream is down");
                                 stream.StreamDownAlarmTriggered = true;
                                 stream.StreamDownAlarmCounter = 0;
@@ -308,10 +304,9 @@ public class SnmpMgr implements Runnable{
                     if(stream.StreamDownAlarmTriggered){ // Stream up alarm is required only if the stream down is already triggered
                         stream.StreamDownAlarmCounter += (((System.currentTimeMillis() -  e.lastEntry)));
                         if((stream.StreamDownAlarmCounter >= (stream.alarmthresholdtime*1000)) && stream.StreamDownAlarm ){
-                            stream.StreamDownAlarmTriggered = false; 
-                            e.writeToEventLog(e.streamName + ", " + "Stream is up");
+                            //e.writeToEventLog(e.streamName + ", " + "Stream is up");  -  already done part of generateAlarm
                             e.generateAlarm("Stream is up");
-                            System.out.println("Stream up alarm counter reset:" + " timegap="+ stream.StreamDownAlarmCounter);   
+                            stream.StreamDownAlarmTriggered = false; 
                             stream.StreamDownAlarmCounter = 0;
                         }
                     }
@@ -338,7 +333,7 @@ public class SnmpMgr implements Runnable{
         //ConcurrentMismatchError
         if(mapRemove){
             logMap.remove(removeKey);
-            //map.remove(removeKey); // move this line to disconnect routine
+            map.remove(removeKey); 
             mapRemove = false;
             prepareMenus = true;
             //this updates the color boxes in the Stream Status tab
@@ -353,8 +348,6 @@ public class SnmpMgr implements Runnable{
             //this updates the color boxes in the Stream Status tab
             IPLinkNetworkTool.updateConnectedStreamstabColor(checkForStreamStatus());
         }
-       
-       
     }
 	
 	/**
@@ -378,14 +371,13 @@ public class SnmpMgr implements Runnable{
                 else
                 {
                     retVal_temp = Integer.parseInt(stream.connectionState);
-                
-                    if (retVal_temp == 2) // connectionState = 2  :  Stream Down
-                    {
-                        retVal = Color.red; 
-                    }
-                    else if (stream.adminState == 2) // admin state = 2 : Stream Stut down
+                    if (stream.adminState == 2) // admin state = 2 : Stream Stut down
                     {
                         retVal = Color.yellow;
+                    }
+                    else if (retVal_temp == 2) // connectionState = 2  :  Stream Down
+                    {
+                        retVal = Color.red; 
                     }
                     else if (retVal_temp == 1) // connectionState = 1 : Stream Up
                     {
@@ -704,9 +696,12 @@ public class SnmpMgr implements Runnable{
             Stream stream = map.get(key);
             if(stream == null)
                 return;
+            else {
             removeKey = key;
-            map.remove(removeKey); // remove from map
+          //  map.remove(removeKey); // remove from map
             mapRemove = true;
+            System.out.println("mapRemove is set");
+            }
         }
 	 
 	/**
@@ -752,8 +747,8 @@ public class SnmpMgr implements Runnable{
             Long key = Long.parseLong(ip.replace(".", "") + dstPort);
             LogMapEntry lme2 = logMap.get(key);
             Stream stream = map.get(key);
-        
-            IplinkNetworkLogEntry inle = lme2.logEnties.add(stream);
+            if(stream != null){
+                IplinkNetworkLogEntry inle = lme2.logEnties.add(stream);
                
             if (lme2.streamName == null)
             {
@@ -782,6 +777,7 @@ public class SnmpMgr implements Runnable{
             catch (Exception e)
             {
                 e.printStackTrace();
+            }
             }
         }
 
@@ -815,13 +811,13 @@ public class SnmpMgr implements Runnable{
             while(true) {
                             //System.out.println(streamCounter);
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(1000);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(MultiLiveLookPanel.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 streamCounter++;
-                if(streamCounter > 10) {
+                if(streamCounter > 5) {
                     streamCounter = 0;
                     snmpRequest();
                 }
